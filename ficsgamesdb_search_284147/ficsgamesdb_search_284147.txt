@@ -1,0 +1,12 @@
+ficsgames.org download from 2023-05-03 17:17:00 with search parameters:
+ignore colors =  yes
+only rated games = no
+Variant = any
+From Date (UTC) = 2022-05-03 04:00:00
+Until Date (UTC)= 2023-05-03 21:17:00
+Average player ratings: any 
+Computer and human games: all games
+Game Result: any
+Time controls: Any time per game / Any Increment
+ECO = any
+Game count: 5000 games
