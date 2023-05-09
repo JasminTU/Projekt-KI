@@ -8,7 +8,15 @@ BISHOP = 4
 ROOK = 5
 QUEEN = 6
 KING = 7
-
+# Define constants for the directions
+NO = 1
+NE = 1 << 9
+EA = 1 << 8
+SE = 1 << 7
+SO = 1 << 6
+WE = 1
+NW = -NE
+SW = -SE
 
 def initialize_bitboards():
     bitboards = [0] * 8
@@ -126,29 +134,62 @@ def get_pawn_moves(bitboards, current_player):
 
 
 
-def get_knight_moves(bitboards, current_player):
-    knight_moves = []
-    knight_attack_offsets = (-17, -15, -10, -6, 6, 10, 15, 17)
-    knights = bitboards[KNIGHT] & bitboards[current_player]
+def get_knight_moves(board, player):
+    # Define the bitboards for each player
+    knights = board[player] & board[KNIGHT]
+    occupied = board[WHITE] | board[BLACK]
+    empty = ~occupied
 
-    while knights:
-        from_square = knights & -knights
-        for offset in knight_attack_offsets:
-            to_square = from_square << offset if offset > 0 else from_square >> -offset
+    # Define bitmasks for the edges of the board
+    left_edge = int('0x7f7f7f7f7f7f7f7f', 16)
+    right_edge = int('0xfefefefefefefefe', 16)
 
-            # Check if the move is within the board
-            if to_square & (0xFFFFFFFFFFFFFFFF ^ (bitboards[WHITE] | bitboards[BLACK])) == 0:
-                continue
+    # Define constants for bit shifts
 
-            # Check if the move captures an opponent's piece or is an empty square
-            if not (to_square & bitboards[1 - current_player]):
-                continue
+    NW = NO << 1
+    NE = NE << 1
+    WN = NO << 8
+    EN = NE << 8
+    SW = SO << 8
+    SE = SE << 8
+    WS = SO << 1
+    ES = SE << 1
+    moves = []
+    for i in range(64):
+        current_position = (1 << i)
+        if knights & current_position:
+            moves = ((current_position << 17) & empty) & (right_edge if i % 8 < 7 else ~0) | \
+                    ((1 << (i + NE)) & (left_edge if i % 8 > 0 else ~0)) | \
+                    ((1 << (i + WN)) & (right_edge if i % 8 < 6 else ~0)) | \
+                    ((1 << (i + EN)) & (left_edge if i % 8 > 1 else ~0)) | \
+                    ((1 << (i + SW)) & (right_edge if i % 8 < 7 else ~0)) | \
+                    ((1 << (i + SE)) & (left_edge if i % 8 > 0 else ~0)) | \
+                    ((1 << (i + WS)) & (left_edge if i % 8 > 1 else ~0)) | \
+                    ((1 << (i + ES)) & (right_edge if i % 8 < 6 else ~0))
 
-            knight_moves.append((from_square, to_square))
+    # Find all possible moves
+    moves = ((my_pieces << NW) & (empty & right_edge)) | \
+            ((my_pieces << NE) & (empty & left_edge)) | \
+            ((my_pieces << WN) & (empty & (right_edge << 8))) | \
+            ((my_pieces << EN) & (empty & (left_edge << 8))) | \
+            ((my_pieces >> SW) & (empty & right_edge)) | \
+            ((my_pieces >> SE) & (empty & left_edge)) | \
+            ((my_pieces >> WS) & (empty & (left_edge << 8))) | \
+            ((my_pieces >> ES) & (empty & (right_edge << 8)))
 
-        knights &= knights - 1
+    return get_bits(moves)
 
-    return knight_moves
+def get_bits(bitboard):
+    bits = []
+    while bitboard:
+        bit = bitboard & -bitboard
+        bits.append(bit)
+        bitboard ^= bit
+    return bits
+
+
+
+
 
 
 def get_bishop_moves(bitboards, current_player):
@@ -288,4 +329,5 @@ if __name__ == '__main__':
     bitboards = initialize_bitboards()
     # print_board(bitboards)
     # print_bitboards(bitboards)
-    print_legal_moves(bitboards, current_player)
+    print(get_knight_moves(bitboards, current_player))
+    #print_legal_moves(bitboards, current_player)
