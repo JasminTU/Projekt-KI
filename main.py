@@ -29,36 +29,22 @@ def initialize_bitboards():
     bitboards = [0] * 8
 
     # Set initial positions for white pieces using binary literals
-    bitboards[WHITE] = int(
-        "0b0000000000000000000000000000000000000000000000001111111111111111", 2)
-    bitboards[PAWN] = int(
-        "0b0000000000000000000000000000000000000000000000001111111100000000", 2)
-    bitboards[KNIGHT] = int(
-        "0b0000000000000000000000000000000000000000000000000000000001000010", 2)
-    bitboards[BISHOP] = int(
-        "0b00000000000000000000000000000000000000000000000000000000000100100", 2)
-    bitboards[ROOK] = int(
-        "0b0000000000000000000000000000000000000000000000000000000010000001", 2)
-    bitboards[QUEEN] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000001000", 2)
-    bitboards[KING] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000010000", 2)
+    bitboards[WHITE] = int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
+    bitboards[PAWN] = int("0b0000000000000000000000000000000000000000000000001111111100000000", 2)
+    bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000001000010", 2)
+    bitboards[BISHOP] = int("0b00000000000000000000000000000000000000000000000000000000000100100", 2)
+    bitboards[ROOK] = int("0b0000000000000000000000000000000000000000000000000000000010000001", 2)
+    bitboards[QUEEN] = int("0b0000000000000000000000000000000000000000000000000000000000001000", 2)
+    bitboards[KING] = int("0b0000000000000000000000000000000000000000000000000000000000010000", 2)
 
     # Set initial positions for black pieces using binary literals
-    bitboards[BLACK] = int(
-        "0b1111111111111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[PAWN] |= int(
-        "0b0000000011111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[KNIGHT] |= int(
-        "0b0100001000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[BISHOP] |= int(
-        "0b0010010000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[ROOK] |= int(
-        "0b1000000100000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[QUEEN] |= int(
-        "0b0000100000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[KING] |= int(
-        "0b0001000000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BLACK] = int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[PAWN] |= int("0b0000000011111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[KNIGHT] |= int("0b0100001000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BISHOP] |= int("0b0010010000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[ROOK] |= int("0b1000000100000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[QUEEN] |= int("0b0000100000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[KING] |= int("0b0001000000000000000000000000000000000000000000000000000000000000", 2)
 
     return bitboards
 
@@ -148,7 +134,6 @@ def algebraic_to_field(algebraic):
 
     return field
 
-
 def algebraic_to_move(move):
     from_algebraic = move[0:2]
     to_algebraic = move[2:4]
@@ -163,25 +148,21 @@ def get_pawn_moves(bitboards, current_player):
     empty_squares = ~(bitboards[WHITE] | bitboards[BLACK])
     pawn_moves = []
 
+    white_pawn_bitboard = int("0b0000000000000000000000000000000000000000000000001111111100000000", 2)
+    black_pawn_bitboard = int("0b0000000011111111000000000000000000000000000000000000000000000000", 2)
+
     if current_player == WHITE:
         one_step = (bitboards[PAWN] & bitboards[WHITE]) << 8 & empty_squares
-        two_steps = ((one_step & algebraic_to_field('h2')) <<
-                     8) & empty_squares & empty_squares << 8
-        captures_left = (bitboards[PAWN] & bitboards[WHITE]
-                         ) << 7 & bitboards[BLACK] & ~algebraic_to_field('h8')
-        captures_right = (bitboards[PAWN] & bitboards[WHITE]
-                          ) << 9 & bitboards[BLACK] & ~algebraic_to_field('a8')
+        two_steps = ((bitboards[PAWN] & white_pawn_bitboard) << 16) & empty_squares
+        captures_left = (bitboards[PAWN] & bitboards[WHITE]) << 7 & bitboards[BLACK]
+        captures_right = (bitboards[PAWN] & bitboards[WHITE]) << 9 & bitboards[BLACK]
     else:
         one_step = (bitboards[PAWN] & bitboards[BLACK]) >> 8 & empty_squares
-        two_steps = ((one_step & 0x00FF000000000000) >>
-                     8) & empty_squares & empty_squares >> 8
-        captures_left = (bitboards[PAWN] & bitboards[BLACK]
-                         ) >> 9 & bitboards[WHITE] & ~0x8080808080808080
-        captures_right = (bitboards[PAWN] & bitboards[BLACK]
-                          ) >> 7 & bitboards[WHITE] & ~0x0101010101010101
+        two_steps = ((bitboards[PAWN] & black_pawn_bitboard) >> 16) & empty_squares
+        captures_left = (bitboards[PAWN] & bitboards[BLACK]) >> 9 & bitboards[WHITE]
+        captures_right = (bitboards[PAWN] & bitboards[BLACK]) >> 7 & bitboards[WHITE]
 
-    moves = [(one_step, 'one_step'), (two_steps, 'two_steps'),
-             (captures_left, 'captures_left'), (captures_right, 'captures_right')]
+    moves = [(one_step, 'one_step'), (two_steps, 'two_steps'), (captures_left, 'captures_left'), (captures_right, 'captures_right')]
 
     for move_type in moves:
         move, move_name = move_type
