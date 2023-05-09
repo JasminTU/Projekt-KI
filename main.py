@@ -177,7 +177,7 @@ def get_pawn_moves(bitboards, current_player):
             if move_name == 'captures_right':
                 from_square = from_square >> 9 if current_player == WHITE else from_square << 7
 
-            pawn_moves.append(move_to_algebraic(from_square, to_square))
+            pawn_moves.append((from_square, to_square))
             move &= move - 1
 
     return pawn_moves
@@ -213,9 +213,7 @@ def get_knight_moves(board, player):
     occupied = board[WHITE] | board[BLACK]
     empty = occupied ^ MAX_VALUE
 
-    print_bitboard("Before shifting: ", knights)
-    print_bitboard("After shifting: ",
-                   (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) >> 6) & empty))
+
     # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
     return (((LEFT_EDGE & knights) << 15) & empty) | \
         (((LEFT_EDGE & (LEFT_EDGE << 1) & knights) << 6) & empty) | \
@@ -362,11 +360,11 @@ def generate_legal_moves(bitboards, current_player):
     moves = []
 
     moves += get_pawn_moves(bitboards, current_player)
-    moves += get_knight_moves(bitboards, current_player)
-    moves += get_bishop_moves(bitboards, current_player)
-    moves += get_rook_moves(bitboards, current_player)
-    moves += get_queen_moves(bitboards, current_player)
-    moves += get_king_moves(bitboards, current_player)
+    # moves += get_knight_moves(bitboards, current_player)
+    # moves += get_bishop_moves(bitboards, current_player)
+    # moves += get_rook_moves(bitboards, current_player)
+    # moves += get_queen_moves(bitboards, current_player)
+    # moves += get_king_moves(bitboards, current_player)
 
     legal_moves = [move for move in moves if is_move_legal(
         move, bitboards, current_player)]
@@ -379,15 +377,16 @@ def print_legal_moves(bitboards, current_player):
     print("Legal moves for the current player ({}):".format(
         "White" if current_player == WHITE else "Black"))
     for move in legal_moves:
-        print(move)
+        from_square, to_square = move
+        print(move_to_algebraic(from_square, to_square))
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     current_player = WHITE
     bitboards = initialize_bitboards()
-    print_board(bitboards)
+    # print_board(bitboards)
     # print_bitboards(bitboards)
-    available_moves = get_knight_moves(bitboards, current_player)
-    print_bitboard("Final bitboard", available_moves)
-    #print_legal_moves(bitboards, current_player)
+    # available_moves = get_knight_moves(bitboards, current_player)
+    # print_bitboard("Final bitboard", available_moves)
+    print_legal_moves(bitboards, current_player)
