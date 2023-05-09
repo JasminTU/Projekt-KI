@@ -29,22 +29,36 @@ def initialize_bitboards():
     bitboards = [0] * 8
 
     # Set initial positions for white pieces using binary literals
-    bitboards[WHITE] = int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
-    bitboards[PAWN] = int("0b0000000000000000000000000000000000000000000000001111111100000000", 2)
-    bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000001000010", 2)
-    bitboards[BISHOP] = int("0b00000000000000000000000000000000000000000000000000000000000100100", 2)
-    bitboards[ROOK] = int("0b0000000000000000000000000000000000000000000000000000000010000001", 2)
-    bitboards[QUEEN] = int("0b0000000000000000000000000000000000000000000000000000000000001000", 2)
-    bitboards[KING] = int("0b0000000000000000000000000000000000000000000000000000000000010000", 2)
+    bitboards[WHITE] = int(
+        "0b0000000000000000000000000000000000000000000000001111111111111111", 2)
+    bitboards[PAWN] = int(
+        "0b0000000000000000000000000000000000000000000000001111111100000000", 2)
+    bitboards[KNIGHT] = int(
+        "0b0000000000000000000000000000000000000000000000000000000001000010", 2)
+    bitboards[BISHOP] = int(
+        "0b00000000000000000000000000000000000000000000000000000000000100100", 2)
+    bitboards[ROOK] = int(
+        "0b0000000000000000000000000000000000000000000000000000000010000001", 2)
+    bitboards[QUEEN] = int(
+        "0b0000000000000000000000000000000000000000000000000000000000001000", 2)
+    bitboards[KING] = int(
+        "0b0000000000000000000000000000000000000000000000000000000000010000", 2)
 
     # Set initial positions for black pieces using binary literals
-    bitboards[BLACK] = int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[PAWN] |= int("0b0000000011111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[KNIGHT] |= int("0b0100001000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[BISHOP] |= int("0b0010010000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[ROOK] |= int("0b1000000100000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[QUEEN] |= int("0b0000100000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[KING] |= int("0b0001000000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BLACK] = int(
+        "0b1111111111111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[PAWN] |= int(
+        "0b0000000011111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[KNIGHT] |= int(
+        "0b0100001000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BISHOP] |= int(
+        "0b0010010000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[ROOK] |= int(
+        "0b1000000100000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[QUEEN] |= int(
+        "0b0000100000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[KING] |= int(
+        "0b0001000000000000000000000000000000000000000000000000000000000000", 2)
 
     return bitboards
 
@@ -135,6 +149,7 @@ def algebraic_to_field(algebraic):
 
     return field
 
+
 def algebraic_to_move(move):
     from_algebraic = move[0:2]
     to_algebraic = move[2:4]
@@ -151,16 +166,23 @@ def get_pawn_moves(bitboards, current_player):
 
     if current_player == WHITE:
         one_step = (bitboards[PAWN] & bitboards[WHITE]) << 8 & empty_squares
-        two_steps = ((one_step & algebraic_to_field('h2')) << 8) & empty_squares & empty_squares << 8
-        captures_left = (bitboards[PAWN] & bitboards[WHITE]) << 7 & bitboards[BLACK] & ~algebraic_to_field('h8')
-        captures_right = (bitboards[PAWN] & bitboards[WHITE]) << 9 & bitboards[BLACK] & ~algebraic_to_field('a8')
+        two_steps = ((one_step & algebraic_to_field('h2')) <<
+                     8) & empty_squares & empty_squares << 8
+        captures_left = (bitboards[PAWN] & bitboards[WHITE]
+                         ) << 7 & bitboards[BLACK] & ~algebraic_to_field('h8')
+        captures_right = (bitboards[PAWN] & bitboards[WHITE]
+                          ) << 9 & bitboards[BLACK] & ~algebraic_to_field('a8')
     else:
         one_step = (bitboards[PAWN] & bitboards[BLACK]) >> 8 & empty_squares
-        two_steps = ((one_step & 0x00FF000000000000) >> 8) & empty_squares & empty_squares >> 8
-        captures_left = (bitboards[PAWN] & bitboards[BLACK]) >> 9 & bitboards[WHITE] & ~0x8080808080808080
-        captures_right = (bitboards[PAWN] & bitboards[BLACK]) >> 7 & bitboards[WHITE] & ~0x0101010101010101
+        two_steps = ((one_step & 0x00FF000000000000) >>
+                     8) & empty_squares & empty_squares >> 8
+        captures_left = (bitboards[PAWN] & bitboards[BLACK]
+                         ) >> 9 & bitboards[WHITE] & ~0x8080808080808080
+        captures_right = (bitboards[PAWN] & bitboards[BLACK]
+                          ) >> 7 & bitboards[WHITE] & ~0x0101010101010101
 
-    moves = [(one_step, 'one_step'), (two_steps, 'two_steps'), (captures_left, 'captures_left'), (captures_right, 'captures_right')]
+    moves = [(one_step, 'one_step'), (two_steps, 'two_steps'),
+             (captures_left, 'captures_left'), (captures_right, 'captures_right')]
 
     for move_type in moves:
         move, move_name = move_type
@@ -213,16 +235,18 @@ def get_knight_moves(board, player):
     occupied = board[WHITE] | board[BLACK]
     empty = occupied ^ MAX_VALUE
 
-
+    print_bitboard("Before shifting: ", knights)
+    print_bitboard("After shifting: ",
+                   (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) >> 6) & empty))
     # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
-    return (((LEFT_EDGE & knights) << 15) & empty) | \
-        (((LEFT_EDGE & (LEFT_EDGE << 1) & knights) << 6) & empty) | \
-        (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) << 10) & empty) | \
-        (((RIGHT_EDGE & knights) << 17) & empty) | \
-        (((LEFT_EDGE & (LEFT_EDGE << 1) & knights) >> 10) & empty) | \
-        (((LEFT_EDGE & knights) >> 17) & empty) | \
-        (((RIGHT_EDGE & knights) >> 15) & empty) | \
-        (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) >> 6) & empty)
+    knight_moves = ((((LEFT_EDGE & knights) << 15) & empty),
+                    (((LEFT_EDGE & (LEFT_EDGE << 1) & knights) << 6) & empty),
+                    (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) << 10) & empty),
+                    (((RIGHT_EDGE & knights) << 17) & empty),
+                    (((LEFT_EDGE & (LEFT_EDGE << 1) & knights) >> 10) & empty),
+                    (((LEFT_EDGE & knights) >> 17) & empty),
+                    (((RIGHT_EDGE & knights) >> 15) & empty),
+                    (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) >> 6) & empty))
 
 
 def print_bitboard(message, bitboard):
@@ -240,43 +264,7 @@ def print_bitboard(message, bitboard):
 
 def get_bishop_moves(bitboards, current_player):
     # TODO: Implement bishop move generation
-    bishop_moves = []
-
-    # Use bitwise operations to generate sliding moves for bishops
-    def generate_bishop_attacks(square, occupied_squares):
-        attacks = 0
-        attack_directions = [-9, -7, 7, 9]
-
-        for direction in attack_directions:
-            possible_square = square
-            while True:
-                possible_square = (
-                    possible_square << direction if direction > 0 else possible_square >> -direction)
-                # Check if the square is within the board
-                if not (0 <= possible_square.bit_length() - 1 < 64):
-                    break
-                if possible_square & occupied_squares:  # Stop if the square is occupied
-                    attacks |= possible_square
-                    break
-                attacks |= possible_square
-
-        return attacks
-
-    bishops = bitboards[BISHOP] & bitboards[current_player]
-    occupied_squares = bitboards[WHITE] | bitboards[BLACK]
-
-    while bishops:
-        from_square = bishops & -bishops
-        attacks = generate_bishop_attacks(
-            from_square, occupied_squares) & ~(bitboards[current_player])
-        while attacks:
-            to_square = attacks & -attacks
-            bishop_moves.append((from_square, to_square))
-            attacks &= attacks - 1
-
-        bishops &= bishops - 1
-
-    return bishop_moves
+    pass
 
 
 def get_rook_moves(bitboards, current_player):
