@@ -64,7 +64,6 @@ def initialize_bitboards():
 
 
 def print_board(bitboards):
-    # TODO: Diese Funktion funktioniert nicht auf ein einzelnes board. Name irreführend? Ich habe provisorisch eine schlechte Funktion hinzugefügt die auf ein einzelnes board funktioniert
     piece_symbols = {
         (WHITE, PAWN): "P",
         (WHITE, KNIGHT): "N",
@@ -234,19 +233,28 @@ def get_knight_moves(board, player):
     knights = board[player] & board[KNIGHT]
     occupied = board[WHITE] | board[BLACK]
     empty = occupied ^ MAX_VALUE
+    moves = []
 
-    print_bitboard("Before shifting: ", knights)
-    print_bitboard("After shifting: ",
-                   (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) >> 6) & empty))
-    # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
-    knight_moves = ((((LEFT_EDGE & knights) << 15) & empty),
-                    (((LEFT_EDGE & (LEFT_EDGE << 1) & knights) << 6) & empty),
-                    (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) << 10) & empty),
-                    (((RIGHT_EDGE & knights) << 17) & empty),
-                    (((LEFT_EDGE & (LEFT_EDGE << 1) & knights) >> 10) & empty),
-                    (((LEFT_EDGE & knights) >> 17) & empty),
-                    (((RIGHT_EDGE & knights) >> 15) & empty),
-                    (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knights) >> 6) & empty))
+    while knights:
+        print("haha")
+        # Get the position of the least significant set bit (i.e., the position of the current knight)
+        print_bitboard("Before shifting: ", knights & -knights)
+        knight_pos = knights & -knights
+        # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
+        knight_moves = ((((LEFT_EDGE & knight_pos) << 15) & empty),
+                        (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) << 6) & empty),
+                        (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) << 10) & empty),
+                        (((RIGHT_EDGE & knight_pos) << 17) & empty),
+                        (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) >> 10) & empty),
+                        (((LEFT_EDGE & knight_pos) >> 17) & empty),
+                        (((RIGHT_EDGE & knight_pos) >> 15) & empty),
+                        (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) >> 6) & empty))
+        # Convert the bitboard positions to tuples and add them to the list of moves
+        moves += [(knight_pos, dest) for dest in knight_moves if dest]
+
+        # Clear the least significant set bit (i.e., remove the current knight from the bitboard)
+        knights &= knights - 1
+    return moves
 
 
 def print_bitboard(message, bitboard):
@@ -347,8 +355,8 @@ def is_move_legal(move, bitboards, current_player):
 def generate_legal_moves(bitboards, current_player):
     moves = []
 
-    moves += get_pawn_moves(bitboards, current_player)
-    # moves += get_knight_moves(bitboards, current_player)
+    # moves += get_pawn_moves(bitboards, current_player)
+    moves += get_knight_moves(bitboards, current_player)
     # moves += get_bishop_moves(bitboards, current_player)
     # moves += get_rook_moves(bitboards, current_player)
     # moves += get_queen_moves(bitboards, current_player)
@@ -373,7 +381,7 @@ def print_legal_moves(bitboards, current_player):
 if __name__ == '__main__':
     current_player = WHITE
     bitboards = initialize_bitboards()
-    # print_board(bitboards)
+    print_board(bitboards)
     # print_bitboards(bitboards)
     # available_moves = get_knight_moves(bitboards, current_player)
     # print_bitboard("Final bitboard", available_moves)
