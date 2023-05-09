@@ -284,7 +284,7 @@ def print_legal_moves(bitboards, current_player):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    current_player = 'WHITE'
+    current_player = WHITE
     bitboards = initialize_bitboards()
     # print_board(bitboards)
     # print_bitboards(bitboards)
