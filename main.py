@@ -36,7 +36,7 @@ def initialize_bitboards():
     bitboards[KNIGHT] = int(
         "0b0000000000000000000000000000000000000000000000000000000001000010", 2)
     bitboards[BISHOP] = int(
-        "0b00000000000000000000000000000000000000000000000000000000000100100", 2)
+        "0b0000000000000000000000000000000000000000000000000000000000000100", 2)
     bitboards[ROOK] = int(
         "0b0000000000000000000000000000000000000000000000000000000010000001", 2)
     bitboards[QUEEN] = int(
@@ -204,41 +204,38 @@ def get_pawn_moves(bitboards, current_player):
     return pawn_moves
 
 
-def shift_by_direction(direction, number_fields):
-    shift = None
+def shift_by_direction(board, direction, number_fields):
+    board = None
     if direction == "north":
-        shift = 1 << (8 * number_fields)
+        board = board << (8 * number_fields)
     if direction == "north_west":
-        shift = 1 << (9 * number_fields)
+        board = board << (9 * number_fields)
     if direction == "north_east":
-        shift = 1 << (7 * number_fields)
+        board = board << (7 * number_fields)
     if direction == "west":
-        shift = 1 << number_fields
+        board = board << number_fields
     if direction == "south":
-        shift = 1 >> (8 * number_fields)
+        board = board >> (8 * number_fields)
     if direction == "south_west":
-        shift = 1 >> (7 * number_fields)
+        board = board >> (7 * number_fields)
     if direction == "south_east":
-        shift = 1 >> (9 * number_fields)
+        board = board >> (9 * number_fields)
     if direction == "east":
-        shift = 1 >> number_fields
+        board = board >> number_fields
     else:
         logger.error("Unknown direction:", direction)
         sys.exit(1)
-    return shift
+    return board
 
 
 def get_knight_moves(board, player):
     # Define the bitboards for each player
     knights = board[player] & board[KNIGHT]
-    occupied = board[WHITE] | board[BLACK]
+    occupied = board[player]
     empty = occupied ^ MAX_VALUE
     moves = []
-
     while knights:
-        print("haha")
         # Get the position of the least significant set bit (i.e., the position of the current knight)
-        print_bitboard("Before shifting: ", knights & -knights)
         knight_pos = knights & -knights
         # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
         knight_moves = ((((LEFT_EDGE & knight_pos) << 15) & empty),
@@ -271,8 +268,48 @@ def print_bitboard(message, bitboard):
 
 
 def get_bishop_moves(bitboards, current_player):
-    # TODO: Implement bishop move generation
-    pass
+    bishops = bitboards[current_player] & bitboards[BISHOP]
+    # TODO: enemy possessed fields are marked as free, therefore bishop cant attack through enemy lines
+    occupied = bitboards[current_player]
+    empty = occupied ^ MAX_VALUE
+    moves = []
+
+    while bishops:
+        # Get the next bishop and remove it from the bitboard
+        bishop_pos = bishops & -bishops
+        bishops ^= bishop_pos
+        bishop_moves = get_bishop_sliding_mask(bishop_pos) & empty
+        while bishop_moves:
+            dest = bishop_moves & -bishop_moves
+            bishop_moves ^= dest
+            moves += [(bishop_pos, dest)]
+    return moves
+
+
+def get_bishop_sliding_mask(bishop_pos):
+    # Initialize bitboard for the bishop's position
+    sq = bishop_pos.bit_length() - 1
+    # Initialize bitboards for the diagonal masks
+    diag_a1h8 = 0x8040201008040201
+    diag_h1a8 = 0x0102040810204080
+
+    # Calculate the position of the bishop on the diagonal a1-h8
+    (sq % 8) - (sq // 8)
+    diag_a1h8_offset = (sq % 8) - (sq // 8)
+    if diag_a1h8_offset > 0:
+        diag_a1h8_mask = diag_a1h8 >> (diag_a1h8_offset * 8)
+    else:
+        diag_a1h8_offset = abs(diag_a1h8_offset)
+        diag_a1h8_mask = diag_a1h8 << (diag_a1h8_offset * 8)
+
+    # Calculate the position of the bishop on the diagonal h1-a8
+    diag_h1a8_offset = 7 - ((sq % 8) + (sq // 8))
+    if diag_h1a8_offset > 0:
+        diag_h1a8_mask = diag_h1a8 >> (diag_h1a8_offset * 8)
+    else:
+        diag_h1a8_offset = abs(diag_h1a8_offset)
+        diag_h1a8_mask = diag_h1a8 << (diag_h1a8_offset * 8)
+    return diag_a1h8_mask ^ diag_h1a8_mask
 
 
 def get_rook_moves(bitboards, current_player):
@@ -356,8 +393,8 @@ def generate_legal_moves(bitboards, current_player):
     moves = []
 
     # moves += get_pawn_moves(bitboards, current_player)
-    moves += get_knight_moves(bitboards, current_player)
-    # moves += get_bishop_moves(bitboards, current_player)
+    #moves += get_knight_moves(bitboards, current_player)
+    moves += get_bishop_moves(bitboards, current_player)
     # moves += get_rook_moves(bitboards, current_player)
     # moves += get_queen_moves(bitboards, current_player)
     # moves += get_king_moves(bitboards, current_player)
