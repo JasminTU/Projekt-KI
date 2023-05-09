@@ -127,33 +127,139 @@ def get_pawn_moves(bitboards, current_player):
 
 
 def get_knight_moves(bitboards, current_player):
-    # TODO: Implement knight move generation
-    return []
+    knight_moves = []
+    knight_attack_offsets = (-17, -15, -10, -6, 6, 10, 15, 17)
+    knights = bitboards[KNIGHT] & bitboards[current_player]
+
+    while knights:
+        from_square = knights & -knights
+        for offset in knight_attack_offsets:
+            to_square = from_square << offset if offset > 0 else from_square >> -offset
+
+            # Check if the move is within the board
+            if to_square & (0xFFFFFFFFFFFFFFFF ^ (bitboards[WHITE] | bitboards[BLACK])) == 0:
+                continue
+
+            # Check if the move captures an opponent's piece or is an empty square
+            if not (to_square & bitboards[1 - current_player]):
+                continue
+
+            knight_moves.append((from_square, to_square))
+
+        knights &= knights - 1
+
+    return knight_moves
 
 
 def get_bishop_moves(bitboards, current_player):
     # TODO: Implement bishop move generation
-    return []
+    bishop_moves = []
+
+    # Use bitwise operations to generate sliding moves for bishops
+    def generate_bishop_attacks(square, occupied_squares):
+        attacks = 0
+        attack_directions = [-9, -7, 7, 9]
+
+        for direction in attack_directions:
+            possible_square = square
+            while True:
+                possible_square = (possible_square << direction if direction > 0 else possible_square >> -direction)
+                if not (0 <= possible_square.bit_length() - 1 < 64):  # Check if the square is within the board
+                    break
+                if possible_square & occupied_squares:  # Stop if the square is occupied
+                    attacks |= possible_square
+                    break
+                attacks |= possible_square
+
+        return attacks
+
+    bishops = bitboards[BISHOP] & bitboards[current_player]
+    occupied_squares = bitboards[WHITE] | bitboards[BLACK]
+
+    while bishops:
+        from_square = bishops & -bishops
+        attacks = generate_bishop_attacks(from_square, occupied_squares) & ~(bitboards[current_player])
+        while attacks:
+            to_square = attacks & -attacks
+            bishop_moves.append((from_square, to_square))
+            attacks &= attacks - 1
+
+        bishops &= bishops - 1
+
+    return bishop_moves
 
 
 def get_rook_moves(bitboards, current_player):
     # TODO: Implement rook move generation
-    return []
+    rook_moves = []
+
+    # Use bitwise operations to generate sliding moves for rooks
+    def generate_rook_attacks(square, occupied_squares):
+        attacks = 0
+        attack_directions = [-8, -1, 1, 8]
+
+        for direction in attack_directions:
+            possible_square = square
+            while True:
+                possible_square = (possible_square << direction if direction > 0 else possible_square >> -direction)
+                if not (0 <= possible_square.bit_length() - 1 < 64):  # Check if the square is within the board
+                    break
+                if possible_square & occupied_squares:  # Stop if the square is occupied
+                    attacks |= possible_square
+                    break
+                attacks |= possible_square
+
+        return attacks
+
+    rooks = bitboards[ROOK] & bitboards[current_player]
+    occupied_squares = bitboards[WHITE] | bitboards[BLACK]
+
+    while rooks:
+        from_square = rooks & -rooks
+        attacks = generate_rook_attacks(from_square, occupied_squares)
+        attacks &= ~(bitboards[current_player])
+        while attacks:
+            to_square = attacks & -attacks
+            rook_moves.append((from_square, to_square))
+            attacks &= attacks - 1
+
+        rooks &= rooks - 1
+
+    return rook_moves
 
 
 def get_queen_moves(bitboards, current_player):
-    # TODO: Implement queen move generation
-    return []
-
+    # The queen's moves are a combination of the bishop and rook moves
+    return get_bishop_moves(bitboards, current_player) + get_rook_moves(bitboards, current_player)
 
 def get_king_moves(bitboards, current_player):
-    # TODO: Implement king move generation
-    return []
+    king_moves = []
+    king_attack_offsets = (-9, -8, -7, -1, 1, 7, 8, 9)
+    king = bitboards[KING] & bitboards[current_player]
 
+    while king:
+        from_square = king & -king
+        for offset in king_attack_offsets:
+            to_square = from_square << offset if offset > 0 else from_square >> -offset
+
+            # Check if the move is within the board
+            if to_square & (0xFFFFFFFFFFFFFFFF ^ (bitboards[WHITE] | bitboards[BLACK])) == 0:
+                continue
+
+            # Check if the move captures an opponent's piece or is an empty square
+            if not (to_square & bitboards[1 - current_player]):
+                continue
+
+            king_moves.append((from_square, to_square))
+
+        king &= king - 1
+
+    return king_moves
 
 def is_move_legal(move, bitboards, current_player):
-    # TODO: Implement legality check for the given move
-    return []
+    # For now, let's assume all generated moves are legal.
+    # This does not account for more complex rules such as king's safety and en passant, which can be added later.
+    return True
 
 
 def generate_legal_moves(bitboards, current_player):
