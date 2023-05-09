@@ -1,6 +1,6 @@
 from loguru import logger
 import sys
-import numpy as np
+
 
 # Constants
 BOARD_SIZE = 8
@@ -12,6 +12,8 @@ BISHOP = 4
 ROOK = 5
 QUEEN = 6
 KING = 7
+
+
 # Define bitmasks for the edges of the board
 RIGHT_EDGE = int(
     "0b0111111101111111011111110111111101111111011111110111111101111111", 2)
@@ -25,41 +27,24 @@ MAX_VALUE = int(
 
 def initialize_bitboards():
     bitboards = [0] * 8
-    # TODO: Warum haben wir 14 Boards? 8 würden doch reichen, weil zB bitboards[ALL_PAWNs] & bitboards[WHITE] dasselbe ist wie momentan bitboards[PAWN]; außerdem überschreiben wir gerade die Einträge
 
     # Set initial positions for white pieces using binary literals
-    bitboards[WHITE] = int(
-        "0b0000000000000000000000000000000000001000000000000000000011111101", 2)
-    # bitboards[PAWN] = int(
-    #   "0b0000000000000000000000000000000000000000000000001111111100000000", 2)
-    bitboards[PAWN] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[KNIGHT] = int(
-        "0b0000000000000000000000000000000000001000000000000000000001000000", 2)
-    bitboards[BISHOP] = int(
-        "0b00000000000000000000000000000000000000000000000000000000000100100", 2)
-    bitboards[ROOK] = int(
-        "0b0000000000000000000000000000000000000000000000000000000010000001", 2)
-    bitboards[QUEEN] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000001000", 2)
-    bitboards[KING] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000010000", 2)
+    bitboards[WHITE] = int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
+    bitboards[PAWN] = int("0b0000000000000000000000000000000000000000000000001111111100000000", 2)
+    bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000001000010", 2)
+    bitboards[BISHOP] = int("0b00000000000000000000000000000000000000000000000000000000000100100", 2)
+    bitboards[ROOK] = int("0b0000000000000000000000000000000000000000000000000000000010000001", 2)
+    bitboards[QUEEN] = int("0b0000000000000000000000000000000000000000000000000000000000001000", 2)
+    bitboards[KING] = int("0b0000000000000000000000000000000000000000000000000000000000010000", 2)
 
     # Set initial positions for black pieces using binary literals
-    bitboards[BLACK] = int(
-        "0b1111111111111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[PAWN] |= int(
-        "0b0000000011111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[KNIGHT] |= int(
-        "0b0100001000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[BISHOP] |= int(
-        "0b0010010000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[ROOK] |= int(
-        "0b1000000100000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[QUEEN] |= int(
-        "0b0000100000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[KING] |= int(
-        "0b0001000000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BLACK] = int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[PAWN] |= int("0b0000000011111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[KNIGHT] |= int("0b0100001000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BISHOP] |= int("0b0010010000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[ROOK] |= int("0b1000000100000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[QUEEN] |= int("0b0000100000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[KING] |= int("0b0001000000000000000000000000000000000000000000000000000000000000", 2)
 
     return bitboards
 
@@ -119,27 +104,63 @@ def print_bitboards(bitboards):
         print()
 
 
+def move_to_algebraic(from_square, to_square):
+    from_field = field_to_algebraic(from_square)
+    to_field = field_to_algebraic(to_square)
+
+    return f"{from_field}{to_field}"
+
+
+def field_to_algebraic(field):
+    col_names = "abcdefgh"
+    row_names = "12345678"
+
+    col = col_names[(field.bit_length() - 1) % 8]
+    row = row_names[(field.bit_length() - 1) // 8]
+
+    return f"{col}{row}"
+
+
+def algebraic_to_field(algebraic):
+    col_names = "abcdefgh"
+    row_names = "12345678"
+
+    col = algebraic[0]
+    row = algebraic[1]
+
+    col_index = col_names.index(col)
+    row_index = row_names.index(row)
+
+    field = 1 << (row_index * 8 + col_index)
+
+    return field
+
+def algebraic_to_move(move):
+    from_algebraic = move[0:2]
+    to_algebraic = move[2:4]
+
+    from_square = algebraic_to_field(from_algebraic)
+    to_square = algebraic_to_field(to_algebraic)
+
+    return (from_square, to_square)
+
+
 def get_pawn_moves(bitboards, current_player):
     empty_squares = ~(bitboards[WHITE] | bitboards[BLACK])
     pawn_moves = []
 
     if current_player == WHITE:
         one_step = (bitboards[PAWN] & bitboards[WHITE]) << 8 & empty_squares
-        two_steps = ((one_step & 0x000000000000FF00) << 8) & empty_squares
-        captures_left = (bitboards[PAWN] & bitboards[WHITE]
-                         ) << 7 & bitboards[BLACK] & ~0x8080808080808080
-        captures_right = (bitboards[PAWN] & bitboards[WHITE]
-                          ) << 9 & bitboards[BLACK] & ~0x0101010101010101
+        two_steps = ((one_step & algebraic_to_field('h2')) << 8) & empty_squares & empty_squares << 8
+        captures_left = (bitboards[PAWN] & bitboards[WHITE]) << 7 & bitboards[BLACK] & ~algebraic_to_field('h8')
+        captures_right = (bitboards[PAWN] & bitboards[WHITE]) << 9 & bitboards[BLACK] & ~algebraic_to_field('a8')
     else:
         one_step = (bitboards[PAWN] & bitboards[BLACK]) >> 8 & empty_squares
-        two_steps = ((one_step & 0x00FF000000000000) >> 8) & empty_squares
-        captures_left = (bitboards[PAWN] & bitboards[BLACK]
-                         ) >> 9 & bitboards[WHITE] & ~0x8080808080808080
-        captures_right = (bitboards[PAWN] & bitboards[BLACK]
-                          ) >> 7 & bitboards[WHITE] & ~0x0101010101010101
+        two_steps = ((one_step & 0x00FF000000000000) >> 8) & empty_squares & empty_squares >> 8
+        captures_left = (bitboards[PAWN] & bitboards[BLACK]) >> 9 & bitboards[WHITE] & ~0x8080808080808080
+        captures_right = (bitboards[PAWN] & bitboards[BLACK]) >> 7 & bitboards[WHITE] & ~0x0101010101010101
 
-    moves = [(one_step, 'one_step'), (two_steps, 'two_steps'),
-             (captures_left, 'captures_left'), (captures_right, 'captures_right')]
+    moves = [(one_step, 'one_step'), (two_steps, 'two_steps'), (captures_left, 'captures_left'), (captures_right, 'captures_right')]
 
     for move_type in moves:
         move, move_name = move_type
@@ -156,7 +177,7 @@ def get_pawn_moves(bitboards, current_player):
             if move_name == 'captures_right':
                 from_square = from_square >> 9 if current_player == WHITE else from_square << 7
 
-            pawn_moves.append((from_square, to_square))
+            pawn_moves.append(move_to_algebraic(from_square, to_square))
             move &= move - 1
 
     return pawn_moves
