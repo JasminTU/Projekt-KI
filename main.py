@@ -49,6 +49,45 @@ def initialize_bitboards():
     return bitboards
 
 
+def fen_to_bitboards(fen):
+    fen_parts = fen.split(" ")
+    piece_positions = fen_parts[0]
+    current_player_fen = fen_parts[1]
+
+    current_player = WHITE if current_player_fen == 'w' else BLACK
+
+    rows = piece_positions.split("/")
+
+    bitboards = [0] * 8
+
+    piece_symbols = {
+        'P': PAWN,
+        'N': KNIGHT,
+        'B': BISHOP,
+        'R': ROOK,
+        'Q': QUEEN,
+        'K': KING
+    }
+
+    for row_index, row in enumerate(reversed(rows)):  # Process rows in reverse order
+        col_index = 0
+        for char in row:
+            if char.isdigit():
+                col_index += int(char)
+            else:
+                color = WHITE if char.isupper() else BLACK
+                piece_type = piece_symbols[char.upper()]
+
+                square = 1 << (row_index * 8 + col_index)
+
+                bitboards[color] |= square
+                bitboards[piece_type] |= square
+
+                col_index += 1
+
+    return bitboards, current_player
+
+
 def print_board(bitboards):
     piece_symbols = {
         (WHITE, PAWN): "P",
@@ -366,4 +405,11 @@ if __name__ == '__main__':
     # print_bitboards(bitboards)
     # available_moves = get_knight_moves(bitboards, current_player)
     # print_bitboard("Final bitboard", available_moves)
-    print_legal_moves(bitboards, current_player)
+    # print_legal_moves(bitboards, current_player)
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"  # Starting position in FEN notation
+    bitboards, current_player = fen_to_bitboards(fen)
+
+    print_board(bitboards)
+    print("Current player:", "White" if current_player == WHITE else "Black")
+
