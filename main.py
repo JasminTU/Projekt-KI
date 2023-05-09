@@ -36,7 +36,7 @@ def initialize_bitboards():
     bitboards[KNIGHT] = int(
         "0b0000000000000000000000000000000000000000000000000000000001000010", 2)
     bitboards[BISHOP] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000000100", 2)
+        "0b00000000000000000000000000000000000000000000000000000000000100100", 2)
     bitboards[ROOK] = int(
         "0b0000000000000000000000000000000000000000000000000000000010000001", 2)
     bitboards[QUEEN] = int(
@@ -61,6 +61,46 @@ def initialize_bitboards():
         "0b0001000000000000000000000000000000000000000000000000000000000000", 2)
 
     return bitboards
+
+
+def fen_to_bitboards(fen):
+    fen_parts = fen.split(" ")
+    piece_positions = fen_parts[0]
+    current_player_fen = fen_parts[1]
+
+    current_player = WHITE if current_player_fen == 'w' else BLACK
+
+    rows = piece_positions.split("/")
+
+    bitboards = [0] * 8
+
+    piece_symbols = {
+        'P': PAWN,
+        'N': KNIGHT,
+        'B': BISHOP,
+        'R': ROOK,
+        'Q': QUEEN,
+        'K': KING
+    }
+
+    # Process rows in reverse order
+    for row_index, row in enumerate(reversed(rows)):
+        col_index = 0
+        for char in row:
+            if char.isdigit():
+                col_index += int(char)
+            else:
+                color = WHITE if char.isupper() else BLACK
+                piece_type = piece_symbols[char.upper()]
+
+                square = 1 << (row_index * 8 + col_index)
+
+                bitboards[color] |= square
+                bitboards[piece_type] |= square
+
+                col_index += 1
+
+    return bitboards, current_player
 
 
 def print_board(bitboards):
@@ -163,22 +203,27 @@ def get_pawn_moves(bitboards, current_player):
     empty_squares = ~(bitboards[WHITE] | bitboards[BLACK])
     pawn_moves = []
 
+    white_pawn_bitboard = int(
+        "0b0000000000000000000000000000000000000000000000001111111100000000", 2)
+    black_pawn_bitboard = int(
+        "0b0000000011111111000000000000000000000000000000000000000000000000", 2)
+
     if current_player == WHITE:
         one_step = (bitboards[PAWN] & bitboards[WHITE]) << 8 & empty_squares
-        two_steps = ((one_step & algebraic_to_field('h2')) <<
-                     8) & empty_squares & empty_squares << 8
-        captures_left = (bitboards[PAWN] & bitboards[WHITE]
-                         ) << 7 & bitboards[BLACK] & ~algebraic_to_field('h8')
-        captures_right = (bitboards[PAWN] & bitboards[WHITE]
-                          ) << 9 & bitboards[BLACK] & ~algebraic_to_field('a8')
+        two_steps = (
+            (bitboards[PAWN] & white_pawn_bitboard) << 16) & empty_squares
+        captures_left = (bitboards[PAWN] &
+                         bitboards[WHITE]) << 7 & bitboards[BLACK]
+        captures_right = (bitboards[PAWN] &
+                          bitboards[WHITE]) << 9 & bitboards[BLACK]
     else:
         one_step = (bitboards[PAWN] & bitboards[BLACK]) >> 8 & empty_squares
-        two_steps = ((one_step & 0x00FF000000000000) >>
-                     8) & empty_squares & empty_squares >> 8
-        captures_left = (bitboards[PAWN] & bitboards[BLACK]
-                         ) >> 9 & bitboards[WHITE] & ~0x8080808080808080
-        captures_right = (bitboards[PAWN] & bitboards[BLACK]
-                          ) >> 7 & bitboards[WHITE] & ~0x0101010101010101
+        two_steps = (
+            (bitboards[PAWN] & black_pawn_bitboard) >> 16) & empty_squares
+        captures_left = (bitboards[PAWN] &
+                         bitboards[BLACK]) >> 9 & bitboards[WHITE]
+        captures_right = (bitboards[PAWN] &
+                          bitboards[BLACK]) >> 7 & bitboards[WHITE]
 
     moves = [(one_step, 'one_step'), (two_steps, 'two_steps'),
              (captures_left, 'captures_left'), (captures_right, 'captures_right')]
@@ -422,4 +467,11 @@ if __name__ == '__main__':
     # print_bitboards(bitboards)
     # available_moves = get_knight_moves(bitboards, current_player)
     # print_bitboard("Final bitboard", available_moves)
-    print_legal_moves(bitboards, current_player)
+    # print_legal_moves(bitboards, current_player)
+
+    # Starting position in FEN notation
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    bitboards, current_player = fen_to_bitboards(fen)
+
+    print_board(bitboards)
+    print("Current player:", "White" if current_player == WHITE else "Black")
