@@ -339,7 +339,6 @@ def get_bishop_sliding_mask(bishop_pos):
     diag_h1a8 = 0x0102040810204080
 
     # Calculate the position of the bishop on the diagonal a1-h8
-    (sq % 8) - (sq // 8)
     diag_a1h8_offset = (sq % 8) - (sq // 8)
     if diag_a1h8_offset > 0:
         diag_a1h8_mask = diag_a1h8 >> (diag_a1h8_offset * 8)
@@ -438,7 +437,7 @@ def generate_legal_moves(bitboards, current_player):
     moves = []
 
     # moves += get_pawn_moves(bitboards, current_player)
-    #moves += get_knight_moves(bitboards, current_player)
+    moves += get_knight_moves(bitboards, current_player)
     moves += get_bishop_moves(bitboards, current_player)
     # moves += get_rook_moves(bitboards, current_player)
     # moves += get_queen_moves(bitboards, current_player)
@@ -467,7 +466,7 @@ if __name__ == '__main__':
     # print_bitboards(bitboards)
     # available_moves = get_knight_moves(bitboards, current_player)
     # print_bitboard("Final bitboard", available_moves)
-    # print_legal_moves(bitboards, current_player)
+    print_legal_moves(bitboards, current_player)
 
     # Starting position in FEN notation
     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
