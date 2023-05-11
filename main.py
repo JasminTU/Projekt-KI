@@ -297,6 +297,7 @@ def get_knight_moves(board, player):
 
 
 def print_bitboard(message, bitboard):
+    # print a single bitboard in a 8x8 grid
     print(message, "\n")
     for row in range(7, -1, -1):
         for col in range(8):
@@ -310,27 +311,27 @@ def print_bitboard(message, bitboard):
 
 
 def get_bishop_moves(bitboards, current_player):
+    # return: all legal bishop moves and attacks
     bishops = bitboards[current_player] & bitboards[BISHOP]
-    # TODO: enemy possessed fields are marked as free, therefore bishop cant attack through enemy lines
-    occupied = bitboards[BLACK] | bitboards[WHITE]
-    empty = occupied ^ MAX_VALUE
     moves = []
-
+        
     while bishops:
         # Get the next bishop and remove it from the bitboard
         bishop_pos = bishops & -bishops
         bishops ^= bishop_pos
-        bishop_moves = get_bishop_sliding_mask(bishop_pos, occupied, empty)
+        bishop_moves = get_bishops_legal_moves(bishop_pos, bitboards[current_player], bitboards[WHITE] if current_player != WHITE else bitboards[BLACK])
         while bishop_moves:
             dest = bishop_moves & -bishop_moves
             bishop_moves ^= dest
             moves += [(bishop_pos, dest)]
     return moves
 
-def get_between_diag(start, diag, occupied):
-    start_row = (start.bit_length() -1) // 8
-    between_diag = diag & (occupied ^ start)
-    legal_moves = diag
+def bishop_legal_moves_diagonal(bishop, diag, player_occupied, opponent_occupied):
+    # filter out moves that pass through other figures on the field
+    start_row = (bishop.bit_length() -1) // 8
+    between_diag = diag & ((player_occupied | opponent_occupied) ^ bishop)
+    legal_moves = diag    
+    
     while between_diag:
         figure_between = between_diag & -between_diag
         figure_row = (figure_between.bit_length() -1)  // 8
@@ -347,11 +348,50 @@ def get_between_diag(start, diag, occupied):
             legal_moves ^= illegal_moves
             to_remove = mask & between_diag
             between_diag ^= to_remove
-    return legal_moves
+            
+    bishop_attack_move = allow_attack_move_bishop(diag, opponent_occupied, bishop)
+    return legal_moves | bishop_attack_move
 
+def allow_attack_move_bishop(diag, opponent_occupied, bishop):
+    # set the closest opponent field in a single (!) lane where a figure stands to 0 (empty field), such that the bishop can move to that field
+    attack_moves = (diag ^ bishop) & opponent_occupied
+    lower_mask = ((1 << 8) << (bishop * 8)) - 1
+    lower_attack_moves = attack_moves & lower_mask
+    bishop_attack_moves = opponent_occupied
+    if closest_opp := search_closest_opponent(bishop, lower_attack_moves):
+        bishop_attack_moves ^= closest_opp
+        
+    upper_mask = ((1 << 8) << ((bishop - 1) * 8)) - 1
+    upper_mask ^= MAX_VALUE
+    upper_attack_moves = attack_moves & upper_mask
+    if closest_opp := search_closest_opponent(bishop, upper_attack_moves):
+        bishop_attack_moves ^= closest_opp
+        
+    return opponent_occupied ^ bishop_attack_moves
+    
+def search_closest_opponent(figure, attack_moves):
+    # inputs: 2 bitboards for the position of the figure and all possible attack moves in one! direction
+    closest_opp = None
+    closest_dist_opp = None
+    while attack_moves:
+        opp_figure = attack_moves & -attack_moves
+        dist_opp = calculate_manhatten_distance(opp_figure, figure)
+        if closest_opp is None or dist_opp < closest_dist_opp:
+            closest_opp = opp_figure
+            closest_dist_opp = dist_opp
+        attack_moves ^= opp_figure
+    return closest_opp
+            
+    
+def calculate_manhatten_distance(bb1, bb2):
+    # input: 2 bitboards, where only one bit is set to 1
+    bb1 = bb1.bit_length() -1
+    bb2 = bb2.bit_length() -1
+    x1, y1 = divmod(bb1, 8)
+    x2, y2 = divmod(bb2, 8)
+    return abs(x1 - x2) + abs(y1 - y2)
 
-def get_bishop_sliding_mask(bishop_pos, occupied, empty):
-    # Initialize bitboard for the bishop's position
+def get_bishops_legal_moves(bishop_pos, player_occupied, opponent_occupied):
     sq = bishop_pos.bit_length() - 1
     # Initialize bitboards for the diagonal masks
     diag_a1h8 = 0x8040201008040201
@@ -372,8 +412,9 @@ def get_bishop_sliding_mask(bishop_pos, occupied, empty):
     else:
         diag_h1a8_offset = abs(diag_h1a8_offset)
         diag_h1a8_mask = diag_h1a8 << (diag_h1a8_offset * 8)
-    legal_moves_a1h8 = get_between_diag(bishop_pos, diag_a1h8_mask, occupied)
-    legal_moves_h1a8 = get_between_diag(bishop_pos, diag_h1a8_mask, occupied)
+    legal_moves_a1h8 = bishop_legal_moves_diagonal(bishop_pos, diag_a1h8_mask, player_occupied, opponent_occupied)
+    legal_moves_h1a8 = bishop_legal_moves_diagonal(bishop_pos, diag_h1a8_mask, player_occupied, opponent_occupied)
+    print_bitboard("Legal moves: ", legal_moves_a1h8 ^ legal_moves_h1a8)
     return legal_moves_a1h8 ^ legal_moves_h1a8
 
 
@@ -500,9 +541,9 @@ if __name__ == "__main__":
     # print_bitboard("Final bitboard", available_moves)
     # bitboards = [0] * 8
 
-    # Set initial positions for white pieces using binary literals
-    # bitboards[WHITE] = int("0b0000000000000000000001000000000000000000001000000001000010000100", 2)
-    # bitboards[PAWN] =  int("0b0000000000000000000001000000000000000000000000000001000010000000", 2)
+    # #Set initial positions for white pieces using binary literals
+    # bitboards[WHITE] = int("0b0000000000000000000000000000000000000000001000000001000010000100", 2)
+    # bitboards[PAWN] =  int("0b0000000000000000000000000000000000000000000000000001000010000000", 2)
     # bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[BISHOP] = int("0b00000000000000000000000000000000000000000001000000000000000000100", 2)
     # bitboards[ROOK] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
@@ -510,14 +551,14 @@ if __name__ == "__main__":
     # bitboards[KING] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
 
     # # Set initial positions for black pieces using binary literals
-    # bitboards[BLACK] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[PAWN] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[KNIGHT] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[BLACK] =   int("0b0000000000000010000000000000000001000000000000000000000000000000", 2)
+    # bitboards[KNIGHT] |= int("0b0000000000000010000000000000000001000000000000000000000000000000", 2)
+    # bitboards[PAWN] |=   int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[BISHOP] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[ROOK] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[QUEEN] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[KING] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    print_board(bitboards)
+    # print_board(bitboards)
     
     print_legal_moves(bitboards, current_player)
 
