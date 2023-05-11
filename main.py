@@ -15,50 +15,33 @@ KING = 7
 
 
 # Define bitmasks for the edges of the board
-RIGHT_EDGE = int(
-    "0b0111111101111111011111110111111101111111011111110111111101111111", 2)
-LEFT_EDGE = int(
-    "0b1111111011111110111111101111111011111110111111101111111011111110", 2)
+RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
+LEFT_EDGE = int("0b1111111011111110111111101111111011111110111111101111111011111110", 2)
 BOTH_EDGES = RIGHT_EDGE & (RIGHT_EDGE << 1)
 # for bitwise inversion
-MAX_VALUE = int(
-    "0b1111111111111111111111111111111111111111111111111111111111111111", 2)
+MAX_VALUE = int("0b1111111111111111111111111111111111111111111111111111111111111111", 2)
 
 
 def initialize_bitboards():
     bitboards = [0] * 8
 
     # Set initial positions for white pieces using binary literals
-    bitboards[WHITE] = int(
-        "0b0000000000000000000000000000000000000000000000001111111111111111", 2)
-    bitboards[PAWN] = int(
-        "0b0000000000000000000000000000000000000000000000001111111100000000", 2)
-    bitboards[KNIGHT] = int(
-        "0b0000000000000000000000000000000000000000000000000000000001000010", 2)
-    bitboards[BISHOP] = int(
-        "0b00000000000000000000000000000000000000000000000000000000000100100", 2)
-    bitboards[ROOK] = int(
-        "0b0000000000000000000000000000000000000000000000000000000010000001", 2)
-    bitboards[QUEEN] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000001000", 2)
-    bitboards[KING] = int(
-        "0b0000000000000000000000000000000000000000000000000000000000010000", 2)
+    bitboards[WHITE] = int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
+    bitboards[PAWN] = int("0b0000000000000000000000000000000000000000000000001111111100000000", 2)
+    bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000001000010", 2)
+    bitboards[BISHOP] = int("0b00000000000000000000000000000000000000000000000000000000000100100", 2)
+    bitboards[ROOK] = int("0b0000000000000000000000000000000000000000000000000000000010000001", 2)
+    bitboards[QUEEN] = int("0b0000000000000000000000000000000000000000000000000000000000001000", 2)
+    bitboards[KING] = int("0b0000000000000000000000000000000000000000000000000000000000010000", 2)
 
     # Set initial positions for black pieces using binary literals
-    bitboards[BLACK] = int(
-        "0b1111111111111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[PAWN] |= int(
-        "0b0000000011111111000000000000000000000000000000000000000000000000", 2)
-    bitboards[KNIGHT] |= int(
-        "0b0100001000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[BISHOP] |= int(
-        "0b0010010000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[ROOK] |= int(
-        "0b1000000100000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[QUEEN] |= int(
-        "0b0000100000000000000000000000000000000000000000000000000000000000", 2)
-    bitboards[KING] |= int(
-        "0b0001000000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BLACK] = int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[PAWN] |= int("0b0000000011111111000000000000000000000000000000000000000000000000", 2)
+    bitboards[KNIGHT] |= int("0b0100001000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[BISHOP] |= int("0b0010010000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[ROOK] |= int("0b1000000100000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[QUEEN] |= int("0b0000100000000000000000000000000000000000000000000000000000000000", 2)
+    bitboards[KING] |= int("0b0001000000000000000000000000000000000000000000000000000000000000", 2)
 
     return bitboards
 
@@ -68,19 +51,19 @@ def fen_to_bitboards(fen):
     piece_positions = fen_parts[0]
     current_player_fen = fen_parts[1]
 
-    current_player = WHITE if current_player_fen == 'w' else BLACK
+    current_player = WHITE if current_player_fen == "w" else BLACK
 
     rows = piece_positions.split("/")
 
     bitboards = [0] * 8
 
     piece_symbols = {
-        'P': PAWN,
-        'N': KNIGHT,
-        'B': BISHOP,
-        'R': ROOK,
-        'Q': QUEEN,
-        'K': KING
+        "P": PAWN,
+        "N": KNIGHT,
+        "B": BISHOP,
+        "R": ROOK,
+        "Q": QUEEN,
+        "K": KING,
     }
 
     # Process rows in reverse order
@@ -123,7 +106,13 @@ def print_board(bitboards):
         for col in range(BOARD_SIZE):
             square = 1 << (row * BOARD_SIZE + col)
             piece = None
-            color = WHITE if bitboards[WHITE] & square else BLACK if bitboards[BLACK] & square else None
+            color = (
+                WHITE
+                if bitboards[WHITE] & square
+                else BLACK
+                if bitboards[BLACK] & square
+                else None
+            )
 
             if color is not None:
                 for piece_type in range(PAWN, KING + 1):
@@ -204,29 +193,29 @@ def get_pawn_moves(bitboards, current_player):
     pawn_moves = []
 
     white_pawn_bitboard = int(
-        "0b0000000000000000000000000000000000000000000000001111111100000000", 2)
+        "0b0000000000000000000000000000000000000000000000001111111100000000", 2
+    )
     black_pawn_bitboard = int(
-        "0b0000000011111111000000000000000000000000000000000000000000000000", 2)
+        "0b0000000011111111000000000000000000000000000000000000000000000000", 2
+    )
 
     if current_player == WHITE:
         one_step = (bitboards[PAWN] & bitboards[WHITE]) << 8 & empty_squares
-        two_steps = (
-            (bitboards[PAWN] & white_pawn_bitboard) << 16) & empty_squares
-        captures_left = (bitboards[PAWN] &
-                         bitboards[WHITE]) << 7 & bitboards[BLACK]
-        captures_right = (bitboards[PAWN] &
-                          bitboards[WHITE]) << 9 & bitboards[BLACK]
+        two_steps = ((bitboards[PAWN] & white_pawn_bitboard) << 16) & empty_squares
+        captures_left = (bitboards[PAWN] & bitboards[WHITE]) << 7 & bitboards[BLACK]
+        captures_right = (bitboards[PAWN] & bitboards[WHITE]) << 9 & bitboards[BLACK]
     else:
         one_step = (bitboards[PAWN] & bitboards[BLACK]) >> 8 & empty_squares
-        two_steps = (
-            (bitboards[PAWN] & black_pawn_bitboard) >> 16) & empty_squares
-        captures_left = (bitboards[PAWN] &
-                         bitboards[BLACK]) >> 9 & bitboards[WHITE]
-        captures_right = (bitboards[PAWN] &
-                          bitboards[BLACK]) >> 7 & bitboards[WHITE]
+        two_steps = ((bitboards[PAWN] & black_pawn_bitboard) >> 16) & empty_squares
+        captures_left = (bitboards[PAWN] & bitboards[BLACK]) >> 9 & bitboards[WHITE]
+        captures_right = (bitboards[PAWN] & bitboards[BLACK]) >> 7 & bitboards[WHITE]
 
-    moves = [(one_step, 'one_step'), (two_steps, 'two_steps'),
-             (captures_left, 'captures_left'), (captures_right, 'captures_right')]
+    moves = [
+        (one_step, "one_step"),
+        (two_steps, "two_steps"),
+        (captures_left, "captures_left"),
+        (captures_right, "captures_right"),
+    ]
 
     for move_type in moves:
         move, move_name = move_type
@@ -234,14 +223,20 @@ def get_pawn_moves(bitboards, current_player):
             to_square = move & -move
             from_square = to_square >> 8 if current_player == WHITE else to_square << 8
 
-            if move_name == 'two_steps':
-                from_square = from_square >> 8 if current_player == WHITE else from_square << 8
+            if move_name == "two_steps":
+                from_square = (
+                    from_square >> 8 if current_player == WHITE else from_square << 8
+                )
 
-            if move_name == 'captures_left':
-                from_square = from_square >> 7 if current_player == WHITE else from_square << 9
+            if move_name == "captures_left":
+                from_square = (
+                    from_square >> 7 if current_player == WHITE else from_square << 9
+                )
 
-            if move_name == 'captures_right':
-                from_square = from_square >> 9 if current_player == WHITE else from_square << 7
+            if move_name == "captures_right":
+                from_square = (
+                    from_square >> 9 if current_player == WHITE else from_square << 7
+                )
 
             pawn_moves.append((from_square, to_square))
             move &= move - 1
@@ -283,14 +278,16 @@ def get_knight_moves(board, player):
         # Get the position of the least significant set bit (i.e., the position of the current knight)
         knight_pos = knights & -knights
         # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
-        knight_moves = ((((LEFT_EDGE & knight_pos) << 15) & empty),
-                        (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) << 6) & empty),
-                        (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) << 10) & empty),
-                        (((RIGHT_EDGE & knight_pos) << 17) & empty),
-                        (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) >> 10) & empty),
-                        (((LEFT_EDGE & knight_pos) >> 17) & empty),
-                        (((RIGHT_EDGE & knight_pos) >> 15) & empty),
-                        (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) >> 6) & empty))
+        knight_moves = (
+            (((LEFT_EDGE & knight_pos) << 15) & empty),
+            (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) << 6) & empty),
+            (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) << 10) & empty),
+            (((RIGHT_EDGE & knight_pos) << 17) & empty),
+            (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) >> 10) & empty),
+            (((LEFT_EDGE & knight_pos) >> 17) & empty),
+            (((RIGHT_EDGE & knight_pos) >> 15) & empty),
+            (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) >> 6) & empty),
+        )
         # Convert the bitboard positions to tuples and add them to the list of moves
         moves += [(knight_pos, dest) for dest in knight_moves if dest]
 
@@ -300,7 +297,7 @@ def get_knight_moves(board, player):
 
 
 def print_bitboard(message, bitboard):
-    print(message, '\n')
+    print(message, "\n")
     for row in range(7, -1, -1):
         for col in range(8):
             index = row * 8 + col
@@ -309,13 +306,13 @@ def print_bitboard(message, bitboard):
             else:
                 print("0", end=" ")
         print()
-    print('--------\n')
+    print("--------\n")
 
 
 def get_bishop_moves(bitboards, current_player):
     bishops = bitboards[current_player] & bitboards[BISHOP]
     # TODO: enemy possessed fields are marked as free, therefore bishop cant attack through enemy lines
-    occupied = bitboards[current_player]
+    occupied = bitboards[BLACK] | bitboards[WHITE]
     empty = occupied ^ MAX_VALUE
     moves = []
 
@@ -323,15 +320,37 @@ def get_bishop_moves(bitboards, current_player):
         # Get the next bishop and remove it from the bitboard
         bishop_pos = bishops & -bishops
         bishops ^= bishop_pos
-        bishop_moves = get_bishop_sliding_mask(bishop_pos) & empty
+        bishop_moves = get_bishop_sliding_mask(bishop_pos, occupied, empty)
         while bishop_moves:
             dest = bishop_moves & -bishop_moves
             bishop_moves ^= dest
             moves += [(bishop_pos, dest)]
     return moves
 
+def get_between_diag(start, diag, occupied):
+    start_row = (start.bit_length() -1) // 8
+    between_diag = diag & (occupied ^ start)
+    legal_moves = diag
+    while between_diag:
+        figure_between = between_diag & -between_diag
+        figure_row = (figure_between.bit_length() -1)  // 8
+        if figure_row < start_row:
+            mask = ((1 << 8) << (figure_row * 8)) - 1
+            illegal_moves = mask & diag
+            legal_moves ^= illegal_moves
+            to_remove = mask & between_diag
+            between_diag ^= to_remove
+        else:
+            mask = ((1 << 8) << ((figure_row - 1) * 8)) - 1
+            mask ^= MAX_VALUE
+            illegal_moves = mask & diag
+            legal_moves ^= illegal_moves
+            to_remove = mask & between_diag
+            between_diag ^= to_remove
+    return legal_moves
 
-def get_bishop_sliding_mask(bishop_pos):
+
+def get_bishop_sliding_mask(bishop_pos, occupied, empty):
     # Initialize bitboard for the bishop's position
     sq = bishop_pos.bit_length() - 1
     # Initialize bitboards for the diagonal masks
@@ -353,7 +372,9 @@ def get_bishop_sliding_mask(bishop_pos):
     else:
         diag_h1a8_offset = abs(diag_h1a8_offset)
         diag_h1a8_mask = diag_h1a8 << (diag_h1a8_offset * 8)
-    return diag_a1h8_mask ^ diag_h1a8_mask
+    legal_moves_a1h8 = get_between_diag(bishop_pos, diag_a1h8_mask, occupied)
+    legal_moves_h1a8 = get_between_diag(bishop_pos, diag_h1a8_mask, occupied)
+    return legal_moves_a1h8 ^ legal_moves_h1a8
 
 
 def get_rook_moves(bitboards, current_player):
@@ -369,7 +390,10 @@ def get_rook_moves(bitboards, current_player):
             possible_square = square
             while True:
                 possible_square = (
-                    possible_square << direction if direction > 0 else possible_square >> -direction)
+                    possible_square << direction
+                    if direction > 0
+                    else possible_square >> -direction
+                )
                 # Check if the square is within the board
                 if not (0 <= possible_square.bit_length() - 1 < 64):
                     break
@@ -399,7 +423,9 @@ def get_rook_moves(bitboards, current_player):
 
 def get_queen_moves(bitboards, current_player):
     # The queen's moves are RIGHT_EDGE combination of the bishop and rook moves
-    return get_bishop_moves(bitboards, current_player) + get_rook_moves(bitboards, current_player)
+    return get_bishop_moves(bitboards, current_player) + get_rook_moves(
+        bitboards, current_player
+    )
 
 
 def get_king_moves(bitboards, current_player):
@@ -413,7 +439,10 @@ def get_king_moves(bitboards, current_player):
             to_square = from_square << offset if offset > 0 else from_square >> -offset
 
             # Check if the move is within the board
-            if to_square & (0xFFFFFFFFFFFFFFFF ^ (bitboards[WHITE] | bitboards[BLACK])) == 0:
+            if (
+                to_square & (0xFFFFFFFFFFFFFFFF ^ (bitboards[WHITE] | bitboards[BLACK]))
+                == 0
+            ):
                 continue
 
             # Check if the move captures an opponent's piece or is an empty square
@@ -437,40 +466,66 @@ def generate_legal_moves(bitboards, current_player):
     moves = []
 
     # moves += get_pawn_moves(bitboards, current_player)
-    moves += get_knight_moves(bitboards, current_player)
+    # moves += get_knight_moves(bitboards, current_player)
     moves += get_bishop_moves(bitboards, current_player)
     # moves += get_rook_moves(bitboards, current_player)
     # moves += get_queen_moves(bitboards, current_player)
     # moves += get_king_moves(bitboards, current_player)
 
-    legal_moves = [move for move in moves if is_move_legal(
-        move, bitboards, current_player)]
+    legal_moves = [
+        move for move in moves if is_move_legal(move, bitboards, current_player)
+    ]
 
     return legal_moves
 
 
 def print_legal_moves(bitboards, current_player):
     legal_moves = generate_legal_moves(bitboards, current_player)
-    print("Legal moves for the current player ({}):".format(
-        "White" if current_player == WHITE else "Black"))
+    print(
+        "Legal moves for the current player ({}):".format(
+            "White" if current_player == WHITE else "Black"
+        )
+    )
     for move in legal_moves:
         from_square, to_square = move
         print(move_to_algebraic(from_square, to_square))
 
 
 # Press the green button in the gutter to run the script.
-if __name__ == '__main__':
+if __name__ == "__main__":
     current_player = WHITE
     bitboards = initialize_bitboards()
-    print_board(bitboards)
     # print_bitboards(bitboards)
     # available_moves = get_knight_moves(bitboards, current_player)
     # print_bitboard("Final bitboard", available_moves)
+    # bitboards = [0] * 8
+
+    # Set initial positions for white pieces using binary literals
+    # bitboards[WHITE] = int("0b0000000000000000000001000000000000000000001000000001000010000100", 2)
+    # bitboards[PAWN] =  int("0b0000000000000000000001000000000000000000000000000001000010000000", 2)
+    # bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[BISHOP] = int("0b00000000000000000000000000000000000000000001000000000000000000100", 2)
+    # bitboards[ROOK] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[QUEEN] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[KING] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+
+    # # Set initial positions for black pieces using binary literals
+    # bitboards[BLACK] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[PAWN] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[KNIGHT] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[BISHOP] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[ROOK] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[QUEEN] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[KING] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    print_board(bitboards)
+    
     print_legal_moves(bitboards, current_player)
 
     # Starting position in FEN notation
-    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    bitboards, current_player = fen_to_bitboards(fen)
+    # fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    # bitboards, current_player = fen_to_bitboards(fen)
 
-    print_board(bitboards)
-    print("Current player:", "White" if current_player == WHITE else "Black")
+    # print_board(bitboards)
+    # print("Current player:", "White" if current_player == WHITE else "Black")
+    
+
