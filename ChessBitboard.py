@@ -32,23 +32,23 @@ class ChessBitboard:
         bitboards[self.BLACK] = int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
         bitboards[self.PAWN] = int("0b0000000011111111000000000000000000000000000000001111111100000000", 2)
         bitboards[self.KNIGHT] = int("0b0100001000000000000000000000000000000000000000000000000001000010", 2)
-        bitboards[self.BISHOP] = int("0b00100100000000000000000000000000000000000000000000000000000100100", 2)
+        bitboards[self.BISHOP] = int("0b0010010000000000000000000000000000000000000000000000000000100100", 2)
         bitboards[self.ROOK] = int("0b1000000100000000000000000000000000000000000000000000000010000001", 2)
         bitboards[self.QUEEN] = int("0b0000100000000000000000000000000000000000000000000000000000001000", 2)
         bitboards[self.KING] = int("0b0001000000000000000000000000000000000000000000000000000000010000", 2)
 
         return bitboards
 
-    def fen_to_bitboards(self, fen):
+    def load_from_fen(self, fen):
         fen_parts = fen.split(" ")
         piece_positions = fen_parts[0]
         current_player_fen = fen_parts[1]
 
-        current_player = self.WHITE if current_player_fen == "w" else self.BLACK
+        self.current_player = self.WHITE if current_player_fen == "w" else self.BLACK
 
         rows = piece_positions.split("/")
 
-        bitboards = [0] * 8
+        self.bitboards = [0] * 8
 
         piece_symbols = {
             "P": self.PAWN,
@@ -71,12 +71,11 @@ class ChessBitboard:
 
                     square = 1 << (row_index * 8 + col_index)
 
-                    bitboards[color] |= square
-                    bitboards[piece_type] |= square
+                    self.bitboards[color] |= square
+                    self.bitboards[piece_type] |= square
 
                     col_index += 1
 
-        return bitboards, current_player
 
     def print_board(self, bitboards):
         piece_symbols = {
@@ -193,8 +192,8 @@ class ChessBitboard:
         else:
             one_step = (bitboards[self.PAWN] & bitboards[self.BLACK]) >> 8 & empty_squares
             two_steps = ((bitboards[self.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
-            captures_left = (bitboards[self.PAWN] & bitboards[self.BLACK]) >> 9 & bitboards[self.WHITE]
-            captures_right = (bitboards[self.PAWN] & bitboards[self.BLACK]) >> 7 & bitboards[self.WHITE]
+            captures_left = (bitboards[self.PAWN] & bitboards[self.BLACK]) >> 7 & bitboards[self.WHITE]
+            captures_right = (bitboards[self.PAWN] & bitboards[self.BLACK]) >> 9 & bitboards[self.WHITE]
 
         moves = [
             (one_step, "one_step"),
@@ -207,21 +206,26 @@ class ChessBitboard:
             move, move_name = move_type
             while move != 0:
                 to_square = move & -move
-                from_square = to_square >> 8 if current_player == self.WHITE else to_square << 8
+                from_square = 0
+
+                if move_name == "one_step":
+                    from_square = (
+                        to_square >> 8 if current_player == self.WHITE else to_square << 8
+                    )
 
                 if move_name == "two_steps":
                     from_square = (
-                        from_square >> 8 if current_player == self.WHITE else from_square << 8
+                        to_square >> 16 if current_player == self.WHITE else to_square << 16
                     )
 
                 if move_name == "captures_left":
                     from_square = (
-                        from_square >> 7 if current_player == self.WHITE else from_square << 9
+                        to_square >> 7 if current_player == self.WHITE else to_square << 7
                     )
 
                 if move_name == "captures_right":
                     from_square = (
-                        from_square >> 9 if current_player == self.WHITE else from_square << 7
+                        to_square >> 9 if current_player == self.WHITE else to_square << 9
                     )
 
                 pawn_moves.append((from_square, to_square))
@@ -375,11 +379,11 @@ class ChessBitboard:
         moves = []
 
         moves += self.get_pawn_moves(bitboards, current_player)
-        moves += self.get_knight_moves(bitboards, current_player)
-        moves += self.get_figure_moves(bitboards, current_player, self.BISHOP)
-        moves += self.get_figure_moves(bitboards, current_player, self.ROOK)
-        moves += self.get_figure_moves(bitboards, current_player, self.QUEEN)
-        moves += self.get_king_moves(bitboards, current_player)
+        # moves += self.get_knight_moves(bitboards, current_player)
+        # moves += self.get_figure_moves(bitboards, current_player, self.BISHOP)
+        # moves += self.get_figure_moves(bitboards, current_player, self.ROOK)
+        # moves += self.get_figure_moves(bitboards, current_player, self.QUEEN)
+        # moves += self.get_king_moves(bitboards, current_player)
 
         legal_moves = [
             move for move in moves if self.is_move_legal(move, bitboards, self.current_player)
@@ -391,23 +395,29 @@ class ChessBitboard:
         move = self.algebraic_to_move(move_algebraic)
         legal_moves = self.generate_legal_moves(self.bitboards, self.current_player)
         if move not in legal_moves:
-            raise Exception("Illegal move: ", move)
+            raise Exception("Illegal move: ", move_algebraic)
         from_square, to_square = move
-        for color_bitboard in self.bitboards[:1]:
-            if color_bitboard & from_square:
-                color_bitboard &= ~from_square
-                color_bitboard |= to_square
+        if self.bitboards[self.WHITE] & from_square:
+            if self.current_player == self.BLACK:
+                raise Exception("Illegal move: ", move_algebraic, ". Current player: ", self.current_player, "but move is for white")
+            self.bitboards[self.WHITE] &= ~from_square
+            self.bitboards[self.WHITE] |= to_square
+        if self.bitboards[self.BLACK] & from_square:
+            if self.current_player == self.WHITE:
+                raise Exception("Illegal move: ", move_algebraic, ". Current player: ", self.current_player, "but move is for black")
+            self.bitboards[self.BLACK] &= ~from_square
+            self.bitboards[self.BLACK] |= to_square
+        for piece in range(2, 8):
+            if self.bitboards[piece] & from_square:
+                self.bitboards[piece] &= ~from_square
+                self.bitboards[piece] |= to_square
                 break
-        for piece_bitboard in self.bitboards[2:]:
-            if piece_bitboard & from_square:
-                piece_bitboard &= ~from_square
-                piece_bitboard |= to_square
-                break
+        self.current_player = self.WHITE if self.current_player == self.BLACK else self.BLACK
 
     def print_legal_moves(self, bitboards, current_player):
         legal_moves = self.generate_legal_moves(bitboards, current_player)
         print(
-            "Legal moves for the current player ({}):".format(
+            "\nLegal moves for the current player ({}):".format(
                 "White" if current_player == self.WHITE else "Black"
             )
         )
@@ -440,13 +450,8 @@ if __name__ == "__main__":
     # bitboards[KING] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # print_board(bitboards)
 
+    chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2")
+    chessBitboard.perform_move("e2e4")
+    chessBitboard.print_bitboards(chessBitboard.bitboards)
+    chessBitboard.print_board(chessBitboard.bitboards)
     chessBitboard.print_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
-
-    # Starting position in FEN notation
-    # fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    # bitboards, current_player = chessBitboard.fen_to_bitboards(fen)
-    # knight = int("0b0000000000000000000000000000000001000000000000000000000000000000", 2)
-    # print_bitboard("Knight pos:", knight)
-    # print_bitboard("Shifted: ", knight >> 9)
-    # print_board(bitboards)
-    # print("Current player:", "White" if current_player == WHITE else "Black")
