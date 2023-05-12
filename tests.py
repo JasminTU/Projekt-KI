@@ -16,7 +16,7 @@ class TestChessBitboard(unittest.TestCase):
     Test boards can be generated using the fen notation using the following website: https://lichess.org/editor
     """
 
-    def assert_equal_bitboards(self, bitboard1, bitboard2):
+    def assertEqualBitboards(self, bitboard1, bitboard2):
         """
         This method compares two bitboards and raises an AssertionError if they are not equal.
         :param bitboard1: the first bitboard to compare.
@@ -28,8 +28,10 @@ class TestChessBitboard(unittest.TestCase):
             error_message = "Bitboards are not equal:"
             error_message += "\nBitboard:\n"
             error_message += bitboard1.get_board_string()
+            error_message += bitboard1.get_bitboards_string()
             error_message += "\nTestboard:\n"
             error_message += bitboard2.get_board_string()
+            error_message += bitboard2.get_bitboards_string()
             raise AssertionError(error_message)
 
     def setUp(self):
@@ -49,7 +51,12 @@ class TestChessBitboard(unittest.TestCase):
         self.bitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
         self.bitboard.perform_move('d4e5')
         self.testboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1")
-        self.assert_equal_bitboards(self.bitboard, self.testboard)
+        self.assertEqualBitboards(self.bitboard, self.testboard)
+    def test_move_pawn_legal_3(self):
+        self.bitboard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2b5/3P4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
+        self.bitboard.perform_move('d4c5')
+        self.testboard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2P5/8/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.bitboard, self.testboard)
     def test_move_pawn_illegal_1(self):
         self.assertRaises(Exception, self.bitboard.perform_move, 'e7e5')
 

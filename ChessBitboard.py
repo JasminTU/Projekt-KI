@@ -130,11 +130,14 @@ class ChessBitboard:
                 board_string += " "
             board_string += f"| {8 - row}\n"
         board_string += f"" + "-" * 15 + f"\n"
-        board_string += f"a b c d e f g h\n"
+        board_string += f"a b c d e f g h\n\n"
 
         return board_string
 
-    def print_bitboards(self, bitboards):
+    def print_bitboards(self):
+        print(self.get_bitboards_string())
+
+    def get_bitboards_string(self):
         labels = {
             self.WHITE: "White",
             self.BLACK: "Black",
@@ -146,14 +149,19 @@ class ChessBitboard:
             self.KING: "Kings",
         }
 
-        for i, bitboard in enumerate(bitboards):
-            print(labels[i] + ":")
+        bitboards_string = ""
+
+        for i, bitboard in enumerate(self.bitboards):
+            bitboards_string += labels[i] + ":\n"
             for row in reversed(range(self.BOARD_SIZE)):
                 for col in range(self.BOARD_SIZE):
                     square = 1 << (row * self.BOARD_SIZE + col)
-                    print("1" if bitboard & square else "0", end=" ")
-                print()
-            print()
+                    bitboards_string += "1" if bitboard & square else "0"
+                    bitboards_string += " "
+                bitboards_string += "\n"
+            bitboards_string += "\n"
+
+        return bitboards_string
 
     def move_to_algebraic(self, from_square, to_square):
         from_field = self.field_to_algebraic(from_square)
@@ -417,22 +425,28 @@ class ChessBitboard:
         if move not in legal_moves:
             raise IllegalMoveException(move_algebraic)
         from_square, to_square = move
-        if self.bitboards[self.WHITE] & from_square:
-            if self.current_player == self.BLACK:
-                raise IllegalMoveException(move_algebraic)
-            self.bitboards[self.WHITE] &= ~from_square
-            self.bitboards[self.WHITE] |= to_square
-        if self.bitboards[self.BLACK] & from_square:
-            if self.current_player == self.WHITE:
-                raise IllegalMoveException(move_algebraic)
-            self.bitboards[self.BLACK] &= ~from_square
-            self.bitboards[self.BLACK] |= to_square
-        for piece in range(2, 8):
+        opponent = self.BLACK if self.current_player == self.WHITE else self.WHITE
+
+        if self.bitboards[self.current_player] & from_square:
+            # Remove the moving piece from its original position
+            self.bitboards[self.current_player] &= ~from_square
+            # Remove a possibly captured piece from the destination
+            self.bitboards[opponent] &= ~to_square
+            # Move the piece to the new position
+            self.bitboards[self.current_player] |= to_square
+
+        for piece in range(self.PAWN, self.KING + 1):
             if self.bitboards[piece] & from_square:
+                # Remove the moving piece from its original position
                 self.bitboards[piece] &= ~from_square
+                # Move the piece to the new position
                 self.bitboards[piece] |= to_square
-                break
-        self.current_player = self.WHITE if self.current_player == self.BLACK else self.BLACK
+            # Remove a possibly captured piece from the destination
+            else:
+                self.bitboards[piece] &= ~to_square
+
+        # Switch the current player
+        self.current_player = opponent
 
     def print_legal_moves(self, bitboards, current_player):
         legal_moves = self.generate_legal_moves(bitboards, current_player)
@@ -470,8 +484,11 @@ if __name__ == "__main__":
     # bitboards[KING] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # print_board(bitboards)
 
-    chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2")
-    chessBitboard.perform_move("e2e4")
-    chessBitboard.print_bitboards(chessBitboard.bitboards)
-    chessBitboard.print_board(chessBitboard.bitboards)
-    chessBitboard.print_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
+    # chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2")
+    # chessBitboard.perform_move("e2e4")
+    # chessBitboard.print_bitboards()
+    # chessBitboard.print_board()
+    # chessBitboard.print_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
+    chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
+    chessBitboard.print_board()
+    chessBitboard.print_bitboards()
