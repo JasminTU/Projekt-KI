@@ -244,30 +244,6 @@ def get_pawn_moves(bitboards, current_player):
     return pawn_moves
 
 
-def shift_by_direction(board, direction, number_fields):
-    board = None
-    if direction == "north":
-        board = board << (8 * number_fields)
-    if direction == "north_west":
-        board = board << (9 * number_fields)
-    if direction == "north_east":
-        board = board << (7 * number_fields)
-    if direction == "west":
-        board = board << number_fields
-    if direction == "south":
-        board = board >> (8 * number_fields)
-    if direction == "south_west":
-        board = board >> (7 * number_fields)
-    if direction == "south_east":
-        board = board >> (9 * number_fields)
-    if direction == "east":
-        board = board >> number_fields
-    else:
-        logger.error("Unknown direction:", direction)
-        sys.exit(1)
-    return board
-
-
 def get_knight_moves(board, player):
     # Define the bitboards for each player
     knights = board[player] & board[KNIGHT]
@@ -310,164 +286,74 @@ def print_bitboard(message, bitboard):
     print("--------\n")
 
 
-def get_bishop_moves(bitboards, current_player):
-    # return: all legal bishop moves and attacks
-    bishops = bitboards[current_player] & bitboards[BISHOP]
-    moves = []
-        
-    while bishops:
-        # Get the next bishop and remove it from the bitboard
-        bishop_pos = bishops & -bishops
-        bishops ^= bishop_pos
-        bishop_moves = get_bishops_legal_moves(bishop_pos, bitboards[current_player], bitboards[WHITE] if current_player != WHITE else bitboards[BLACK])
-        while bishop_moves:
-            dest = bishop_moves & -bishop_moves
-            bishop_moves ^= dest
-            moves += [(bishop_pos, dest)]
-    return moves
+def get_figure_moves(bitboards, current_player, figure):
+    figure_moves = []
+    figures = bitboards[figure] & bitboards[current_player]
 
-def bishop_legal_moves_diagonal(bishop, diag, player_occupied, opponent_occupied):
-    # filter out moves that pass through other figures on the field
-    start_row = (bishop.bit_length() -1) // 8
-    between_diag = diag & ((player_occupied | opponent_occupied) ^ bishop)
-    legal_moves = diag    
-    
-    while between_diag:
-        figure_between = between_diag & -between_diag
-        figure_row = (figure_between.bit_length() -1)  // 8
-        if figure_row < start_row:
-            mask = ((1 << 8) << (figure_row * 8)) - 1
-            illegal_moves = mask & diag
-            legal_moves ^= illegal_moves
-            to_remove = mask & between_diag
-            between_diag ^= to_remove
+    while figures:
+        from_square = figures & -figures
+        if figure == ROOK:
+            attacks = generate_rook_attacks(from_square, bitboards[WHITE] if current_player != WHITE else bitboards[BLACK], bitboards[current_player])
+        elif figure == BISHOP:
+            attacks = generate_bishop_attacks(from_square, bitboards[WHITE] if current_player != WHITE else bitboards[BLACK], bitboards[current_player])
+        elif figure == QUEEN:
+            attacks = generate_rook_attacks(from_square, bitboards[WHITE] if current_player != WHITE else bitboards[BLACK], bitboards[current_player])
+            attacks |= generate_bishop_attacks(from_square, bitboards[WHITE] if current_player != WHITE else bitboards[BLACK], bitboards[current_player])
         else:
-            mask = ((1 << 8) << ((figure_row - 1) * 8)) - 1
-            mask ^= MAX_VALUE
-            illegal_moves = mask & diag
-            legal_moves ^= illegal_moves
-            to_remove = mask & between_diag
-            between_diag ^= to_remove
+            logger.error("Unknown figure: ", figure)
             
-    bishop_attack_move = allow_attack_move_bishop(diag, opponent_occupied, bishop)
-    return legal_moves | bishop_attack_move
-
-def allow_attack_move_bishop(diag, opponent_occupied, bishop):
-    # set the closest opponent field in a single (!) lane where a figure stands to 0 (empty field), such that the bishop can move to that field
-    attack_moves = (diag ^ bishop) & opponent_occupied
-    lower_mask = ((1 << 8) << (bishop * 8)) - 1
-    lower_attack_moves = attack_moves & lower_mask
-    bishop_attack_moves = opponent_occupied
-    if closest_opp := search_closest_opponent(bishop, lower_attack_moves):
-        bishop_attack_moves ^= closest_opp
-        
-    upper_mask = ((1 << 8) << ((bishop - 1) * 8)) - 1
-    upper_mask ^= MAX_VALUE
-    upper_attack_moves = attack_moves & upper_mask
-    if closest_opp := search_closest_opponent(bishop, upper_attack_moves):
-        bishop_attack_moves ^= closest_opp
-        
-    return opponent_occupied ^ bishop_attack_moves
-    
-def search_closest_opponent(figure, attack_moves):
-    # inputs: 2 bitboards for the position of the figure and all possible attack moves in one! direction
-    closest_opp = None
-    closest_dist_opp = None
-    while attack_moves:
-        opp_figure = attack_moves & -attack_moves
-        dist_opp = calculate_manhatten_distance(opp_figure, figure)
-        if closest_opp is None or dist_opp < closest_dist_opp:
-            closest_opp = opp_figure
-            closest_dist_opp = dist_opp
-        attack_moves ^= opp_figure
-    return closest_opp
-            
-    
-def calculate_manhatten_distance(bb1, bb2):
-    # input: 2 bitboards, where only one bit is set to 1
-    bb1 = bb1.bit_length() -1
-    bb2 = bb2.bit_length() -1
-    x1, y1 = divmod(bb1, 8)
-    x2, y2 = divmod(bb2, 8)
-    return abs(x1 - x2) + abs(y1 - y2)
-
-def get_bishops_legal_moves(bishop_pos, player_occupied, opponent_occupied):
-    sq = bishop_pos.bit_length() - 1
-    # Initialize bitboards for the diagonal masks
-    diag_a1h8 = 0x8040201008040201
-    diag_h1a8 = 0x0102040810204080
-
-    # Calculate the position of the bishop on the diagonal a1-h8
-    diag_a1h8_offset = (sq % 8) - (sq // 8)
-    if diag_a1h8_offset > 0:
-        diag_a1h8_mask = diag_a1h8 >> (diag_a1h8_offset * 8)
-    else:
-        diag_a1h8_offset = abs(diag_a1h8_offset)
-        diag_a1h8_mask = diag_a1h8 << (diag_a1h8_offset * 8)
-
-    # Calculate the position of the bishop on the diagonal h1-a8
-    diag_h1a8_offset = 7 - ((sq % 8) + (sq // 8))
-    if diag_h1a8_offset > 0:
-        diag_h1a8_mask = diag_h1a8 >> (diag_h1a8_offset * 8)
-    else:
-        diag_h1a8_offset = abs(diag_h1a8_offset)
-        diag_h1a8_mask = diag_h1a8 << (diag_h1a8_offset * 8)
-    legal_moves_a1h8 = bishop_legal_moves_diagonal(bishop_pos, diag_a1h8_mask, player_occupied, opponent_occupied)
-    legal_moves_h1a8 = bishop_legal_moves_diagonal(bishop_pos, diag_h1a8_mask, player_occupied, opponent_occupied)
-    print_bitboard("Legal moves: ", legal_moves_a1h8 ^ legal_moves_h1a8)
-    return legal_moves_a1h8 ^ legal_moves_h1a8
-
-
-def get_rook_moves(bitboards, current_player):
-    # TODO: Implement rook move generation
-    rook_moves = []
-
-    # Use bitwise operations to generate sliding moves for rooks
-    def generate_rook_attacks(square, occupied_squares):
-        attacks = 0
-        attack_directions = [-8, -1, 1, 8]
-
-        for direction in attack_directions:
-            possible_square = square
-            while True:
-                possible_square = (
-                    possible_square << direction
-                    if direction > 0
-                    else possible_square >> -direction
-                )
-                # Check if the square is within the board
-                if not (0 <= possible_square.bit_length() - 1 < 64):
-                    break
-                if possible_square & occupied_squares:  # Stop if the square is occupied
-                    attacks |= possible_square
-                    break
-                attacks |= possible_square
-
-        return attacks
-
-    rooks = bitboards[ROOK] & bitboards[current_player]
-    occupied_squares = bitboards[WHITE] | bitboards[BLACK]
-
-    while rooks:
-        from_square = rooks & -rooks
-        attacks = generate_rook_attacks(from_square, occupied_squares)
-        attacks &= ~(bitboards[current_player])
         while attacks:
             to_square = attacks & -attacks
-            rook_moves.append((from_square, to_square))
+            figure_moves.append((from_square, to_square))
             attacks &= attacks - 1
 
-        rooks &= rooks - 1
+        figures &= figures - 1
 
-    return rook_moves
+    return figure_moves
 
 
-def get_queen_moves(bitboards, current_player):
-    # The queen's moves are RIGHT_EDGE combination of the bishop and rook moves
-    return get_bishop_moves(bitboards, current_player) + get_rook_moves(
-        bitboards, current_player
-    )
+def generate_bishop_attacks(square, opp_occupied_squares, player_occupied_squares):
+    attacks = 0
+    attack_directions = [-9, -7, 7, 9]
 
+    for direction in attack_directions:
+        possible_square = square
+        while True:
+            possible_square = (possible_square << direction if direction > 0 else possible_square >> -direction)
+            # Check if the square is within the board
+            if not (0 <= possible_square.bit_length() - 1 < 64):
+                break
+            if possible_square & opp_occupied_squares:  # Stop if the square is occupied
+                attacks |= possible_square
+                break
+            if possible_square & player_occupied_squares:
+                break 
+            # print_bitboard("Possible Sq: ", possible_square)
+            attacks |= possible_square
+            if (direction in [-9, 7] and (LEFT_EDGE & possible_square) == 0) or (direction in [-7, 9] and (RIGHT_EDGE & possible_square) == 0):
+                break
+    return attacks
+
+def generate_rook_attacks(square, opp_occupied_squares, player_occupied_squares):
+    attacks = 0
+    attack_directions = [-8, -1, 1, 8]
+
+    for direction in attack_directions:
+        possible_square = square
+        while True:
+            possible_square = (possible_square << direction if direction > 0 else possible_square >> -direction)
+            # Check if the square is within the board
+            if not (0 <= possible_square.bit_length() - 1 < 64):
+                break
+            if possible_square & opp_occupied_squares:  # Stop if the square is occupied
+                attacks |= possible_square
+                break
+            if possible_square & player_occupied_squares:
+                break 
+            attacks |= possible_square
+            if (direction == -1 and (LEFT_EDGE & possible_square) == 0) or (direction == 1 and (RIGHT_EDGE & possible_square) == 0):
+                break
+    return attacks
 
 def get_king_moves(bitboards, current_player):
     king_moves = []
@@ -478,22 +364,14 @@ def get_king_moves(bitboards, current_player):
         from_square = king & -king
         for offset in king_attack_offsets:
             to_square = from_square << offset if offset > 0 else from_square >> -offset
-
             # Check if the move is within the board
-            if (
-                to_square & (0xFFFFFFFFFFFFFFFF ^ (bitboards[WHITE] | bitboards[BLACK]))
-                == 0
-            ):
+            if  not to_square or to_square.bit_length() > 63:
                 continue
-
             # Check if the move captures an opponent's piece or is an empty square
-            if not (to_square & bitboards[1 - current_player]):
+            if to_square & bitboards[current_player] != 0:
                 continue
-
             king_moves.append((from_square, to_square))
-
         king &= king - 1
-
     return king_moves
 
 
@@ -507,11 +385,11 @@ def generate_legal_moves(bitboards, current_player):
     moves = []
 
     # moves += get_pawn_moves(bitboards, current_player)
-    # moves += get_knight_moves(bitboards, current_player)
-    moves += get_bishop_moves(bitboards, current_player)
-    # moves += get_rook_moves(bitboards, current_player)
-    # moves += get_queen_moves(bitboards, current_player)
-    # moves += get_king_moves(bitboards, current_player)
+    moves += get_knight_moves(bitboards, current_player)
+    moves += get_figure_moves(bitboards, current_player, BISHOP)
+    moves += get_figure_moves(bitboards, current_player, ROOK)
+    moves += get_figure_moves(bitboards, current_player, QUEEN)
+    moves += get_king_moves(bitboards, current_player)
 
     legal_moves = [
         move for move in moves if is_move_legal(move, bitboards, current_player)
@@ -542,17 +420,17 @@ if __name__ == "__main__":
     # bitboards = [0] * 8
 
     # #Set initial positions for white pieces using binary literals
-    # bitboards[WHITE] = int("0b0000000000000000000000000000000000000000001000000001000010000100", 2)
-    # bitboards[PAWN] =  int("0b0000000000000000000000000000000000000000000000000001000010000000", 2)
+    # bitboards[WHITE] =  int("0b0000100000000000000000000000000000000000001000000010000000000101", 2)
+    # bitboards[KING] =   int("0b0000100000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[PAWN] =   int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[BISHOP] = int("0b00000000000000000000000000000000000000000001000000000000000000100", 2)
-    # bitboards[ROOK] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[QUEEN] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[KING] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
+    # bitboards[BISHOP] = int("0b0000000000000000000000000000000000000000001000000000000000000101", 2)
+    # bitboards[ROOK] =   int("0b0000000000000000000000000000000000000000000000000010000000000000", 2)
+    # bitboards[QUEEN] =  int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
 
     # # Set initial positions for black pieces using binary literals
-    # bitboards[BLACK] =   int("0b0000000000000010000000000000000001000000000000000000000000000000", 2)
-    # bitboards[KNIGHT] |= int("0b0000000000000010000000000000000001000000000000000000000000000000", 2)
+    # bitboards[BLACK] =   int("0b0000000000000001000000000000000001000000000000000000100000000000", 2)
+    # bitboards[KNIGHT] |= int("0b0000000000000001000000000000000001000000000000000000100000000000", 2)
     # bitboards[PAWN] |=   int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[BISHOP] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
     # bitboards[ROOK] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
@@ -565,8 +443,9 @@ if __name__ == "__main__":
     # Starting position in FEN notation
     # fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     # bitboards, current_player = fen_to_bitboards(fen)
-
+    # knight = int("0b0000000000000000000000000000000001000000000000000000000000000000", 2)
+    # print_bitboard("Knight pos:", knight)
+    # print_bitboard("Shifted: ", knight >> 9)
     # print_board(bitboards)
     # print("Current player:", "White" if current_player == WHITE else "Black")
-    
 
