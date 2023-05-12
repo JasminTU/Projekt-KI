@@ -37,30 +37,30 @@ class TestChessBitboard(unittest.TestCase):
             raise AssertionError(error_message)
 
     def setUp(self):
-        self.exptectedBoard = ChessBitboard()
+        self.expectedBoard = ChessBitboard()
         self.actualBoard = ChessBitboard()
 
     def test_initial_board(self):
         self.actualBoard.initialize_bitboards()
-        self.exptectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        self.assertEqualBitboards(self.exptectedBoard, self.actualBoard)
+        self.expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_legal_1(self):
         self.actualBoard.perform_move('e2e4')
-        self.exptectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
-        self.assertEqualBitboards(self.exptectedBoard, self.actualBoard)
+        self.expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_legal_2(self):
         self.actualBoard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
         self.actualBoard.perform_move('d4e5')
-        self.exptectedBoard.load_from_fen("rnbqkbnr/pppp1ppp/8/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1")
-        self.assertEqualBitboards(self.exptectedBoard, self.actualBoard)
+        self.expectedBoard.load_from_fen("rnbqkbnr/pppp1ppp/8/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_legal_3(self):
         self.actualBoard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2b5/3P4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
         self.actualBoard.perform_move('d4c5')
-        self.exptectedBoard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2P5/8/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
-        self.assertEqualBitboards(self.exptectedBoard, self.actualBoard)
+        self.expectedBoard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2P5/8/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_illegal_1(self):
         self.assertRaises(Exception, self.actualBoard.perform_move, 'e7e5')
