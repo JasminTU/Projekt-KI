@@ -93,6 +93,10 @@ class ChessBitboard:
             (self.BLACK, self.KING): "k",
         }
 
+        # ANSI escape codes for formatting
+        BOLD = '\033[1m'
+        END = '\033[0m'
+
         for row in reversed(range(self.BOARD_SIZE)):
             for col in range(self.BOARD_SIZE):
                 square = 1 << (row * self.BOARD_SIZE + col)
@@ -112,7 +116,9 @@ class ChessBitboard:
                             break
 
                 print(piece if piece else ".", end=" ")
-            print()
+            print(f"{BOLD} | {8 - row}{END}")
+        print(f"{BOLD}-" * 15)
+        print(f"a b c d e f g h{END}")
 
     def print_bitboards(self, bitboards):
         labels = {
