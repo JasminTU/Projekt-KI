@@ -1,5 +1,16 @@
 from loguru import logger
 
+class IllegalMoveException(Exception):
+    """Exception raised for illegal move in the game."""
+
+    def __init__(self, move, message="Move is not legal."):
+        self.move = move
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'{self.move} -> {self.message}'
+
 
 class ChessBitboard:
     # Constants
@@ -401,16 +412,16 @@ class ChessBitboard:
         move = self.algebraic_to_move(move_algebraic)
         legal_moves = self.generate_legal_moves(self.bitboards, self.current_player)
         if move not in legal_moves:
-            raise Exception("Illegal move: ", move_algebraic)
+            raise IllegalMoveException(move_algebraic)
         from_square, to_square = move
         if self.bitboards[self.WHITE] & from_square:
             if self.current_player == self.BLACK:
-                raise Exception("Illegal move: ", move_algebraic, ". Current player: ", self.current_player, "but move is for white")
+                raise IllegalMoveException(move_algebraic)
             self.bitboards[self.WHITE] &= ~from_square
             self.bitboards[self.WHITE] |= to_square
         if self.bitboards[self.BLACK] & from_square:
             if self.current_player == self.WHITE:
-                raise Exception("Illegal move: ", move_algebraic, ". Current player: ", self.current_player, "but move is for black")
+                raise IllegalMoveException(move_algebraic)
             self.bitboards[self.BLACK] &= ~from_square
             self.bitboards[self.BLACK] |= to_square
         for piece in range(2, 8):
