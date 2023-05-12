@@ -396,11 +396,11 @@ class ChessBitboard:
         moves = []
 
         moves += self.get_pawn_moves(bitboards, current_player)
-        # moves += self.get_knight_moves(bitboards, current_player)
-        # moves += self.get_figure_moves(bitboards, current_player, self.BISHOP)
-        # moves += self.get_figure_moves(bitboards, current_player, self.ROOK)
-        # moves += self.get_figure_moves(bitboards, current_player, self.QUEEN)
-        # moves += self.get_king_moves(bitboards, current_player)
+        moves += self.get_knight_moves(bitboards, current_player)
+        moves += self.get_figure_moves(bitboards, current_player, self.BISHOP)
+        moves += self.get_figure_moves(bitboards, current_player, self.ROOK)
+        moves += self.get_figure_moves(bitboards, current_player, self.QUEEN)
+        moves += self.get_king_moves(bitboards, current_player)
 
         legal_moves = [
             move for move in moves if self.is_move_legal(move, bitboards, self.current_player)
