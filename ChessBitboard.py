@@ -24,6 +24,16 @@ class ChessBitboard:
     QUEEN = 6
     KING = 7
 
+    labels = {
+        WHITE: "White",
+        BLACK: "Black",
+        PAWN: "Pawns",
+        KNIGHT: "Knights",
+        BISHOP: "Bishops",
+        ROOK: "Rooks",
+        QUEEN: "Queens",
+        KING: "Kings",
+    }
     def __init__(self):
         self.bitboards = self.initialize_bitboards()
         self.current_player = self.WHITE
@@ -138,30 +148,23 @@ class ChessBitboard:
         print(self.get_bitboards_string())
 
     def get_bitboards_string(self):
-        labels = {
-            self.WHITE: "White",
-            self.BLACK: "Black",
-            self.PAWN: "Pawns",
-            self.KNIGHT: "Knights",
-            self.BISHOP: "Bishops",
-            self.ROOK: "Rooks",
-            self.QUEEN: "Queens",
-            self.KING: "Kings",
-        }
-
         bitboards_string = ""
 
         for i, bitboard in enumerate(self.bitboards):
-            bitboards_string += labels[i] + ":\n"
-            for row in reversed(range(self.BOARD_SIZE)):
-                for col in range(self.BOARD_SIZE):
-                    square = 1 << (row * self.BOARD_SIZE + col)
-                    bitboards_string += "1" if bitboard & square else "0"
-                    bitboards_string += " "
-                bitboards_string += "\n"
-            bitboards_string += "\n"
+            bitboards_string += self.get_bitboard_string(i)
 
         return bitboards_string
+
+    def get_bitboard_string(self, board_index):
+        bitboard_string = self.labels[board_index] + ":\n"
+        for row in reversed(range(self.BOARD_SIZE)):
+            for col in range(self.BOARD_SIZE):
+                square = 1 << (row * self.BOARD_SIZE + col)
+                bitboard_string += "1" if self.bitboards[board_index] & square else "0"
+                bitboard_string += " "
+            bitboard_string += "\n"
+        bitboard_string += "\n"
+        return bitboard_string
 
     def move_to_algebraic(self, from_square, to_square):
         from_field = self.field_to_algebraic(from_square)
@@ -490,5 +493,5 @@ if __name__ == "__main__":
     # chessBitboard.print_board()
     # chessBitboard.print_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
     chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
-    chessBitboard.print_board()
+    # chessBitboard.print_board()
     chessBitboard.print_bitboards()
