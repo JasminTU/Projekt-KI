@@ -387,6 +387,23 @@ class ChessBitboard:
 
         return legal_moves
 
+    def perform_move(self, move_algebraic):
+        move = self.algebraic_to_move(move_algebraic)
+        legal_moves = self.generate_legal_moves(self.bitboards, self.current_player)
+        if move not in legal_moves:
+            raise Exception("Illegal move: ", move)
+        from_square, to_square = move
+        for color_bitboard in self.bitboards[:1]:
+            if color_bitboard & from_square:
+                color_bitboard &= ~from_square
+                color_bitboard |= to_square
+                break
+        for piece_bitboard in self.bitboards[2:]:
+            if piece_bitboard & from_square:
+                piece_bitboard &= ~from_square
+                piece_bitboard |= to_square
+                break
+
     def print_legal_moves(self, bitboards, current_player):
         legal_moves = self.generate_legal_moves(bitboards, current_player)
         print(
