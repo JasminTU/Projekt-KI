@@ -1,5 +1,6 @@
 import unittest
 from ChessBitboard import ChessBitboard
+from ChessBitboard import IllegalMoveException
 
 
 class TestChessBitboard(unittest.TestCase):
@@ -63,7 +64,7 @@ class TestChessBitboard(unittest.TestCase):
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_illegal_1(self):
-        self.assertRaises(Exception, self.actualBoard.perform_move, 'e7e5')
+        self.assertRaises(IllegalMoveException, self.actualBoard.perform_move, 'e7e5')
 
 
 if __name__ == '__main__':
