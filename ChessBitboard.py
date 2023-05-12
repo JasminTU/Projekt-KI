@@ -166,13 +166,13 @@ class ChessBitboard:
         bitboard_string += "\n"
         return bitboard_string
 
-    def move_to_algebraic(self, from_square, to_square):
-        from_field = self.field_to_algebraic(from_square)
-        to_field = self.field_to_algebraic(to_square)
+    def binary_move_to_algebraic(self, from_square, to_square):
+        from_field = self.binary_field_to_algebraic(from_square)
+        to_field = self.binary_field_to_algebraic(to_square)
 
         return f"{from_field}{to_field}"
 
-    def field_to_algebraic(self, field):
+    def binary_field_to_algebraic(self, field):
         col_names = "abcdefgh"
         row_names = "12345678"
 
@@ -181,7 +181,7 @@ class ChessBitboard:
 
         return f"{col}{row}"
 
-    def algebraic_to_field(self, algebraic):
+    def algebraic_field_to_binary(self, algebraic):
         col_names = "abcdefgh"
         row_names = "12345678"
 
@@ -195,12 +195,12 @@ class ChessBitboard:
 
         return field
 
-    def algebraic_to_move(self, move):
+    def algebraic_move_to_binary(self, move):
         from_algebraic = move[0:2]
         to_algebraic = move[2:4]
 
-        from_square = self.algebraic_to_field(from_algebraic)
-        to_square = self.algebraic_to_field(to_algebraic)
+        from_square = self.algebraic_field_to_binary(from_algebraic)
+        to_square = self.algebraic_field_to_binary(to_algebraic)
 
         return (from_square, to_square)
 
@@ -423,7 +423,7 @@ class ChessBitboard:
         return legal_moves
 
     def perform_move(self, move_algebraic):
-        move = self.algebraic_to_move(move_algebraic)
+        move = self.algebraic_move_to_binary(move_algebraic)
         legal_moves = self.generate_legal_moves(self.bitboards, self.current_player)
         if move not in legal_moves:
             raise IllegalMoveException(move_algebraic)
@@ -460,7 +460,7 @@ class ChessBitboard:
         )
         for move in legal_moves:
             from_square, to_square = move
-            print(self.move_to_algebraic(from_square, to_square))
+            print(self.binary_move_to_algebraic(from_square, to_square))
 
 
 # Press the green button in the gutter to run the script.
