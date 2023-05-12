@@ -106,10 +106,6 @@ class ChessBitboard:
             (self.BLACK, self.KING): "k",
         }
 
-        # ANSI escape codes for formatting
-        BOLD = '\033[1m'
-        END = '\033[0m'
-
         board_string = ""
 
         for row in reversed(range(self.BOARD_SIZE)):
