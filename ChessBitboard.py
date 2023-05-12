@@ -87,8 +87,10 @@ class ChessBitboard:
 
                     col_index += 1
 
+    def print_board(self):
+        print(self.get_board_string())
 
-    def print_board(self, bitboards):
+    def get_board_string(self):
         piece_symbols = {
             (self.WHITE, self.PAWN): "P",
             (self.WHITE, self.KNIGHT): "N",
@@ -108,28 +110,33 @@ class ChessBitboard:
         BOLD = '\033[1m'
         END = '\033[0m'
 
+        board_string = ""
+
         for row in reversed(range(self.BOARD_SIZE)):
             for col in range(self.BOARD_SIZE):
                 square = 1 << (row * self.BOARD_SIZE + col)
                 piece = None
                 color = (
                     self.WHITE
-                    if bitboards[self.WHITE] & square
+                    if self.bitboards[self.WHITE] & square
                     else self.BLACK
-                    if bitboards[self.BLACK] & square
+                    if self.bitboards[self.BLACK] & square
                     else None
                 )
 
                 if color is not None:
                     for piece_type in range(self.PAWN, self.KING + 1):
-                        if bitboards[piece_type] & square:
+                        if self.bitboards[piece_type] & square:
                             piece = piece_symbols[(color, piece_type)]
                             break
 
-                print(piece if piece else ".", end=" ")
-            print(f"{BOLD} | {8 - row}{END}")
-        print(f"{BOLD}-" * 15)
-        print(f"a b c d e f g h{END}")
+                board_string += piece if piece else "."
+                board_string += " "
+            board_string += f"| {8 - row}\n"
+        board_string += f"" + "-" * 15 + f"\n"
+        board_string += f"a b c d e f g h\n"
+
+        return board_string
 
     def print_bitboards(self, bitboards):
         labels = {
