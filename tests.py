@@ -1,6 +1,7 @@
 import unittest
 import chessBitboard
 from illegalMoveException import IllegalMoveException
+import constants
 
 class TestChessBitboard(unittest.TestCase):
     """
@@ -16,7 +17,7 @@ class TestChessBitboard(unittest.TestCase):
 
     Test boards can be generated using the fen notation using the following website: https://lichess.org/editor
     """
-    def __init__(self):
+    def setUp(self):
         self.expectedBoard = chessBitboard.ChessBitboard()
         self.actualBoard = chessBitboard.ChessBitboard()
 
@@ -28,11 +29,11 @@ class TestChessBitboard(unittest.TestCase):
         """
         board_index = 0
         try:
-            for i in range(chessBitboard.KING + 1):
+            for i in range(constants.KING + 1):
                 board_index = i
                 self.assertEqual(exptectedBoard.bitboards[i], actualBoard.bitboards[i])
         except AssertionError:
-            error_message = f"{chessBitboard.LABELS.get(board_index)} Bitboard is not equal:\n"
+            error_message = f"{constants.LABELS.get(board_index)} Bitboard is not equal:\n"
             error_message += "\nExpected:\n"
             error_message += exptectedBoard.get_bitboard_string(board_index)
             error_message += "\nActual:\n"
@@ -46,24 +47,24 @@ class TestChessBitboard(unittest.TestCase):
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_legal_1(self):
-        self.actualBoard.chess_move.perform_move('e2e4')
+        self.actualBoard.chess_move.perform_move('e2e4', self.actualBoard)
         self.expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_legal_2(self):
         self.actualBoard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
-        self.actualBoard.chess_move.perform_move('d4e5')
+        self.actualBoard.chess_move.perform_move('d4e5', self.actualBoard)
         self.expectedBoard.load_from_fen("rnbqkbnr/pppp1ppp/8/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1")
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_legal_3(self):
         self.actualBoard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2b5/3P4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
-        self.actualBoard.chess_move.perform_move('d4c5')
+        self.actualBoard.chess_move.perform_move('d4c5', self.actualBoard)
         self.expectedBoard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2P5/8/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_illegal_1(self):
-        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'e7e5')
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'e7e5', self.actualBoard)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-import chessBitboard
+import constants
 
 class PrintBitBoard():
     
@@ -27,10 +27,10 @@ class PrintBitBoard():
         print(bitboards_string)
         
     def _get_bitboard_string(self, board_index, bitboards):
-        bitboard_string = chessBitboard.LABELS[board_index] + ":\n"
-        for row in reversed(range(chessBitboard.BOARD_SIZE)):
-            for col in range(chessBitboard.BOARD_SIZE):
-                square = 1 << (row * chessBitboard.BOARD_SIZE + col)
+        bitboard_string = constants.LABELS[board_index] + ":\n"
+        for row in reversed(range(constants.BOARD_SIZE)):
+            for col in range(constants.BOARD_SIZE):
+                square = 1 << (row * constants.BOARD_SIZE + col)
                 bitboard_string += "1" if bitboards[board_index] & square else "0"
                 bitboard_string += " "
             bitboard_string += "\n"
@@ -39,36 +39,36 @@ class PrintBitBoard():
         
     def print_board(self, bitboards):
         piece_symbols = {
-            (chessBitboard.WHITE, chessBitboard.PAWN): "P",
-            (chessBitboard.WHITE, chessBitboard.KNIGHT): "N",
-            (chessBitboard.WHITE, chessBitboard.BISHOP): "B",
-            (chessBitboard.WHITE, chessBitboard.ROOK): "R",
-            (chessBitboard.WHITE, chessBitboard.QUEEN): "Q",
-            (chessBitboard.WHITE, chessBitboard.KING): "K",
-            (chessBitboard.BLACK, chessBitboard.PAWN): "p",
-            (chessBitboard.BLACK, chessBitboard.KNIGHT): "n",
-            (chessBitboard.BLACK, chessBitboard.BISHOP): "b",
-            (chessBitboard.BLACK, chessBitboard.ROOK): "r",
-            (chessBitboard.BLACK, chessBitboard.QUEEN): "q",
-            (chessBitboard.BLACK, chessBitboard.KING): "k",
+            (constants.WHITE, constants.PAWN): "P",
+            (constants.WHITE, constants.KNIGHT): "N",
+            (constants.WHITE, constants.BISHOP): "B",
+            (constants.WHITE, constants.ROOK): "R",
+            (constants.WHITE, constants.QUEEN): "Q",
+            (constants.WHITE, constants.KING): "K",
+            (constants.BLACK, constants.PAWN): "p",
+            (constants.BLACK, constants.KNIGHT): "n",
+            (constants.BLACK, constants.BISHOP): "b",
+            (constants.BLACK, constants.ROOK): "r",
+            (constants.BLACK, constants.QUEEN): "q",
+            (constants.BLACK, constants.KING): "k",
         }
 
         board_string = ""
 
-        for row in reversed(range(chessBitboard.BOARD_SIZE)):
-            for col in range(chessBitboard.BOARD_SIZE):
-                square = 1 << (row * chessBitboard.BOARD_SIZE + col)
+        for row in reversed(range(constants.BOARD_SIZE)):
+            for col in range(constants.BOARD_SIZE):
+                square = 1 << (row * constants.BOARD_SIZE + col)
                 piece = None
                 color = (
-                    chessBitboard.WHITE
-                    if bitboards[chessBitboard.WHITE] & square
-                    else chessBitboard.BLACK
-                    if bitboards[chessBitboard.BLACK] & square
+                    constants.WHITE
+                    if bitboards[constants.WHITE] & square
+                    else constants.BLACK
+                    if bitboards[constants.BLACK] & square
                     else None
                 )
 
                 if color is not None:
-                    for piece_type in range(chessBitboard.PAWN, chessBitboard.KING + 1):
+                    for piece_type in range(constants.PAWN, constants.KING + 1):
                         if bitboards[piece_type] & square:
                             piece = piece_symbols[(color, piece_type)]
                             break

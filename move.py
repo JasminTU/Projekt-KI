@@ -1,6 +1,6 @@
 from loguru import logger
 from illegalMoveException import IllegalMoveException
-import chessBitboard
+import constants
 
 # Define bitmasks for the edges of the board
 RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
@@ -14,7 +14,7 @@ class Move():
         pass
     
     def get_pawn_moves(self, bitboards, current_player):
-        empty_squares = ~(bitboards[chessBitboard.WHITE] | bitboards[chessBitboard.BLACK])
+        empty_squares = ~(bitboards[constants.WHITE] | bitboards[constants.BLACK])
         pawn_moves = []
 
         white_pawn_bitboard = int(
@@ -24,16 +24,16 @@ class Move():
             "0b0000000011111111000000000000000000000000000000000000000000000000", 2
         )
 
-        if current_player == chessBitboard.WHITE:
-            one_step = (bitboards[chessBitboard.PAWN] & bitboards[chessBitboard.WHITE]) << 8 & empty_squares
-            two_steps = ((bitboards[chessBitboard.PAWN] & white_pawn_bitboard) << 16) & empty_squares
-            captures_left = (bitboards[chessBitboard.PAWN] & bitboards[chessBitboard.WHITE]) << 7 & bitboards[chessBitboard.BLACK]
-            captures_right = (bitboards[chessBitboard.PAWN] & bitboards[chessBitboard.WHITE]) << 9 & bitboards[chessBitboard.BLACK]
+        if current_player == constants.WHITE:
+            one_step = (bitboards[constants.PAWN] & bitboards[constants.WHITE]) << 8 & empty_squares
+            two_steps = ((bitboards[constants.PAWN] & white_pawn_bitboard) << 16) & empty_squares
+            captures_left = (bitboards[constants.PAWN] & bitboards[constants.WHITE]) << 7 & bitboards[constants.BLACK]
+            captures_right = (bitboards[constants.PAWN] & bitboards[constants.WHITE]) << 9 & bitboards[constants.BLACK]
         else:
-            one_step = (bitboards[chessBitboard.PAWN] & bitboards[chessBitboard.BLACK]) >> 8 & empty_squares
-            two_steps = ((bitboards[chessBitboard.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
-            captures_left = (bitboards[chessBitboard.PAWN] & bitboards[chessBitboard.BLACK]) >> 7 & bitboards[chessBitboard.WHITE]
-            captures_right = (bitboards[chessBitboard.PAWN] & bitboards[chessBitboard.BLACK]) >> 9 & bitboards[chessBitboard.WHITE]
+            one_step = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 8 & empty_squares
+            two_steps = ((bitboards[constants.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
+            captures_left = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 7 & bitboards[constants.WHITE]
+            captures_right = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 9 & bitboards[constants.WHITE]
 
         moves = [
             (one_step, "one_step"),
@@ -50,22 +50,22 @@ class Move():
 
                 if move_name == "one_step":
                     from_square = (
-                        to_square >> 8 if current_player == chessBitboard.WHITE else to_square << 8
+                        to_square >> 8 if current_player == constants.WHITE else to_square << 8
                     )
 
                 if move_name == "two_steps":
                     from_square = (
-                        to_square >> 16 if current_player == chessBitboard.WHITE else to_square << 16
+                        to_square >> 16 if current_player == constants.WHITE else to_square << 16
                     )
 
                 if move_name == "captures_left":
                     from_square = (
-                        to_square >> 7 if current_player == chessBitboard.WHITE else to_square << 7
+                        to_square >> 7 if current_player == constants.WHITE else to_square << 7
                     )
 
                 if move_name == "captures_right":
                     from_square = (
-                        to_square >> 9 if current_player == chessBitboard.WHITE else to_square << 9
+                        to_square >> 9 if current_player == constants.WHITE else to_square << 9
                     )
 
                 pawn_moves.append((from_square, to_square))
@@ -75,12 +75,12 @@ class Move():
 
     def get_knight_moves(self, board, player):
         # Define the bitboards for each player
-        knights = board[player] & board[chessBitboard.KNIGHT]
+        knights = board[player] & board[constants.KNIGHT]
         occupied = board[player]
         empty = occupied ^ MAX_VALUE
         moves = []
         while knights:
-            # Get the position of the least significant set bit (i.e., the position of the current chessBitboard.KNIGHT)
+            # Get the position of the least significant set bit (i.e., the position of the current constants.KNIGHT)
             knight_pos = knights & -knights
             # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
             knight_moves = (
@@ -96,7 +96,7 @@ class Move():
             # Convert the bitboard positions to tuples and add them to the list of moves
             moves += [(knight_pos, dest) for dest in knight_moves if dest]
 
-            # Clear the least significant set bit (i.e., remove the current chessBitboard.KNIGHT from the bitboard)
+            # Clear the least significant set bit (i.e., remove the current constants.KNIGHT from the bitboard)
             knights &= knights - 1
         return moves
 
@@ -106,21 +106,21 @@ class Move():
 
         while figures:
             from_square = figures & -figures
-            if figure == chessBitboard.ROOK:
+            if figure == constants.ROOK:
                 attacks = self.generate_rook_attacks(from_square,
-                                                        bitboards[chessBitboard.WHITE] if current_player != chessBitboard.WHITE else
-                                                        bitboards[chessBitboard.BLACK], bitboards[current_player])
-            elif figure == chessBitboard.BISHOP:
+                                                        bitboards[constants.WHITE] if current_player != constants.WHITE else
+                                                        bitboards[constants.BLACK], bitboards[current_player])
+            elif figure == constants.BISHOP:
                 attacks = self.generate_bishop_attacks(from_square,
-                                                        bitboards[chessBitboard.WHITE] if current_player != chessBitboard.WHITE else
-                                                        bitboards[chessBitboard.BLACK], bitboards[current_player])
-            elif figure == chessBitboard.QUEEN:
+                                                        bitboards[constants.WHITE] if current_player != constants.WHITE else
+                                                        bitboards[constants.BLACK], bitboards[current_player])
+            elif figure == constants.QUEEN:
                 attacks = self.generate_rook_attacks(from_square,
-                                                        bitboards[chessBitboard.WHITE] if current_player != chessBitboard.WHITE else
-                                                        bitboards[chessBitboard.BLACK], bitboards[current_player])
+                                                        bitboards[constants.WHITE] if current_player != constants.WHITE else
+                                                        bitboards[constants.BLACK], bitboards[current_player])
                 attacks |= self.generate_bishop_attacks(from_square,
-                                                        bitboards[chessBitboard.WHITE] if current_player != chessBitboard.WHITE else
-                                                        bitboards[chessBitboard.BLACK], bitboards[current_player])
+                                                        bitboards[constants.WHITE] if current_player != constants.WHITE else
+                                                        bitboards[constants.BLACK], bitboards[current_player])
             else:
                 logger.error("Unknown figure: ", figure)
 
@@ -181,10 +181,10 @@ class Move():
     def get_king_moves(self, bitboards, current_player):
         king_moves = []
         king_attack_offsets = (-9, -8, -7, -1, 1, 7, 8, 9)
-        chessBitboard.KING = bitboards[chessBitboard.KING] & bitboards[current_player]
+        constants.KING = bitboards[constants.KING] & bitboards[current_player]
 
-        while chessBitboard.KING:
-            from_square = chessBitboard.KING & -chessBitboard.KING
+        while constants.KING:
+            from_square = constants.KING & -constants.KING
             for offset in king_attack_offsets:
                 to_square = from_square << offset if offset > 0 else from_square >> -offset
                 # Check if the move is within the board
@@ -194,41 +194,41 @@ class Move():
                 if to_square & bitboards[current_player] != 0:
                     continue
                 king_moves.append((from_square, to_square))
-            chessBitboard.KING &= chessBitboard.KING - 1
+            constants.KING &= constants.KING - 1
         return king_moves
     
-    def perform_move(self, move_algebraic, chessBitboard):
+    def perform_move(self, move_algebraic, bitboard):
         move = self.algebraic_move_to_binary(move_algebraic)
-        legal_moves = self.generate_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
+        legal_moves = self.generate_legal_moves(bitboard.bitboards, bitboard.current_player)
         if move not in legal_moves:
             raise IllegalMoveException(move_algebraic)
         from_square, to_square = move
-        opponent = chessBitboard.WHITE if chessBitboard.current_player == chessBitboard.WHITE else chessBitboard.WHITE
+        opponent = constants.WHITE if bitboard.current_player == constants.WHITE else constants.WHITE
 
-        if chessBitboard.bitboards[chessBitboard.current_player] & from_square:
+        if bitboard.bitboards[bitboard.current_player] & from_square:
             # Remove the moving piece from its original position
-            chessBitboard.bitboards[chessBitboard.current_player] &= ~from_square
+            bitboard.bitboards[bitboard.current_player] &= ~from_square
             # Remove a possibly captured piece from the destination
-            chessBitboard.bitboards[opponent] &= ~to_square
+            bitboard.bitboards[opponent] &= ~to_square
             # Move the piece to the new position
-            chessBitboard.bitboards[chessBitboard.current_player] |= to_square
+            bitboard.bitboards[bitboard.current_player] |= to_square
 
-        for piece in range(chessBitboard.PAWN, chessBitboard.KING + 1):
-            if chessBitboard.bitboards[piece] & from_square:
+        for piece in range(constants.PAWN, constants.KING + 1):
+            if bitboard.bitboards[piece] & from_square:
                 # Remove the moving piece from its original position
-                chessBitboard.bitboards[piece] &= ~from_square
+                bitboard.bitboards[piece] &= ~from_square
                 # Move the piece to the new position
-                chessBitboard.bitboards[piece] |= to_square
+                bitboard.bitboards[piece] |= to_square
             # Remove a possibly captured piece from the destination
             else:
-                chessBitboard.bitboards[piece] &= ~to_square
+                bitboard.bitboards[piece] &= ~to_square
 
         # Switch the current player
-        chessBitboard.current_player = opponent
+        bitboard.current_player = opponent
         
     
     def algebraic_move_to_binary(self, move):
-        def algebraic_field_to_binary(self, algebraic):
+        def algebraic_field_to_binary(algebraic):
             col_names = "abcdefgh"
             row_names = "12345678"
 
@@ -245,14 +245,14 @@ class Move():
         from_algebraic = move[0:2]
         to_algebraic = move[2:4]
 
-        from_square = self.algebraic_field_to_binary(from_algebraic)
-        to_square = self.algebraic_field_to_binary(to_algebraic)
+        from_square = algebraic_field_to_binary(from_algebraic)
+        to_square = algebraic_field_to_binary(to_algebraic)
 
         return (from_square, to_square)
     
     def is_move_legal(self, move, bitboards, current_player):
         # For now, let's assume all generated moves are legal.
-        # This does not account for more complex rules such as chessBitboard.KING's safety and en passant, which can be added later.
+        # This does not account for more complex rules such as constants.KING's safety and en passant, which can be added later.
         return True
 
     def generate_legal_moves(self, bitboards, current_player):
@@ -260,13 +260,13 @@ class Move():
 
         moves += self.get_pawn_moves(bitboards, current_player)
         moves += self.get_knight_moves(bitboards, current_player)
-        moves += self.get_figure_moves(bitboards, current_player, chessBitboard.BISHOP)
-        moves += self.get_figure_moves(bitboards, current_player, chessBitboard.ROOK)
-        moves += self.get_figure_moves(bitboards, current_player, chessBitboard.QUEEN)
+        moves += self.get_figure_moves(bitboards, current_player, constants.BISHOP)
+        moves += self.get_figure_moves(bitboards, current_player, constants.ROOK)
+        moves += self.get_figure_moves(bitboards, current_player, constants.QUEEN)
         moves += self.get_king_moves(bitboards, current_player)
 
         legal_moves = [
-            move for move in moves if self.is_move_legal(move, bitboards, self.current_player)
+            move for move in moves if self.is_move_legal(move, bitboards, current_player)
         ]
 
         return legal_moves
@@ -275,7 +275,7 @@ class Move():
         legal_moves = self.generate_legal_moves(bitboards, current_player)
         print(
             "\nLegal moves for the current player ({}):".format(
-                "chessBitboard.WHITE" if current_player == chessBitboard.WHITE else "chessBitboard.BLACK"
+                "constants.WHITE" if current_player == constants.WHITE else "constants.BLACK"
             )
         )
         for move in legal_moves:
