@@ -1,5 +1,5 @@
 import unittest
-import chessBitboard
+from ChessBitboard import ChessBitboard
 from illegalMoveException import IllegalMoveException
 import constants
 
@@ -18,8 +18,8 @@ class TestChessBitboard(unittest.TestCase):
     Test boards can be generated using the fen notation using the following website: https://lichess.org/editor
     """
     def setUp(self):
-        self.expectedBoard = chessBitboard.ChessBitboard()
-        self.actualBoard = chessBitboard.ChessBitboard()
+        self.expectedBoard = ChessBitboard()
+        self.actualBoard = ChessBitboard()
 
     def assertEqualBitboards(self, exptectedBoard, actualBoard):
         """
@@ -47,6 +47,7 @@ class TestChessBitboard(unittest.TestCase):
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
     def test_move_pawn_legal_1(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         self.actualBoard.chess_move.perform_move('e2e4', self.actualBoard)
         self.expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)

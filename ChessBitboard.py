@@ -75,7 +75,7 @@ class ChessBitboard:
     
 
 if __name__ == "__main__":
-    chessBitboard = ChessBitboard()
+    ChessBitboard = ChessBitboard()
     printBitboard = PrintBitBoard()
 
 
@@ -88,4 +88,4 @@ if __name__ == "__main__":
     # PrintBitBoard.print_board(chessBitboard)
     
     # printBitboard.print_bitboards(chessBitboard.bitboards)
-    printBitboard.print_board(chessBitboard.bitboards)
+    printBitboard.print_board(ChessBitboard.bitboards)
