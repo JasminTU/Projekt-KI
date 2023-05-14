@@ -1,49 +1,37 @@
 from loguru import logger
+from illegalMoveException import IllegalMoveException
 
-class IllegalMoveException(Exception):
-    """Exception raised for illegal move in the game."""
-
-    def __init__(self, move, message="Move is not legal."):
-        self.move = move
-        self.message = message
-        super().__init__(self.message)
-
-    def __str__(self):
-        return f'{self.move} -> {self.message}'
+# Constants
+BOARD_SIZE = 8
+WHITE = 0
+BLACK = 1
+PAWN = 2
+KNIGHT = 3
+BISHOP = 4
+ROOK = 5
+QUEEN = 6
+KING = 7
+# Define bitmasks for the edges of the board
+RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
+LEFT_EDGE = int("0b1111111011111110111111101111111011111110111111101111111011111110", 2)
+BOTH_EDGES = RIGHT_EDGE & (RIGHT_EDGE << 1)
+MAX_VALUE = int("0b1111111111111111111111111111111111111111111111111111111111111111", 2) # for bitwise inversion
+labels = {
+    WHITE: "White",
+    BLACK: "Black",
+    PAWN: "Pawns",
+    KNIGHT: "Knights",
+    BISHOP: "Bishops",
+    ROOK: "Rooks",
+    QUEEN: "Queens",
+    KING: "Kings",
+}
 
 
 class ChessBitboard:
-    # Constants
-    BOARD_SIZE = 8
-    WHITE = 0
-    BLACK = 1
-    PAWN = 2
-    KNIGHT = 3
-    BISHOP = 4
-    ROOK = 5
-    QUEEN = 6
-    KING = 7
-
-    labels = {
-        WHITE: "White",
-        BLACK: "Black",
-        PAWN: "Pawns",
-        KNIGHT: "Knights",
-        BISHOP: "Bishops",
-        ROOK: "Rooks",
-        QUEEN: "Queens",
-        KING: "Kings",
-    }
     def __init__(self):
         self.bitboards = self.initialize_bitboards()
         self.current_player = self.WHITE
-
-    # Define bitmasks for the edges of the board
-    RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
-    LEFT_EDGE = int("0b1111111011111110111111101111111011111110111111101111111011111110", 2)
-    BOTH_EDGES = RIGHT_EDGE & (RIGHT_EDGE << 1)
-    # for bitwise inversion
-    MAX_VALUE = int("0b1111111111111111111111111111111111111111111111111111111111111111", 2)
 
     def initialize_bitboards(self):
         bitboards = [0] * 8
@@ -461,37 +449,3 @@ class ChessBitboard:
         for move in legal_moves:
             from_square, to_square = move
             print(self.binary_move_to_algebraic(from_square, to_square))
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == "__main__":
-    chessBitboard = ChessBitboard()
-
-
-    # #Set initial positions for white pieces using binary literals
-    # bitboards[WHITE] =  int("0b0000100000000000000000000000000000000000001000000010000000000101", 2)
-    # bitboards[KING] =   int("0b0000100000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[PAWN] =   int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[KNIGHT] = int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[BISHOP] = int("0b0000000000000000000000000000000000000000001000000000000000000101", 2)
-    # bitboards[ROOK] =   int("0b0000000000000000000000000000000000000000000000000010000000000000", 2)
-    # bitboards[QUEEN] =  int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-
-    # # Set initial positions for black pieces using binary literals
-    # bitboards[BLACK] =   int("0b0000000000000001000000000000000001000000000000000000100000000000", 2)
-    # bitboards[KNIGHT] |= int("0b0000000000000001000000000000000001000000000000000000100000000000", 2)
-    # bitboards[PAWN] |=   int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[BISHOP] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[ROOK] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[QUEEN] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # bitboards[KING] |= int("0b0000000000000000000000000000000000000000000000000000000000000000", 2)
-    # print_board(bitboards)
-
-    # chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2")
-    # chessBitboard.perform_move("e2e4")
-    # chessBitboard.print_bitboards()
-    # chessBitboard.print_board()
-    # chessBitboard.print_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
-    chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
-    # chessBitboard.print_board()
-    chessBitboard.print_bitboards()

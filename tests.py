@@ -1,6 +1,6 @@
 import unittest
-from ChessBitboard import ChessBitboard
-from ChessBitboard import IllegalMoveException
+from chessBitboard import ChessBitboard
+from illegalMoveException import IllegalMoveException
 
 
 class TestChessBitboard(unittest.TestCase):
