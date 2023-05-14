@@ -13,6 +13,9 @@ class Move():
     def __init__(self):
         pass
     
+    
+    
+    
     def get_pawn_moves(self, bitboards, current_player):
         empty_squares = ~(bitboards[constants.WHITE] | bitboards[constants.BLACK])
         pawn_moves = []
@@ -100,7 +103,7 @@ class Move():
             knights &= knights - 1
         return moves
 
-    def get_figure_moves(self, bitboards, current_player, figure):
+    def get_move_by_figure(self, bitboards, current_player, figure):
         figure_moves = []
         figures = bitboards[figure] & bitboards[current_player]
 
@@ -121,6 +124,12 @@ class Move():
                 attacks |= self.generate_bishop_attacks(from_square,
                                                         bitboards[constants.WHITE] if current_player != constants.WHITE else
                                                         bitboards[constants.BLACK], bitboards[current_player])
+            elif figure == constants.KING:
+                return self.get_king_moves(bitboards, current_player)
+            elif figure == constants.PAWN:
+                return self.get_pawn_moves(bitboards, current_player)
+            elif figure == constants.KNIGHT:
+                return self.get_knight_moves(bitboards, current_player)
             else:
                 logger.error("Unknown figure: ", figure)
 
@@ -197,34 +206,38 @@ class Move():
             constants.KING &= constants.KING - 1
         return king_moves
     
-    def perform_move(self, move_algebraic, bitboard):
-        move = self.algebraic_move_to_binary(move_algebraic)
-        legal_moves = self.generate_legal_moves(bitboard.bitboards, bitboard.current_player)
+    def perform_move(self, move, chessBitboard, move_type = "binary"):
+        # TODO: Je nach Verwendung der Funktion würde ich hier nicht nochmal alle legalen moves generieren, da der ausgewählte move bereits legal ist --> Laufzeitverlängerung
+        legal_moves = self.generate_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
+        if move_type == "algebraic":
+            move = self.algebraic_move_to_binary(move)
+        if move not in legal_moves and move_type != "algebraic":
+            raise IllegalMoveException(self.binary_move_to_algebraic(move))
         if move not in legal_moves:
-            raise IllegalMoveException(move_algebraic)
+            raise IllegalMoveException(move)
         from_square, to_square = move
-        opponent = constants.WHITE if bitboard.current_player == constants.WHITE else constants.WHITE
+        opponent = constants.WHITE if chessBitboard.current_player == constants.WHITE else constants.WHITE
 
-        if bitboard.bitboards[bitboard.current_player] & from_square:
+        if chessBitboard.bitboards[chessBitboard.current_player] & from_square:
             # Remove the moving piece from its original position
-            bitboard.bitboards[bitboard.current_player] &= ~from_square
+            chessBitboard.bitboards[chessBitboard.current_player] &= ~from_square
             # Remove a possibly captured piece from the destination
-            bitboard.bitboards[opponent] &= ~to_square
+            chessBitboard.bitboards[opponent] &= ~to_square
             # Move the piece to the new position
-            bitboard.bitboards[bitboard.current_player] |= to_square
+            chessBitboard.bitboards[chessBitboard.current_player] |= to_square
 
         for piece in range(constants.PAWN, constants.KING + 1):
-            if bitboard.bitboards[piece] & from_square:
+            if chessBitboard.bitboards[piece] & from_square:
                 # Remove the moving piece from its original position
-                bitboard.bitboards[piece] &= ~from_square
+                chessBitboard.bitboards[piece] &= ~from_square
                 # Move the piece to the new position
-                bitboard.bitboards[piece] |= to_square
+                chessBitboard.bitboards[piece] |= to_square
             # Remove a possibly captured piece from the destination
             else:
-                bitboard.bitboards[piece] &= ~to_square
+                chessBitboard.bitboards[piece] &= ~to_square
 
         # Switch the current player
-        bitboard.current_player = opponent
+        chessBitboard.current_player = opponent
         
     
     def algebraic_move_to_binary(self, move):
@@ -260,9 +273,9 @@ class Move():
 
         moves += self.get_pawn_moves(bitboards, current_player)
         moves += self.get_knight_moves(bitboards, current_player)
-        moves += self.get_figure_moves(bitboards, current_player, constants.BISHOP)
-        moves += self.get_figure_moves(bitboards, current_player, constants.ROOK)
-        moves += self.get_figure_moves(bitboards, current_player, constants.QUEEN)
+        moves += self.get_move_by_figure(bitboards, current_player, constants.BISHOP)
+        moves += self.get_move_by_figure(bitboards, current_player, constants.ROOK)
+        moves += self.get_move_by_figure(bitboards, current_player, constants.QUEEN)
         moves += self.get_king_moves(bitboards, current_player)
 
         legal_moves = [
@@ -283,7 +296,7 @@ class Move():
             print(self.binary_move_to_algebraic(from_square, to_square))
             
     def binary_move_to_algebraic(self, from_square, to_square):
-        def binary_field_to_algebraic(self, field):
+        def binary_field_to_algebraic(field):
             col_names = "abcdefgh"
             row_names = "12345678"
 
@@ -292,8 +305,8 @@ class Move():
 
             return f"{col}{row}"
         
-        from_field = self.binary_field_to_algebraic(from_square)
-        to_field = self.binary_field_to_algebraic(to_square)
+        from_field = binary_field_to_algebraic(from_square)
+        to_field = binary_field_to_algebraic(to_square)
 
         return f"{from_field}{to_field}"
 

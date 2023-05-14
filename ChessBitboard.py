@@ -8,6 +8,7 @@ class ChessBitboard:
         self.bitboards = self.initialize_bitboards()
         self.current_player = constants.WHITE
         self.chess_move = Move()
+        self.next_player_in_check = False
 
     def initialize_bitboards(self):
         bitboards = [0] * 8
@@ -71,21 +72,59 @@ class ChessBitboard:
             bitboard_string += "\n"
         bitboard_string += "\n"
         return bitboard_string
-
     
-
+    def evaluate_board(self):
+        score = 0
+        opponent = constants.BLACK if self.current_player == constants.WHITE else constants.WHITE
+        # Evaluate material value: chatgpt constants
+        # score += 1 * (bin(self.bitboards[constants.PAWN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.PAWN] & self.bitboards[opponent]).count("1"))
+        # score += 3 * (bin(self.bitboards[constants.KNIGHT] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.KNIGHT] & self.bitboards[opponent]).count("1"))
+        # score += 3 * (bin(self.bitboards[constants.BISHOP] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.BISHOP] & self.bitboards[opponent]).count("1"))
+        # score += 5 * (bin(self.bitboards[constants.ROOK] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.ROOK] & self.bitboards[opponent]).count("1"))
+        # score += 9 * (bin(self.bitboards[constants.QUEEN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.QUEEN] & self.bitboards[opponent]).count("1"))
+        
+        # Evaluate material value: slide constants (pawns are differetiated)
+        score += 50 * (bin(self.bitboards[constants.PAWN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.PAWN] & self.bitboards[opponent]).count("1"))
+        score += 300 * (bin(self.bitboards[constants.KNIGHT] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.KNIGHT] & self.bitboards[opponent]).count("1"))
+        score += 300 * (bin(self.bitboards[constants.BISHOP] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.BISHOP] & self.bitboards[opponent]).count("1"))
+        score += 500 * (bin(self.bitboards[constants.ROOK] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.ROOK] & self.bitboards[opponent]).count("1"))
+        score += 900 * (bin(self.bitboards[constants.QUEEN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.QUEEN] & self.bitboards[opponent]).count("1"))
+        score += 2000 * (bin(self.bitboards[constants.KING] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.KING] & self.bitboards[opponent]).count("1"))
+        
+        # Evaluate position of kings
+        # king_pos = bin(self.bitboards[constants.KING] & self.bitboards[self.current_player]).count("1")
+        # if king_pos in range(4, 12) or king_pos in range(52, 60): # define some range in the center of the field
+        #     score += 3
+        return score
+    
+    def is_in_check(self):
+        # move is a tuple containing start and destination bitboards
+        # TODO: king - king face off not included yet
+        legal_moves_opponent = self.chess_move.generate_legal_moves(self.bitboards, self._get_opponent(self.current_player))
+        dest_legal_moves = [elem[1] for elem in legal_moves_opponent]
+        in_check = [dest & (self.bitboards[constants.KING] & self.bitboards[self.current_player]) for dest in dest_legal_moves]
+        return any(elem != 0 for elem in in_check)
+    
+    def _get_opponent(self, current_player):
+        return constants.WHITE if current_player == constants.BLACK else constants.BLACK
+        
 if __name__ == "__main__":
-    ChessBitboard = ChessBitboard()
+    chessBitboard = ChessBitboard()
     printBitboard = PrintBitBoard()
 
 
-    # chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2")
+    chessBitboard.load_from_fen("rnbq1bnr/pppkpppp/8/8/8/8/PPP2PPP/RNBQKBNR w KQha - 0 1")
+    # printBitboard.print_bitboards(chessBitboard.bitboards)
+    in_check = chessBitboard.is_in_check()
+    print(in_check)
+    # for elem in in_check:
+    #     printBitboard.print_bitboard(".", elem)
+    # print(in_check)
     # chessBitboard.perform_move("e2e4")
-    # PrintBitBoard.print_bitboards(chessBitboard)
     # PrintBitBoard.print_board(chessBitboard)
-    # chessBitboard.print_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
+    # chessBitboard.chess_move.print_legal_moves(chessBitboard.bitboards, chessBitboard._get_opponent(chessBitboard.current_player))
     # chessBitboard.load_from_fen("rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
     # PrintBitBoard.print_board(chessBitboard)
     
     # printBitboard.print_bitboards(chessBitboard.bitboards)
-    printBitboard.print_board(ChessBitboard.bitboards)
+    # printBitboard.print_board(ChessBitboard.bitboards)
