@@ -64,6 +64,11 @@ class TestChessBitboard(unittest.TestCase):
         self.expectedBoard.load_from_fen("rnbqk1nr/pppp1ppp/4p3/2P5/8/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 1")
         self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
 
+    def test_move_pawn_legal_4(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppppppp1/8/7p/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'a4h5', self.actualBoard)
+  
+
     def test_move_pawn_illegal_1(self):
         self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'e7e5', self.actualBoard)
 

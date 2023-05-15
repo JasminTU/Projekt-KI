@@ -3,9 +3,9 @@ from illegalMoveException import IllegalMoveException
 import constants
 
 # Define bitmasks for the edges of the board
-RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
-LEFT_EDGE = int("0b1111111011111110111111101111111011111110111111101111111011111110", 2)
-BOTH_EDGES = RIGHT_EDGE & (RIGHT_EDGE << 1)
+NOT_RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
+NOT_LEFT_EDGE = int("0b1111111011111110111111101111111011111110111111101111111011111110", 2)
+NOT_EDGES = NOT_RIGHT_EDGE & (NOT_RIGHT_EDGE << 1)
 MAX_VALUE = int("0b1111111111111111111111111111111111111111111111111111111111111111", 2) # for bitwise inversion
 
 class Move():
@@ -27,13 +27,13 @@ class Move():
         if current_player == constants.WHITE:
             one_step = (bitboards[constants.PAWN] & bitboards[constants.WHITE]) << 8 & empty_squares
             two_steps = ((bitboards[constants.PAWN] & white_pawn_bitboard) << 16) & empty_squares
-            captures_left = (bitboards[constants.PAWN] & bitboards[constants.WHITE]) << 7 & bitboards[constants.BLACK]
-            captures_right = (bitboards[constants.PAWN] & bitboards[constants.WHITE]) << 9 & bitboards[constants.BLACK]
+            captures_left = (bitboards[constants.PAWN] & bitboards[constants.WHITE] & NOT_LEFT_EDGE) << 7 & bitboards[constants.BLACK]
+            captures_right = (bitboards[constants.PAWN] & bitboards[constants.WHITE] & NOT_RIGHT_EDGE) << 9 & bitboards[constants.BLACK]
         else:
             one_step = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 8 & empty_squares
             two_steps = ((bitboards[constants.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
-            captures_left = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 7 & bitboards[constants.WHITE]
-            captures_right = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 9 & bitboards[constants.WHITE]
+            captures_left = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_LEFT_EDGE) >> 7 & bitboards[constants.WHITE]
+            captures_right = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_RIGHT_EDGE) >> 9 & bitboards[constants.WHITE]
 
         moves = [
             (one_step, "one_step"),
@@ -84,14 +84,14 @@ class Move():
             knight_pos = knights & -knights
             # Reihenfolge: Oben dia-links, links dia-oben, rechts dia-oben, oben dia-rechts, links dia-unten, unten dia-links, unten dia-rechts, rechts dia-unten
             knight_moves = (
-                (((LEFT_EDGE & knight_pos) << 15) & empty),
-                (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) << 6) & empty),
-                (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) << 10) & empty),
-                (((RIGHT_EDGE & knight_pos) << 17) & empty),
-                (((LEFT_EDGE & (LEFT_EDGE << 1) & knight_pos) >> 10) & empty),
-                (((LEFT_EDGE & knight_pos) >> 17) & empty),
-                (((RIGHT_EDGE & knight_pos) >> 15) & empty),
-                (((RIGHT_EDGE & (RIGHT_EDGE >> 1) & knight_pos) >> 6) & empty),
+                (((NOT_LEFT_EDGE & knight_pos) << 15) & empty),
+                (((NOT_LEFT_EDGE & (NOT_LEFT_EDGE << 1) & knight_pos) << 6) & empty),
+                (((NOT_RIGHT_EDGE & (NOT_RIGHT_EDGE >> 1) & knight_pos) << 10) & empty),
+                (((NOT_RIGHT_EDGE & knight_pos) << 17) & empty),
+                (((NOT_LEFT_EDGE & (NOT_LEFT_EDGE << 1) & knight_pos) >> 10) & empty),
+                (((NOT_LEFT_EDGE & knight_pos) >> 17) & empty),
+                (((NOT_RIGHT_EDGE & knight_pos) >> 15) & empty),
+                (((NOT_RIGHT_EDGE & (NOT_RIGHT_EDGE >> 1) & knight_pos) >> 6) & empty),
             )
             # Convert the bitboard positions to tuples and add them to the list of moves
             moves += [(knight_pos, dest) for dest in knight_moves if dest]
@@ -151,8 +151,8 @@ class Move():
                     break
                 # print_bitboard("Possible Sq: ", possible_square)
                 attacks |= possible_square
-                if (direction in [-9, 7] and (LEFT_EDGE & possible_square) == 0) or (
-                    direction in [-7, 9] and (RIGHT_EDGE & possible_square) == 0):
+                if (direction in [-9, 7] and (NOT_LEFT_EDGE & possible_square) == 0) or (
+                    direction in [-7, 9] and (NOT_RIGHT_EDGE & possible_square) == 0):
                     break
         return attacks
 
@@ -173,8 +173,8 @@ class Move():
                 if possible_square & player_occupied_squares:
                     break
                 attacks |= possible_square
-                if (direction == -1 and (LEFT_EDGE & possible_square) == 0) or (
-                    direction == 1 and (RIGHT_EDGE & possible_square) == 0):
+                if (direction == -1 and (NOT_LEFT_EDGE & possible_square) == 0) or (
+                    direction == 1 and (NOT_RIGHT_EDGE & possible_square) == 0):
                     break
         return attacks
 
