@@ -48,7 +48,7 @@ class TestChessBitboard(unittest.TestCase):
         :param actualBoard: the actualBoard to check.
         """
         try:
-            self.assertTrue(actualBoard.is_in_check())
+            self.assertTrue(actualBoard.is_in_check(actualBoard.current_player))
         except AssertionError:
             error_message = f"There should be a check on the following board, but none were found:\n\n"
             error_message += PrintBitBoardService.get_board_string(actualBoard.bitboards)
@@ -60,7 +60,7 @@ class TestChessBitboard(unittest.TestCase):
         :param actualBoard: the actualBoard to check.
         """
         try:
-            self.assertFalse(actualBoard.is_in_check())
+            self.assertFalse(actualBoard.is_in_check(actualBoard.current_player))
         except AssertionError:
             error_message = f"There should be no check on the following board, but at least one was found:\n\n"
             error_message += PrintBitBoardService.get_board_string(actualBoard.bitboards)
