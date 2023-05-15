@@ -6,25 +6,24 @@ import copy
 
 class ChessBitboard:
     def __init__(self):
-        self.bitboards = self.initialize_bitboards()
+        self.bitboards = None
+        self.initialize_bitboards()
         self.current_player = constants.WHITE
         self.chess_move = Move()
         self.next_player_in_check = False
 
     def initialize_bitboards(self):
-        bitboards = [0] * 8
+        self.bitboards = [0] * 8
 
         # Set initial positions for constants.WHITE, black and all pieces using binary literals
-        bitboards[constants.WHITE] =  int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
-        bitboards[constants.BLACK] =  int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
-        bitboards[constants.PAWN] =   int("0b0000000011111111000000000000000000000000000000001111111100000000", 2)
-        bitboards[constants.KNIGHT] = int("0b0100001000000000000000000000000000000000000000000000000001000010", 2)
-        bitboards[constants.BISHOP] = int("0b0010010000000000000000000000000000000000000000000000000000100100", 2)
-        bitboards[constants.ROOK] =   int("0b1000000100000000000000000000000000000000000000000000000010000001", 2)
-        bitboards[constants.QUEEN] =  int("0b0000100000000000000000000000000000000000000000000000000000001000", 2)
-        bitboards[constants.KING] =   int("0b0001000000000000000000000000000000000000000000000000000000010000", 2)
-
-        return bitboards
+        self.bitboards[constants.WHITE] =  int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
+        self.bitboards[constants.BLACK] =  int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
+        self.bitboards[constants.PAWN] =   int("0b0000000011111111000000000000000000000000000000001111111100000000", 2)
+        self.bitboards[constants.KNIGHT] = int("0b0100001000000000000000000000000000000000000000000000000001000010", 2)
+        self.bitboards[constants.BISHOP] = int("0b0010010000000000000000000000000000000000000000000000000000100100", 2)
+        self.bitboards[constants.ROOK] =   int("0b1000000100000000000000000000000000000000000000000000000010000001", 2)
+        self.bitboards[constants.QUEEN] =  int("0b0000100000000000000000000000000000000000000000000000000000001000", 2)
+        self.bitboards[constants.KING] =   int("0b0001000000000000000000000000000000000000000000000000000000010000", 2)
 
     def load_from_fen(self, fen):
         fen_parts = fen.split(" ")
@@ -62,6 +61,8 @@ class ChessBitboard:
                     self.bitboards[piece_type] |= square
 
                     col_index += 1
+        PrintBitBoardService.print_bitboards(self.bitboards)
+        PrintBitBoardService.print_board(self.bitboards)
 
     def evaluate_board(self):
         score = 0
