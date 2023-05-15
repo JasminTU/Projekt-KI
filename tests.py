@@ -173,19 +173,19 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard.load_from_fen("rnb1kbnr/8/3R4/8/8/8/8/1NBQKBNR w Kkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
 
-    # rook can move one space diagonally
+
     def test_rook_illegal_1(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/8/3R4/8/8/8/8/1NBQKBNR w Kkq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'd6e7', actualBoard)
 
-    # rook cannot move more than one space diagonally
+
     def test_rook_illegal_2(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/8/3R4/8/8/8/8/1NBQKBNR w Kkq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'd6f4', actualBoard)
 
-    # rook can also capture one space diagonally
+
     def test_rook_illegal_3(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1k1nr/8/3R4/4b3/8/8/8/1NBQKBNR w Kkq - 0 1")
@@ -256,31 +256,26 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
 
-    # knight can move one space horizontally
     def test_knight_illegal_1(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'd5e5', actualBoard)
 
-    # knight can move one space vertically
     def test_knight_illegal_2(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'd5d4', actualBoard)
 
-    # knight can move one space diagonally
     def test_knight_illegal_3(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'd5e4', actualBoard)
 
-    # knight cannot move more than one space vertically
     def test_knight_illegal_4(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'd5d3', actualBoard)
 
-    # knight cannot move more than one space horizontally
     def test_knight_illegal_5(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
