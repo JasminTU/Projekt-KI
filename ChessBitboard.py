@@ -99,7 +99,7 @@ class ChessBitboard:
         return constants.WHITE if current_player == constants.BLACK else constants.BLACK
 
     def is_check_mate(self):
-        if not self.is_in_check():
+        if not self.is_in_check(self.current_player):
             return False
         legal_moves = self.chess_move.generate_legal_moves(self.bitboards, self.current_player)
         for move in legal_moves:

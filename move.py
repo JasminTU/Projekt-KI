@@ -270,13 +270,12 @@ class Move():
 
     def generate_legal_moves(self, bitboards, current_player):
         moves = []
-
-        moves += self.get_pawn_moves(bitboards, current_player)
-        moves += self.get_knight_moves(bitboards, current_player)
+        moves += self.get_move_by_figure(bitboards, current_player, constants.PAWN)
+        moves += self.get_move_by_figure(bitboards, current_player, constants.KNIGHT)
         moves += self.get_move_by_figure(bitboards, current_player, constants.BISHOP)
         moves += self.get_move_by_figure(bitboards, current_player, constants.ROOK)
         moves += self.get_move_by_figure(bitboards, current_player, constants.QUEEN)
-        moves += self.get_king_moves(bitboards, current_player)
+        moves += self.get_move_by_figure(bitboards, current_player, constants.KING)
 
         legal_moves = [
             move for move in moves if self.is_move_legal(move, bitboards, current_player)
