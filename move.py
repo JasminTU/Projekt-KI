@@ -190,10 +190,10 @@ class Move():
     def get_king_moves(self, bitboards, current_player):
         king_moves = []
         king_attack_offsets = (-9, -8, -7, -1, 1, 7, 8, 9)
-        constants.KING = bitboards[constants.KING] & bitboards[current_player]
+        king_position = bitboards[constants.KING] & bitboards[current_player]
 
-        while constants.KING:
-            from_square = constants.KING & -constants.KING
+        while king_position:
+            from_square = king_position & -king_position
             for offset in king_attack_offsets:
                 to_square = from_square << offset if offset > 0 else from_square >> -offset
                 # Check if the move is within the board
@@ -203,7 +203,7 @@ class Move():
                 if to_square & bitboards[current_player] != 0:
                     continue
                 king_moves.append((from_square, to_square))
-            constants.KING &= constants.KING - 1
+            king_position &= king_position - 1
         return king_moves
     
     def perform_move(self, move, chessBitboard, move_type="algebraic"):
