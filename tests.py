@@ -110,6 +110,20 @@ class TestChessBitboard(unittest.TestCase):
     def test_move_pawn_illegal_1(self):
         self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'e7e5', self.actualBoard, move_type = "algebraic")
 
+    def test_en_passant(self):
+        self.actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")
+        self.actualBoard.chess_move.perform_move('f5e6', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("4k3/8/4P3/8/8/8/8/4K3 b - - 0 2")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+    
+    def test_en_pessant_illegal_1(self):
+        self.actualBoard.load_from_fen("4k3/8/8/3pP3/8/8/8/4K3 w - - 0 2")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'e5d6', self.actualBoard)
+
+    def test_en_pessant_illegal_2(self):
+        self.actualBoard.load_from_fen("4k3/8/5P2/4p3/8/8/8/4K3 w - e6 0 2")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'f6e6', self.actualBoard)
+
     def test_evaluate_board_initial(self):
         self.actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         self.assertEqual(self.actualBoard.evaluate_board(), 0)
