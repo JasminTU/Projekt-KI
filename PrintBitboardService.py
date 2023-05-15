@@ -7,25 +7,15 @@ class PrintBitBoardService:
         pass
 
     @staticmethod
-    def print_bitboard(message, bitboard):
-        # print a single bitboard in a 8x8 grid
-        print(message, "\n")
-        for row in range(7, -1, -1):
-            for col in range(8):
-                index = row * 8 + col
-                if bitboard & (1 << index):
-                    print("1", end=" ")
-                else:
-                    print("0", end=" ")
-            print()
-        print("--------\n")
-
-    @staticmethod
-    def print_bitboards(bitboards):
+    def get_bitboards_string(bitboards):
         bitboards_string = ""
         for i, _ in enumerate(bitboards):
             bitboards_string += PrintBitBoardService.get_bitboard_string(i, bitboards)
-        print(bitboards_string)
+        return bitboards_string
+
+    @staticmethod
+    def print_bitboards(bitboards):
+        PrintBitBoardService.get_bitboards_string(bitboards)
 
     @staticmethod
     def get_bitboard_string(board_index, bitboards):
@@ -38,6 +28,10 @@ class PrintBitBoardService:
             bitboard_string += "\n"
         bitboard_string += "\n"
         return bitboard_string
+
+    @staticmethod
+    def print_bitboard(board_index, bitboard):
+        PrintBitBoardService.get_bitboard_string(board_index, bitboard)
 
     @staticmethod
     def get_board_string(bitboards):
@@ -83,3 +77,7 @@ class PrintBitBoardService:
         board_string += f"a b c d e f g h\n\n"
 
         return board_string
+
+    @staticmethod
+    def print_board(bitboards):
+        print(PrintBitBoardService.get_board_string(bitboards))
