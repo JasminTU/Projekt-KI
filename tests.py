@@ -110,6 +110,166 @@ class TestChessBitboard(unittest.TestCase):
     def test_move_pawn_illegal_1(self):
         self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'e7e5', self.actualBoard, move_type = "algebraic")
 
+
+    def test_move_rook_legal_1(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/8/8/3R4/8/8/1NBQKBNR w Kkq - 0 1")
+        self.actualBoard.chess_move.perform_move('d4d6', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/8/3R4/8/8/8/8/1NBQKBNR w Kkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_rook_legal_2(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/8/8/3R4/8/8/1NBQKBNR w Kkq - 0 1")
+        self.actualBoard.chess_move.perform_move('d4h4', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/8/8/8/7R/8/8/1NBQKBNR w Kkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_rook_legal_3(self):
+        self.actualBoard.load_from_fen("rnb1kbnr/8/3q4/8/3R4/8/8/1NBQKBNR w Kkq - 0 1")
+        self.actualBoard.chess_move.perform_move('d4d6', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnb1kbnr/8/3R4/8/8/8/8/1NBQKBNR w Kkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    #rook can move one space diagonally
+    def test_rook_illegal_1(self):
+        self.actualBoard.load_from_fen("rnb1kbnr/8/3R4/8/8/8/8/1NBQKBNR w Kkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd6e7', self.actualBoard)
+
+    #rook cannot move more than one space diagonally
+    def test_rook_illegal_2(self):
+        self.actualBoard.load_from_fen("rnb1kbnr/8/3R4/8/8/8/8/1NBQKBNR w Kkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd6f4', self.actualBoard)
+
+    #rook can also capture one space diagonally
+    def test_rook_illegal_3(self):
+        self.actualBoard.load_from_fen("rnb1k1nr/8/3R4/4b3/8/8/8/1NBQKBNR w Kkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd6e5', self.actualBoard)
+    
+    def test_rook_illegal_4(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'a1a2', self.actualBoard)
+
+    def test_rook_illegal_5(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/R7/8/1PPPPPPP/1NBQKBNR w Kkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'a4c5', self.actualBoard)
+
+
+    def test_move_bishop_legal_1(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/8/8/8/8/8/RNBQKBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('c1h6', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/8/7B/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+
+    def test_move_bishop_legal_2(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/7B/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('h6f8', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkBnr/8/8/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_bishop_illegal_1(self):
+        self.actualBoard.load_from_fen("rnbqk1nr/8/7B/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'h6g6', self.actualBoard)
+
+    def test_bishop_illegal_2(self):
+        self.actualBoard.load_from_fen("rnbqk1nr/8/7B/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'c1d2', self.actualBoard)
+    
+    def test_bishop_illegal_3(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/5B2/8/PPP1PPPP/RN1QKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'f4d5', self.actualBoard)
+
+    def test_move_knight_legal_1(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('b1c3', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_knight_legal_2(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('d5c3', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_knight_legal_3(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3p4/8/2N5/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('c3d5', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    #knight can move one space horizontally
+    def test_knight_illegal_1(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd5e5', self.actualBoard)
+
+    #knight can move one space vertically
+    def test_knight_illegal_2(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd5d4', self.actualBoard)
+    
+    #knight can move one space diagonally
+    def test_knight_illegal_3(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd5e4', self.actualBoard)
+
+    #knight cannot move more than one space vertically
+    def test_knight_illegal_4(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd5d3', self.actualBoard)
+
+    #knight cannot move more than one space horizontally
+    def test_knight_illegal_5(self):
+        self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd5a5', self.actualBoard)
+
+    def test_move_queen_legal_1 (self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/8/8/3Q4/8/8/RNB1KBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('d4f4', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/8/8/8/5Q2/8/8/RNB1KBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_queen_legal_2 (self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/8/8/3Q4/8/8/RNB1KBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('d4b6', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/8/1Q6/8/8/8/8/RNB1KBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_queen_legal_3 (self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/1Q6/8/8/8/8/RNB1KBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('b6b3', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbnr/8/8/8/8/1Q6/8/RNB1KBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_queen_legal_4 (self):
+        self.actualBoard.load_from_fen("rnbqkbnr/8/8/8/8/1Q6/8/RNB1KBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('b3g8', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkbQr/8/8/8/8/8/8/RNB1KBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_queen_legal_5 (self):
+        self.actualBoard.load_from_fen("rnbqkb2/8/8/8/2Q4r/8/8/RNB1KBNR w KQq - 0 1")
+        self.actualBoard.chess_move.perform_move('c4h4', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnbqkb2/8/8/8/7Q/8/8/RNB1KBNR w KQq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_queen_legal_6 (self):
+        self.actualBoard.load_from_fen("rnbqkb2/8/8/8/Q7/8/8/RNB1KBNR w KQq - 0 1")
+        self.actualBoard.chess_move.perform_move('a4a8', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("Qnbqkb2/8/8/8/8/8/8/RNB1KBNR w KQ - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_queen_illegal_1(self):
+        self.actualBoard.load_from_fen("1nbqkb2/8/8/8/3Q4/8/8/RNB1KBNR w KQ - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd4f5', self.actualBoard)
+
+    def test_queen_illegal_2(self):
+        self.actualBoard.load_from_fen("1nbqkb2/8/8/3R4/8/3Q4/8/1NB1KBNR w K - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd3d5', self.actualBoard)
+
+    def test_queen_illegal_3(self):
+        self.actualBoard.load_from_fen("1nbqkb2/8/8/3R4/8/3Q4/8/1NB1KBNR w K - 0 1")
+        self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'd3d6', self.actualBoard)
+
+
     def test_en_passant(self):
         self.actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")
         self.actualBoard.chess_move.perform_move('f5e6', self.actualBoard, move_type = "algebraic")
