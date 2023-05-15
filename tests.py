@@ -67,6 +67,18 @@ class TestChessBitboard(unittest.TestCase):
     def test_move_pawn_legal_4(self):
         self.actualBoard.load_from_fen("rnbqkbnr/ppppppp1/8/7p/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1")
         self.assertRaises(IllegalMoveException, self.actualBoard.chess_move.perform_move, 'a4h5', self.actualBoard)
+
+    def test_move_pawn_legal_5(self):
+        self.actualBoard.load_from_fen("rn1qkbnr/ppp1pppp/8/3p4/8/7b/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('g2h3', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rn1qkbnr/ppp1pppp/8/3p4/8/7P/PPPPPP1P/RNBQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
+
+    def test_move_pawn_legal_6(self):
+        self.actualBoard.load_from_fen("rnb1kbnr/pppp1ppp/8/4p3/3P4/6q1/PPP1PPPP/RNBQKBNR w KQkq - 0 1")
+        self.actualBoard.chess_move.perform_move('f2g3', self.actualBoard, move_type = "algebraic")
+        self.expectedBoard.load_from_fen("rnb1kbnr/pppp1ppp/8/4p3/3P4/6P1/PPP1P1PP/RNBQKBNR w KQkq - 0 1")
+        self.assertEqualBitboards(self.expectedBoard, self.actualBoard)
   
 
     def test_move_pawn_illegal_1(self):
