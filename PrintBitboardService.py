@@ -15,7 +15,7 @@ class PrintBitBoardService:
 
     @staticmethod
     def print_bitboards(bitboards):
-        PrintBitBoardService.get_bitboards_string(bitboards)
+        print(PrintBitBoardService.get_bitboards_string(bitboards))
 
     @staticmethod
     def get_bitboard_string(board_index, bitboards):
