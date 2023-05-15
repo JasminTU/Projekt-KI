@@ -1,6 +1,6 @@
 from loguru import logger
 from move import Move
-from printBitboard import PrintBitBoard
+from PrintBitboardService import PrintBitBoardService
 import constants
 import copy
 
@@ -62,17 +62,6 @@ class ChessBitboard:
                     self.bitboards[piece_type] |= square
 
                     col_index += 1
-                    
-    def get_bitboard_string(self, board_index):
-        bitboard_string = constants.LABELS[board_index] + ":\n"
-        for row in reversed(range(constants.BOARD_SIZE)):
-            for col in range(constants.BOARD_SIZE):
-                square = 1 << (row * constants.BOARD_SIZE + col)
-                bitboard_string += "1" if self.bitboards[board_index] & square else "0"
-                bitboard_string += " "
-            bitboard_string += "\n"
-        bitboard_string += "\n"
-        return bitboard_string
     
     def evaluate_board(self):
         score = 0
@@ -122,7 +111,6 @@ class ChessBitboard:
         
 if __name__ == "__main__":
     chessBitboard = ChessBitboard()
-    printBitboard = PrintBitBoard()
 
 
     chessBitboard.load_from_fen("rnbq1bnr/pppkpppp/8/8/8/8/PPP2PPP/RNBQKBNR w KQha - 0 1")
