@@ -74,75 +74,68 @@ class TestChessBitboard(unittest.TestCase):
         
     def test_evaluate_board_initial(self):
         self.actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        boardScore = self.actualBoard.evaluate_board()
-        assert boardScore == 0
+        self.assertEqual(self.actualBoard.evaluate_board(), 0)
         
     def test_evaluate_board_on_pawn(self):
         self.actualBoard.load_from_fen("rnbqkbnr/pp1ppppp/8/8/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
         boardScore = self.actualBoard.evaluate_board()
-        assert boardScore == 0        
-        
+
     def test_evaluate_board_on_rook(self):
         self.actualBoard.load_from_fen("1nbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR w Kk - 0 1")
-        boardScore = self.actualBoard.evaluate_board()
-        assert boardScore == 0       
+        self.assertEqual(self.actualBoard.evaluate_board(), 0)
         
     def test_evaluate_board_on_bishop(self):
         self.actualBoard.load_from_fen("1n1qkbnr/pppppppp/8/8/8/R1r5/PPPPPPPP/1N1QKBNR w Kk - 0 1")
-        boardScore = self.actualBoard.evaluate_board()
-        assert boardScore == 0       
+        self.assertEqual(self.actualBoard.evaluate_board(), 0)
         
     def test_evaluate_board_on_queen(self):
         self.actualBoard.load_from_fen("5p2/8/8/8/8/8/4Q3/7P w - - 0 1")
-        boardScore = self.actualBoard.evaluate_board()
-        assert boardScore == 900, boardScore
+        self.assertEqual(self.actualBoard.evaluate_board(), 900)
         
     def test_evaluate_board_on_king(self):
         self.actualBoard.load_from_fen("1n2kbnr/pppppppp/2b5/8/8/R1r2Bq1/PPPPPPPP/1N1Q1BNR w Hk - 0 1")
-        boardScore = self.actualBoard.evaluate_board()
-        assert boardScore == -2000       
+        self.assertEqual(self.actualBoard.evaluate_board(), -2000)
         
     def test_evaluate_board_on_empty(self):
         self.actualBoard.load_from_fen("8/8/8/8/8/8/8/8 w - - 0 1")
-        boardScore = self.actualBoard.evaluate_board()
-        assert boardScore == 0 
+        self.assertEqual(self.actualBoard.evaluate_board(), 0)
         
     def test_is_in_check_1(self):
         self.actualBoard.load_from_fen("rnbq1bnr/ppp1pppp/4k3/8/8/8/PPP1QPPP/RNBK1BNR w KQha - 0 1")
         in_check = self.actualBoard.is_in_check()
-        assert in_check == True
+        self.assertTrue(in_check)
 
     def test_is_in_check_2(self):
         self.actualBoard.load_from_fen("rnbq1bnr/pppkpppp/8/8/8/8/PPP2PPP/RNBQKBNR w KQha - 0 1")
         in_check = self.actualBoard.is_in_check()
-        assert self.actualBoard.current_player == constants.WHITE
-        assert in_check == False
+        self.assertEqual(self.actualBoard.current_player, constants.WHITE)
+        self.assertFalse(in_check)
         
     def test_is_in_check_3(self):
         self.actualBoard.load_from_fen("rnbqkb1r/pppnpppp/8/8/6K1/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
         in_check = self.actualBoard.is_in_check()
-        assert in_check == False
+        self.assertFalse(in_check)
         
     def test_is_in_check_4(self):
         self.actualBoard.load_from_fen("rnbqkb1r/pppnpppp/8/6K1/8/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
         in_check = self.actualBoard.is_in_check()
-        assert in_check == False
+        self.assertFalse(in_check)
         
-    def test_is_in_check_4(self):
+    def test_is_in_check_7(self):
         self.actualBoard.load_from_fen("rnbqkb1r/pppnppp1/7p/6K1/8/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
         in_check = self.actualBoard.is_in_check()
-        assert in_check == True
+        self.assertTrue(in_check)
         
     def test_is_in_check_5(self):
         self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/5P2/6K1/8/PPP3PP/RNB1QBNR w HAkq - 0 1")
         in_check = self.actualBoard.is_in_check()
         # Test schlägt Fehl, weil der Läufer irrtümlich durch das Pferd läuft
-        assert in_check == False
+        self.assertFalse(in_check)
         
     def test_is_in_check_6(self):
         self.actualBoard.load_from_fen("rnbqknbr/ppp1pppp/4K3/5P2/8/8/PPP3PP/RNB1QBNR w HAkq - 0 1")
         in_check = self.actualBoard.is_in_check()
-        assert in_check == True
+        self.assertTrue(in_check)
 
 
 if __name__ == '__main__':
