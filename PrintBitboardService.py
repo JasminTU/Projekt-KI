@@ -1,11 +1,13 @@
 import constants
 
-class PrintBitBoard():
-    
+
+class PrintBitBoardService:
+
     def __init__(self) -> None:
         pass
-    
-    def print_bitboard(self, message, bitboard):
+
+    @staticmethod
+    def print_bitboard(message, bitboard):
         # print a single bitboard in a 8x8 grid
         print(message, "\n")
         for row in range(7, -1, -1):
@@ -17,16 +19,16 @@ class PrintBitBoard():
                     print("0", end=" ")
             print()
         print("--------\n")
-        
-    def print_bitboards(self, bitboards):
+
+    @staticmethod
+    def print_bitboards(bitboards):
         bitboards_string = ""
-
         for i, _ in enumerate(bitboards):
-            bitboards_string += self._get_bitboard_string(i, bitboards)
-
+            bitboards_string += PrintBitBoardService.get_bitboard_string(i, bitboards)
         print(bitboards_string)
-        
-    def _get_bitboard_string(self, board_index, bitboards):
+
+    @staticmethod
+    def get_bitboard_string(board_index, bitboards):
         bitboard_string = constants.LABELS[board_index] + ":\n"
         for row in reversed(range(constants.BOARD_SIZE)):
             for col in range(constants.BOARD_SIZE):
@@ -36,8 +38,9 @@ class PrintBitBoard():
             bitboard_string += "\n"
         bitboard_string += "\n"
         return bitboard_string
-        
-    def print_board(self, bitboards):
+
+    @staticmethod
+    def get_board_string(bitboards):
         piece_symbols = {
             (constants.WHITE, constants.PAWN): "P",
             (constants.WHITE, constants.KNIGHT): "N",
@@ -79,4 +82,4 @@ class PrintBitBoard():
         board_string += f"" + "-" * 15 + f"\n"
         board_string += f"a b c d e f g h\n\n"
 
-        print(board_string)
+        return board_string
