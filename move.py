@@ -206,7 +206,7 @@ class Move():
             constants.KING &= constants.KING - 1
         return king_moves
     
-    def perform_move(self, move, chessBitboard, move_type = "binary"):
+    def perform_move(self, move, chessBitboard, move_type="algebraic"):
         # TODO: Je nach Verwendung der Funktion würde ich hier nicht nochmal alle legalen moves generieren, da der ausgewählte move bereits legal ist --> Laufzeitverlängerung
         legal_moves = self.generate_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
         if move_type == "algebraic":
