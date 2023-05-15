@@ -2,6 +2,7 @@ from loguru import logger
 from move import Move
 from printBitboard import PrintBitBoard
 import constants
+import copy
 
 class ChessBitboard:
     def __init__(self):
@@ -97,16 +98,27 @@ class ChessBitboard:
         #     score += 3
         return score
     
-    def is_in_check(self):
-        # move is a tuple containing start and destination bitboards
+    def is_in_check(self , player):
+        # move is a tuple containing start and destination bitboards, checks if input player is in check
         # TODO: king - king face off not included yet
-        legal_moves_opponent = self.chess_move.generate_legal_moves(self.bitboards, self._get_opponent(self.current_player))
+        legal_moves_opponent = self.chess_move.generate_legal_moves(self.bitboards, self._get_opponent(player))
         dest_legal_moves = [elem[1] for elem in legal_moves_opponent]
-        in_check = [dest & (self.bitboards[constants.KING] & self.bitboards[self.current_player]) for dest in dest_legal_moves]
+        in_check = [dest & (self.bitboards[constants.KING] & self.bitboards[player]) for dest in dest_legal_moves]
         return any(elem != 0 for elem in in_check)
     
     def _get_opponent(self, current_player):
         return constants.WHITE if current_player == constants.BLACK else constants.BLACK
+    
+    def is_check_mate(self):
+        if not self.is_in_check():
+            return False
+        legal_moves = self.chess_move.generate_legal_moves(self.bitboards, self.current_player)
+        for move in legal_moves:
+            board_after_move = copy.deepcopy(self)
+            board_after_move.chess_move.perform_move(move, board_after_move, move_type="binary")
+            if not board_after_move.is_in_check(self.current_player):
+                return False
+        return True
         
 if __name__ == "__main__":
     chessBitboard = ChessBitboard()
@@ -115,7 +127,8 @@ if __name__ == "__main__":
 
     chessBitboard.load_from_fen("rnbq1bnr/pppkpppp/8/8/8/8/PPP2PPP/RNBQKBNR w KQha - 0 1")
     # printBitboard.print_bitboards(chessBitboard.bitboards)
-    in_check = chessBitboard.is_in_check()
+    print(chessBitboard.current_player)
+    in_check = chessBitboard.is_in_check(chessBitboard.current_player)
     print(in_check)
     # for elem in in_check:
     #     printBitboard.print_bitboard(".", elem)

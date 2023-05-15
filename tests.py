@@ -114,39 +114,40 @@ class TestChessBitboard(unittest.TestCase):
         
     def test_is_in_check_1(self):
         self.actualBoard.load_from_fen("rnbq1bnr/ppp1pppp/4k3/8/8/8/PPP1QPPP/RNBK1BNR w KQha - 0 1")
-        in_check = self.actualBoard.is_in_check()
+        in_check = self.actualBoard.is_in_check(constants.WHITE)
         self.assertTrue(in_check)
 
     def test_is_in_check_2(self):
-        self.actualBoard.load_from_fen("rnbq1bnr/pppkpppp/8/8/8/8/PPP2PPP/RNBQKBNR w KQha - 0 1")
-        in_check = self.actualBoard.is_in_check()
-        self.assertEqual(self.actualBoard.current_player, constants.WHITE)
+        board = ChessBitboard()
+        board.load_from_fen("rnbq1bnr/pppkpppp/8/8/8/8/PPP2PPP/RNBQKBNR w KQha - 0 1")
+        in_check = board.is_in_check(constants.WHITE)
+        self.assertEqual(board.current_player, constants.WHITE)
         self.assertFalse(in_check)
         
     def test_is_in_check_3(self):
         self.actualBoard.load_from_fen("rnbqkb1r/pppnpppp/8/8/6K1/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
-        in_check = self.actualBoard.is_in_check()
+        in_check = self.actualBoard.is_in_check(constants.WHITE)
         self.assertFalse(in_check)
         
     def test_is_in_check_4(self):
         self.actualBoard.load_from_fen("rnbqkb1r/pppnpppp/8/6K1/8/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
-        in_check = self.actualBoard.is_in_check()
+        in_check = self.actualBoard.is_in_check(constants.WHITE)
         self.assertFalse(in_check)
         
     def test_is_in_check_7(self):
         self.actualBoard.load_from_fen("rnbqkb1r/pppnppp1/7p/6K1/8/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
-        in_check = self.actualBoard.is_in_check()
+        in_check = self.actualBoard.is_in_check(constants.WHITE)
         self.assertTrue(in_check)
         
     def test_is_in_check_5(self):
         self.actualBoard.load_from_fen("rnbqkbnr/ppp1pppp/8/5P2/6K1/8/PPP3PP/RNB1QBNR w HAkq - 0 1")
-        in_check = self.actualBoard.is_in_check()
+        in_check = self.actualBoard.is_in_check(constants.WHITE)
         # Test schlägt Fehl, weil der Läufer irrtümlich durch das Pferd läuft
         self.assertFalse(in_check)
         
     def test_is_in_check_6(self):
         self.actualBoard.load_from_fen("rnbqknbr/ppp1pppp/4K3/5P2/8/8/PPP3PP/RNB1QBNR w HAkq - 0 1")
-        in_check = self.actualBoard.is_in_check()
+        in_check = self.actualBoard.is_in_check(constants.WHITE)
         self.assertTrue(in_check)
 
 
