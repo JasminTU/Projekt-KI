@@ -67,6 +67,5 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    chess_engine = ChessBitboard()
-    game = ChessGame(chess_engine, isBlackAI=True, isWhiteAI=True)
+    game = ChessGame(ChessBitboard(), isBlackAI=True, isWhiteAI=True)
     game.play()
