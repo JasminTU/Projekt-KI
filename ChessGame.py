@@ -19,7 +19,8 @@ class ChessGame:
                 print("Invalid move. Try again.")
                 continue
             if self.is_checkmate():
-                print("Checkmate!")
+                winner = "White" if self.board.game_result == 0 else "Black"
+                print("Checkmate! Winner is ", winner)
                 break
             self.move_number += 1
 
@@ -27,7 +28,8 @@ class ChessGame:
         PrintBitboardService.PrintBitBoardService.print_board(self.board.bitboards)
 
     def get_move(self):
-        user_input = input(f"Move {self.move_number}: ")
+        str = "White" if self.board.current_player == 0 else "Black"
+        user_input = input(f"Move {self.move_number} by {str}: ")
         if len(user_input) == 4:
             return user_input
         else:

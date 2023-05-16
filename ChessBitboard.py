@@ -111,6 +111,7 @@ class ChessBitboard:
             board_after_move = copy.deepcopy(self)
             board_after_move.chess_move.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not board_after_move.is_in_check(self.current_player):
+                self.game_result = self.get_opponent(self.current_player)
                 return False
         return True
     
