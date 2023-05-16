@@ -218,7 +218,7 @@ class Move():
         if move not in legal_moves:
             raise IllegalMoveException(move)
         from_square, to_square = move
-        opponent = constants.BLACK if chessBitboard.current_player == constants.WHITE else constants.WHITE
+        opponent = chessBitboard.get_opponent(chessBitboard.current_player)
 
         if chessBitboard.bitboards[chessBitboard.current_player] & from_square:
             # Remove the moving piece from its original position

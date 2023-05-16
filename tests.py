@@ -97,7 +97,7 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard = ChessBitboard()
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkBnr/8/8/4N3/1N2B3/1K2B3/R7/RN1Q4 w Akq - 0 1")
-        actualBoard.chess_move.perform_move('b2a3', actualBoard)
+        actualBoard.chess_move.perform_move('b3a4', actualBoard)
         expectedBoard.load_from_fen("rnbqkBnr/8/8/4N3/KN2B3/4B3/R7/RN1Q4 w Akq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
         
@@ -429,6 +429,12 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkb1r/pppnppp1/7p/6K1/8/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
         self.assertIsInCheck(actualBoard)
+        
+    def test_is_check_mate(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
+        self.assertIsInCheck(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate())
 
     # def test_en_passant(self):
     #     actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")

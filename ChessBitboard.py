@@ -91,12 +91,12 @@ class ChessBitboard:
     def is_in_check(self , player):
         # move is a tuple containing start and destination bitboards, checks if input player is in check
         # TODO: king - king face off not included yet
-        legal_moves_opponent = self.chess_move.generate_legal_moves(self.bitboards, self._get_opponent(player))
+        legal_moves_opponent = self.chess_move.generate_legal_moves(self.bitboards, self.get_opponent(player))
         dest_legal_moves = [elem[1] for elem in legal_moves_opponent]
         in_check = [dest & (self.bitboards[constants.KING] & self.bitboards[player]) for dest in dest_legal_moves]
         return any(elem != 0 for elem in in_check)
 
-    def _get_opponent(self, current_player):
+    def get_opponent(self, current_player):
         return constants.WHITE if current_player == constants.BLACK else constants.BLACK
 
     def is_check_mate(self):
@@ -112,6 +112,5 @@ class ChessBitboard:
 
 if __name__ == "__main__":
     actualBoard = ChessBitboard()
-    actualBoard.load_from_fen("rnbqkbnr/8/7B/8/8/8/8/RN1QKBNR w KQkq - 0 1")
-    # actualBoard.chess_move.print_legal_moves(actualBoard.bitboards, actualBoard.current_player)
-    actualBoard.chess_move.perform_move('h6f8', actualBoard)
+    actualBoard.load_from_fen("rnbqkBnr/8/8/4N3/1N2B3/1K2B3/R7/RN1Q4 w Akq - 0 1")
+    actualBoard.chess_move.perform_move('b2a3', actualBoard)
