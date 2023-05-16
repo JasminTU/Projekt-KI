@@ -220,7 +220,7 @@ class Move():
         if move_type == "algebraic":
             move = self.algebraic_move_to_binary(move)
         if with_validation:
-            legal_moves = self.filter_legal_moves(self.generate_moves(board), board)
+            legal_moves = self.filter_illegal_moves(board, self.generate_moves(board))
             if move not in legal_moves and move_type != "algebraic":
                 raise IllegalMoveException(self.binary_move_to_algebraic(move[0], move[1]))
             if move not in legal_moves:
@@ -314,7 +314,7 @@ class Move():
 
         return moves
 
-    def filter_legal_moves(self, moves, board):
+    def filter_illegal_moves(self, board, moves):
         legal_moves = [
             move for move in moves if self.is_move_legal(move, board)
         ]
