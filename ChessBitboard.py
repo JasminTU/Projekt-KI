@@ -61,8 +61,8 @@ class ChessBitboard:
                     self.bitboards[piece_type] |= square
 
                     col_index += 1
-        PrintBitBoardService.print_bitboards(self.bitboards)
-        PrintBitBoardService.print_board(self.bitboards)
+        # PrintBitBoardService.print_bitboards(self.bitboards)
+        # PrintBitBoardService.print_board(self.bitboards)
 
     def evaluate_board(self):
         score = 0
@@ -111,6 +111,7 @@ class ChessBitboard:
         return True
 
 if __name__ == "__main__":
-    chessBitboard = ChessBitboard()
-    chessBitboard.load_from_fen("rnbq1bnr/pppkpppp/8/8/8/8/PPP2PPP/RNBQKBNR w KQha - 0 1")
-    PrintBitBoardService.print_board(chessBitboard.bitboards)
+    actualBoard = ChessBitboard()
+    actualBoard.load_from_fen("rnbqkbnr/8/7B/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+    # actualBoard.chess_move.print_legal_moves(actualBoard.bitboards, actualBoard.current_player)
+    actualBoard.chess_move.perform_move('h6f8', actualBoard)

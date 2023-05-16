@@ -32,6 +32,18 @@ class PrintBitBoardService:
     @staticmethod
     def print_bitboard(board_index, bitboard):
         PrintBitBoardService.get_bitboard_string(board_index, bitboard)
+        
+    @staticmethod
+    def print_binary_bitboard(bitboard):
+        for rank in range(7, -1, -1):
+            for file in range(8):
+                square = rank * 8 + file
+                if bitboard & (1 << square):
+                    print("1", end=" ")
+                else:
+                    print("0", end=" ")
+            print()
+        print("\n")
 
     @staticmethod
     def get_board_string(bitboards):

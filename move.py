@@ -1,5 +1,6 @@
 from loguru import logger
 from illegalMoveException import IllegalMoveException
+from PrintBitboardService import PrintBitBoardService
 import constants
 
 # Define bitmasks for the edges of the board
@@ -209,6 +210,7 @@ class Move():
     def perform_move(self, move, chessBitboard, move_type="algebraic"):
         # TODO: Je nach Verwendung der Funktion würde ich hier nicht nochmal alle legalen moves generieren, da der ausgewählte move bereits legal ist --> Laufzeitverlängerung
         legal_moves = self.generate_legal_moves(chessBitboard.bitboards, chessBitboard.current_player)
+        
         if move_type == "algebraic":
             move = self.algebraic_move_to_binary(move)
         if move not in legal_moves and move_type != "algebraic":
@@ -216,7 +218,7 @@ class Move():
         if move not in legal_moves:
             raise IllegalMoveException(move)
         from_square, to_square = move
-        opponent = constants.WHITE if chessBitboard.current_player == constants.WHITE else constants.WHITE
+        opponent = constants.BLACK if chessBitboard.current_player == constants.WHITE else constants.WHITE
 
         if chessBitboard.bitboards[chessBitboard.current_player] & from_square:
             # Remove the moving piece from its original position
