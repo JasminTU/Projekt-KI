@@ -206,6 +206,9 @@ class Move():
             for offset in king_attack_offsets:
                 to_square = from_square << offset if offset > 0 else from_square >> -offset
                 # Check if the move is within the board
+                if (offset in [-9, 7, -1] and (NOT_LEFT_EDGE & from_square) == 0) or (
+                    offset in [-7, 9, 1] and (NOT_RIGHT_EDGE & from_square) == 0):
+                    continue
                 if not to_square or to_square.bit_length() > 63:
                     continue
                 # Check if the move captures an opponent's piece or is an empty square

@@ -119,14 +119,17 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard.load_from_fen("rnbqkBnr/8/8/4N3/1N2B3/1K2B3/R7/RN1Q4 w Akq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'b3a4', actualBoard)
 
-    #King can capture beyond edge
     def test_move_king_illegal_6(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbq1bnr/8/B6k/8/8/B1R5/8/RN1QK3 b Qha - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'h6a6', actualBoard)
-
-    #King can move beyond edge
+        
     def test_move_king_illegal_7(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbq1bnr/8/k6B/8/8/B1R5/8/RN1QK3 b Qha - 0 1")
+        self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'a6h6', actualBoard)
+
+    def test_move_king_illegal_8(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbq1bnr/8/7k/8/8/B1R5/8/RN1QKB2 b Qha - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'h6a6', actualBoard)

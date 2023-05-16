@@ -116,6 +116,10 @@ class ChessBitboard:
     
 
 if __name__ == "__main__":
+    service = PrintBitBoardService()
     expectedBoard = ChessBitboard()
     actualBoard = ChessBitboard()
-    actualBoard.load_from_fen("1kr5/1b3R2/4p3/4Pn1p/8/2P3p1/1KP4r/6B1 w - - 0 1")
+    actualBoard.load_from_fen("rnbq1bnr/8/B6k/8/8/B1R5/8/RN1QK3 b Qha - 0 1")
+    king_moves = actualBoard.chess_move.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.KING)
+
+    actualBoard.chess_move.print_legal_moves(actualBoard)
