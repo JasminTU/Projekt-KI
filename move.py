@@ -260,7 +260,7 @@ class Move():
         # Mit exakt ist gemeint, dass jeweils der gleiche Spieler am Zug sein muss. Optionen wie das Rochaderecht oder En passant müssen ebenfalls identisch sein.
         # TODO: include rochade, ...
         for sublist in board_list:
-            print(board_list.count(sublist))
+            # print(board_list.count(sublist))
             if board_list.count(sublist) > 2:
                 return True
         return False
