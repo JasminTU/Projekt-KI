@@ -11,6 +11,8 @@ class ChessBitboard:
         self.current_player = constants.WHITE
         self.chess_move = Move()
         self.next_player_in_check = False
+        self.game_result = None
+        self.board_history = []
 
     def initialize_bitboards(self):
         self.bitboards = [0] * 8
@@ -109,8 +111,9 @@ class ChessBitboard:
             if not board_after_move.is_in_check(self.current_player):
                 return False
         return True
+    
 
 if __name__ == "__main__":
+    expectedBoard = ChessBitboard()
     actualBoard = ChessBitboard()
-    actualBoard.load_from_fen("rnbqkBnr/8/8/4N3/1N2B3/1K2B3/R7/RN1Q4 w Akq - 0 1")
-    actualBoard.chess_move.perform_move('b2a3', actualBoard)
+    actualBoard.load_from_fen("1kr5/1b3R2/4p3/4Pn1p/8/2P3p1/1KP4r/6B1 w - - 0 1")

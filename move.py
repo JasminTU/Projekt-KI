@@ -2,6 +2,8 @@ from loguru import logger
 from illegalMoveException import IllegalMoveException
 from PrintBitboardService import PrintBitBoardService
 import constants
+from collections import Counter
+import copy
 
 # Define bitmasks for the edges of the board
 NOT_RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
@@ -13,9 +15,6 @@ class Move():
     
     def __init__(self):
         pass
-    
-    
-    
     
     def get_pawn_moves(self, bitboards, current_player):
         empty_squares = ~(bitboards[constants.WHITE] | bitboards[constants.BLACK])
@@ -240,7 +239,31 @@ class Move():
 
         # Switch the current player
         chessBitboard.current_player = opponent
+        copied_chessBoard = copy.deepcopy(chessBitboard)
+        chessBitboard.board_history.append(copied_chessBoard.bitboards)
         
+    def is_draw(self, legal_moves, chessBitboard):
+        # TODO: There is one more draw rule "50-Züge-Regel"
+        if not legal_moves and not chessBitboard.is_in_check(chessBitboard.current_player):
+            print("Draw by Patt!")
+            chessBitboard.game_result = constants.WHITE if chessBitboard.current_player == constants.BLACK else constants.BLACK
+            return True
+        if self._is_repetition_draw(chessBitboard.board_history):
+            print("Draw by repetition!")
+            chessBitboard.game_result = constants.WHITE if chessBitboard.current_player == constants.BLACK else constants.BLACK
+            return True
+        return False
+
+        
+    def _is_repetition_draw(self, board_list):
+        # Wenn in einer Schachpartie dreimal die exakt gleiche Stellung auf dem Brett auftritt, endet die Partie in einem Remis. 
+        # Mit exakt ist gemeint, dass jeweils der gleiche Spieler am Zug sein muss. Optionen wie das Rochaderecht oder En passant müssen ebenfalls identisch sein.
+        # TODO: include rochade, ...
+        for sublist in board_list:
+            print(board_list.count(sublist))
+            if board_list.count(sublist) > 2:
+                return True
+        return False
     
     def algebraic_move_to_binary(self, move):
         def algebraic_field_to_binary(algebraic):
