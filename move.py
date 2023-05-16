@@ -81,7 +81,7 @@ class Move():
 
         return pawn_moves
 
-    def get_knight_moves(self, board, player):
+    def _get_knight_moves(self, board, player):
         # Define the bitboards for each player
         knights = board[player] & board[constants.KNIGHT]
         occupied = board[player]
@@ -108,56 +108,16 @@ class Move():
             knights &= knights - 1
         return moves
 
-    def get_move_by_figure(self, bitboards, current_player, figure):
-        figure_moves = []
-        figures = bitboards[figure] & bitboards[current_player]
-
-        while figures:
-            from_square = figures & -figures
-            if figure == constants.ROOK:
-                attacks = self.generate_rook_attacks(from_square,
-                                                     bitboards[
-                                                         constants.WHITE] if current_player != constants.WHITE else
-                                                     bitboards[constants.BLACK], bitboards[current_player])
-            elif figure == constants.BISHOP:
-                attacks = self.generate_bishop_attacks(from_square,
-                                                       bitboards[
-                                                           constants.WHITE] if current_player != constants.WHITE else
-                                                       bitboards[constants.BLACK], bitboards[current_player])
-            elif figure == constants.QUEEN:
-                attacks = self.generate_rook_attacks(from_square,
-                                                     bitboards[
-                                                         constants.WHITE] if current_player != constants.WHITE else
-                                                     bitboards[constants.BLACK], bitboards[current_player])
-                attacks |= self.generate_bishop_attacks(from_square,
-                                                        bitboards[
-                                                            constants.WHITE] if current_player != constants.WHITE else
-                                                        bitboards[constants.BLACK], bitboards[current_player])
-            elif figure == constants.KING:
-                return self.get_king_moves(bitboards, current_player)
-            elif figure == constants.PAWN:
-                return self.get_pawn_moves(bitboards, current_player)
-            elif figure == constants.KNIGHT:
-                return self.get_knight_moves(bitboards, current_player)
-            else:
-                logger.error("Unknown figure: ", figure)
-
-            while attacks:
-                to_square = attacks & -attacks
-                figure_moves.append((from_square, to_square))
-                attacks &= attacks - 1
-
-            figures &= figures - 1
-
-        return figure_moves
-
-    def generate_bishop_attacks(self, square, opp_occupied_squares, player_occupied_squares):
+    def _generate_bishop_attacks(self, square, opp_occupied_squares, player_occupied_squares):
         attacks = 0
         attack_directions = [-9, -7, 7, 9]
 
         for direction in attack_directions:
             possible_square = square
             while True:
+                if (direction in [-9, 7] and (NOT_LEFT_EDGE & possible_square) == 0) or (
+                    direction in [-7, 9] and (NOT_RIGHT_EDGE & possible_square) == 0):
+                    break
                 possible_square = (possible_square << direction if direction > 0 else possible_square >> -direction)
                 # Check if the square is within the board
                 if not (0 <= possible_square.bit_length() - 1 < 64):
@@ -169,18 +129,18 @@ class Move():
                     break
                 # print_bitboard("Possible Sq: ", possible_square)
                 attacks |= possible_square
-                if (direction in [-9, 7] and (NOT_LEFT_EDGE & possible_square) == 0) or (
-                    direction in [-7, 9] and (NOT_RIGHT_EDGE & possible_square) == 0):
-                    break
         return attacks
 
-    def generate_rook_attacks(self, square, opp_occupied_squares, player_occupied_squares):
+    def _generate_rook_attacks(self, square, opp_occupied_squares, player_occupied_squares):
         attacks = 0
         attack_directions = [-8, -1, 1, 8]
 
         for direction in attack_directions:
             possible_square = square
             while True:
+                if (direction == -1 and (NOT_LEFT_EDGE & possible_square) == 0) or (
+                    direction == 1 and (NOT_RIGHT_EDGE & possible_square) == 0):
+                    break
                 possible_square = (possible_square << direction if direction > 0 else possible_square >> -direction)
                 # Check if the square is within the board
                 if not (0 <= possible_square.bit_length() - 1 < 64):
@@ -191,12 +151,9 @@ class Move():
                 if possible_square & player_occupied_squares:
                     break
                 attacks |= possible_square
-                if (direction == -1 and (NOT_LEFT_EDGE & possible_square) == 0) or (
-                    direction == 1 and (NOT_RIGHT_EDGE & possible_square) == 0):
-                    break
         return attacks
 
-    def get_king_moves(self, bitboards, current_player):
+    def _get_king_moves(self, bitboards, current_player):
         king_moves = []
         king_attack_offsets = (-9, -8, -7, -1, 1, 7, 8, 9)
         king_position = bitboards[constants.KING] & bitboards[current_player]
@@ -217,6 +174,49 @@ class Move():
                 king_moves.append((from_square, to_square))
             king_position &= king_position - 1
         return king_moves
+    
+    def get_move_by_figure(self, bitboards, current_player, figure):
+        figure_moves = []
+        figures = bitboards[figure] & bitboards[current_player]
+
+        while figures:
+            from_square = figures & -figures
+            if figure == constants.ROOK:
+                attacks = self._generate_rook_attacks(from_square,
+                                                     bitboards[
+                                                         constants.WHITE] if current_player != constants.WHITE else
+                                                     bitboards[constants.BLACK], bitboards[current_player])
+            elif figure == constants.BISHOP:
+                attacks = self._generate_bishop_attacks(from_square,
+                                                       bitboards[
+                                                           constants.WHITE] if current_player != constants.WHITE else
+                                                       bitboards[constants.BLACK], bitboards[current_player])
+            elif figure == constants.QUEEN:
+                attacks = self._generate_rook_attacks(from_square,
+                                                     bitboards[
+                                                         constants.WHITE] if current_player != constants.WHITE else
+                                                     bitboards[constants.BLACK], bitboards[current_player])
+                attacks |= self._generate_bishop_attacks(from_square,
+                                                        bitboards[
+                                                            constants.WHITE] if current_player != constants.WHITE else
+                                                        bitboards[constants.BLACK], bitboards[current_player])
+            elif figure == constants.KING:
+                return self._get_king_moves(bitboards, current_player)
+            elif figure == constants.PAWN:
+                return self.get_pawn_moves(bitboards, current_player)
+            elif figure == constants.KNIGHT:
+                return self._get_knight_moves(bitboards, current_player)
+            else:
+                logger.error("Unknown figure: ", figure)
+
+            while attacks:
+                to_square = attacks & -attacks
+                figure_moves.append((from_square, to_square))
+                attacks &= attacks - 1
+
+            figures &= figures - 1
+
+        return figure_moves
 
     def perform_move(self, move, board, move_type="algebraic", with_validation=True):
         # TODO: Je nach Verwendung der Funktion würde ich hier nicht nochmal alle legalen moves generieren, da der ausgewählte move bereits legal ist --> Laufzeitverlängerung

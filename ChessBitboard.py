@@ -119,7 +119,9 @@ if __name__ == "__main__":
     service = PrintBitBoardService()
     expectedBoard = ChessBitboard()
     actualBoard = ChessBitboard()
-    actualBoard.load_from_fen("rnbq1bnr/8/B6k/8/8/B1R5/8/RN1QK3 b Qha - 0 1")
-    king_moves = actualBoard.chess_move.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.KING)
-
-    actualBoard.chess_move.print_legal_moves(actualBoard)
+    actualBoard.load_from_fen("rnbq1bnr/8/7k/8/8/B1R5/8/RN1QKB2 w Qa - 0 1")
+    king_moves = actualBoard.chess_move.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.BISHOP)
+    for move in king_moves:
+        alg = actualBoard.chess_move.binary_move_to_algebraic(move[0], move[1])
+        print(alg)
+    # actualBoard.chess_move.print_legal_moves(actualBoard)
