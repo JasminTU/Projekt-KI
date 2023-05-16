@@ -84,7 +84,7 @@ class PrintBitBoardService:
 
                 board_string += piece if piece else "."
                 board_string += " "
-            board_string += f"| {8 - row}\n"
+            board_string += f"| {row + 1}\n"
         board_string += f"" + "-" * 15 + f"\n"
         board_string += f"a b c d e f g h\n\n"
 
