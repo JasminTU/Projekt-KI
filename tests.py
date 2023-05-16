@@ -69,13 +69,58 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
 
-    def test_move_pawn_legal_1(self):
+    def test_move_king_legal_1(self):
         expectedBoard = ChessBitboard()
         actualBoard = ChessBitboard()
-        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        actualBoard.chess_move.perform_move('e2e4', actualBoard)
-        expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
+        actualBoard.load_from_fen("rnbqkBnr/8/8/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+        actualBoard.chess_move.perform_move('e1f2', actualBoard)
+        expectedBoard.load_from_fen("rnbqkBnr/8/8/8/8/8/5K2/RN1Q1BNR w HAkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+    def test_move_king_legal_2(self):
+        expectedBoard = ChessBitboard()
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkBnr/8/8/8/8/8/8/RN1QKBNR w KQkq - 0 1")
+        actualBoard.chess_move.perform_move('e1e2', actualBoard)
+        expectedBoard.load_from_fen("rnbqkBnr/8/8/8/8/8/4K3/RN1Q1BNR w HAkq - 0 1")
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+
+    def test_move_king_legal_3(self):
+        expectedBoard = ChessBitboard()
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkBnr/8/8/2NNN3/2RKB3/4B3/8/RN1Q4 w Akq - 0 1")
+        actualBoard.chess_move.perform_move('d4c3', actualBoard)
+        expectedBoard.load_from_fen("rnbqkBnr/8/8/2NNN3/2R1B3/2K1B3/8/RN1Q4 w Akq - 0 1")
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+
+    def test_move_king_legal_4(self):
+        expectedBoard = ChessBitboard()
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkBnr/8/8/4N3/1N2B3/1K2B3/R7/RN1Q4 w Akq - 0 1")
+        actualBoard.chess_move.perform_move('b2a3', actualBoard)
+        expectedBoard.load_from_fen("rnbqkBnr/8/8/4N3/KN2B3/4B3/R7/RN1Q4 w Akq - 0 1")
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+    def test_move_king_illegal_1(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'e1d1', actualBoard)
+        
+    def test_move_king_illegal_2(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'g2f3', actualBoard)
+        
+        
+    def test_move_king_illegal_3(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'f4e5', actualBoard)
+        
+    def test_move_king_illegal_4(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'e2f2', actualBoard)
 
     def test_move_pawn_legal_2(self):
         expectedBoard = ChessBitboard()
