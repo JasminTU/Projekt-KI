@@ -35,8 +35,8 @@ class Move():
         else:
             one_step = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 8 & empty_squares
             two_steps = ((bitboards[constants.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
-            captures_left = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_LEFT_EDGE) >> 7 & bitboards[constants.WHITE]
-            captures_right = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_RIGHT_EDGE) >> 9 & bitboards[constants.WHITE]
+            captures_left = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_LEFT_EDGE) >> 9 & bitboards[constants.WHITE]
+            captures_right = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_RIGHT_EDGE) >> 7 & bitboards[constants.WHITE]
 
         moves = [
             (one_step, "one_step"),
