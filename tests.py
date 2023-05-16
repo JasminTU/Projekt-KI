@@ -429,7 +429,12 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkb1r/pppnppp1/7p/6K1/8/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
         self.assertIsInCheck(actualBoard)
-        
+
+    def test_is_in_check_8(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbq1bnr/pppppppp/8/8/5P2/4k3/PPPPP1PP/RNBQKBNR b KQha - 0 1")
+        self.assertIsInCheck(actualBoard)
+
     def test_is_check_mate_1(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
