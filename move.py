@@ -68,12 +68,12 @@ class Move():
 
                 if move_name == "captures_left":
                     from_square = (
-                        to_square >> 7 if current_player == constants.WHITE else to_square << 7
+                        to_square >> 7 if current_player == constants.WHITE else to_square << 9
                     )
 
                 if move_name == "captures_right":
                     from_square = (
-                        to_square >> 9 if current_player == constants.WHITE else to_square << 9
+                        to_square >> 9 if current_player == constants.WHITE else to_square << 7
                     )
 
                 pawn_moves.append((from_square, to_square))
