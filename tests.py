@@ -430,11 +430,41 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard.load_from_fen("rnbqkb1r/pppnppp1/7p/6K1/8/8/PPP2PPP/RNB1QBNR w HAkq - 0 1")
         self.assertIsInCheck(actualBoard)
         
-    def test_is_check_mate(self):
+    def test_is_check_mate_1(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
         self.assertIsInCheck(actualBoard)
         self.assertFalse(actualBoard.is_check_mate())
+        
+    def test_is_check_mate_2(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBQK1NR w KQkq - 0 1")
+        self.assertIsInCheck(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate())
+        
+    def test_is_check_mate_3(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNB1K1NR w KQkq - 0 1")
+        self.assertIsInCheck(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate())
+        
+    def test_is_check_mate_4(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNB1K2R w KQkq - 0 1")
+        self.assertIsInCheck(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate())
+        
+    def test_is_check_mate_5(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBPKP1R w KQkq - 0 1")
+        self.assertIsInCheck(actualBoard)
+        self.assertTrue(actualBoard.is_check_mate())
+        
+    def test_is_check_mate_6(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnb1kbnr/pppp1ppp/4p3/8/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 1")
+        self.assertIsInCheck(actualBoard)
+        self.assertTrue(actualBoard.is_check_mate())
 
     # def test_en_passant(self):
     #     actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")
