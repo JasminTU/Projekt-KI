@@ -15,6 +15,7 @@ class ChessGame:
     def play(self):
         while True:
             self.print_board()
+            self.currentLegalMoves = self.get_legal_moves()
             if self.is_ai_turn():
                 move = self.get_ai_move()
             else:
@@ -49,10 +50,12 @@ class ChessGame:
             return None
 
     def get_ai_move(self):
+        return random.choice(self.currentLegalMoves)
+
+    def get_legal_moves(self):
         moves = self.chess_engine.generate_moves(self.board)
         legal_moves = self.chess_engine.filter_illegal_moves(self.board, moves)
-        self.currentLegalMoves = legal_moves
-        return random.choice(legal_moves)
+        return legal_moves
 
     def perform_move(self, move):
         try:
@@ -69,5 +72,5 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    game = ChessGame(ChessBitboard(), isBlackAI=True, isWhiteAI=True)
+    game = ChessGame(ChessBitboard(), isBlackAI=True, isWhiteAI=False)
     game.play()
