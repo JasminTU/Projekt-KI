@@ -73,7 +73,7 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard = ChessBitboard()
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkBnr/8/8/8/8/8/8/RN1QKBNR w KQkq - 0 1")
-        actualBoard.chess_move.perform_move('e1f2', actualBoard)
+        actualBoard.chess_move.perform_move((constants.E1, constants.F2), actualBoard, move_type="binary")
         expectedBoard.load_from_fen("rnbqkBnr/8/8/8/8/8/5K2/RN1Q1BNR w HAkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
         
