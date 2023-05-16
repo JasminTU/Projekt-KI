@@ -93,14 +93,6 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard.load_from_fen("rnbqkBnr/8/8/2NNN3/2R1B3/2K1B3/8/RN1Q4 w Akq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
 
-    def test_move_king_legal_4(self):
-        expectedBoard = ChessBitboard()
-        actualBoard = ChessBitboard()
-        actualBoard.load_from_fen("rnbqkBnr/8/8/4N3/1N2B3/1K2B3/R7/RN1Q4 w Akq - 0 1")
-        actualBoard.chess_move.perform_move('b3a4', actualBoard)
-        expectedBoard.load_from_fen("rnbqkBnr/8/8/4N3/KN2B3/4B3/R7/RN1Q4 w Akq - 0 1")
-        self.assertEqualBitboards(expectedBoard, actualBoard)
-        
     def test_move_king_illegal_1(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
@@ -121,6 +113,11 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'e2f2', actualBoard)
+
+    def test_move_king_illegal_5(self):
+        actualBoard = ChessBitboard()
+        actualBoard.load_from_fen("rnbqkBnr/8/8/4N3/1N2B3/1K2B3/R7/RN1Q4 w Akq - 0 1")
+        self.assertRaises(IllegalMoveException, actualBoard.chess_move.perform_move, 'b3a4', actualBoard)
 
     def test_move_pawn_legal_2(self):
         expectedBoard = ChessBitboard()
@@ -491,7 +488,7 @@ class TestChessBitboard(unittest.TestCase):
             actualBoard.chess_move.perform_move('a8b8', actualBoard)
             expectedBoard.load_from_fen("1kr5/1b3R2/4p3/4Pn1p/8/2P3p1/1KP4r/6B1 w - - 0 1")
             self.assertEqualBitboards(expectedBoard, actualBoard)
-        self.assertTrue(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_legal_moves(actualBoard.bitboards, actualBoard.current_player), actualBoard))
+        self.assertTrue(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_moves(actualBoard), actualBoard))
         
     def test_draw_by_repitition_2(self):
         expectedBoard = ChessBitboard()
@@ -513,7 +510,7 @@ class TestChessBitboard(unittest.TestCase):
             actualBoard.chess_move.perform_move('a8b8', actualBoard)
             expectedBoard.load_from_fen("1kr5/1b3R2/4p3/4Pn1p/8/2P3p1/1KP4r/6B1 w - - 0 1")
             self.assertEqualBitboards(expectedBoard, actualBoard)
-        self.assertFalse(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_legal_moves(actualBoard.bitboards, actualBoard.current_player), actualBoard))
+        self.assertFalse(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_moves(actualBoard), actualBoard))
         
     def test_draw_by_repitition_3(self):
         expectedBoard = ChessBitboard()
@@ -539,7 +536,7 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard.chess_move.perform_move('g1b6', actualBoard)
         expectedBoard.load_from_fen("1kr5/1b3R2/1B2p3/4Pn1p/8/2P3p1/1KP4r/8 w - - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
-        self.assertFalse(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_legal_moves(actualBoard.bitboards, actualBoard.current_player), actualBoard))
+        self.assertFalse(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_moves(actualBoard), actualBoard))
         
     def test_draw_by_repitition_4(self):
         expectedBoard = ChessBitboard()
@@ -565,7 +562,7 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard.chess_move.perform_move('g1a7', actualBoard)
         expectedBoard.load_from_fen("1kr5/Bb3R2/4p3/4Pn1p/8/2P3p1/1KP4r/8 w - - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
-        self.assertTrue(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_legal_moves(actualBoard.bitboards, actualBoard.current_player), actualBoard))
+        self.assertTrue(actualBoard.chess_move.is_draw(actualBoard.chess_move.generate_moves(actualBoard), actualBoard))
         
     # def test_en_passant(self):
     #     actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")
