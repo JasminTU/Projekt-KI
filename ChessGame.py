@@ -2,10 +2,10 @@ from ChessPrintService import ChessPrintService
 from ChessBoard import ChessBoard
 from ChessEngine import ChessEngine
 import constants
-from IllegalMoveException import IllegalMoveException
 import re
 from loguru import logger
 import sys
+
 
 class ChessGame:
     def __init__(self, board, isBlackAI=True, isWhiteAI=False):
@@ -25,7 +25,7 @@ class ChessGame:
                 winner = "White" if self.board.game_result == constants.WHITE else "Black"
                 print("Checkmate! Winner is ", winner)
                 break
-            if self.is_draw(): # more detailed print is in draw function
+            if self.is_draw():  # more detailed print is in draw function
                 break
 
             if self.is_ai_turn():
@@ -39,7 +39,8 @@ class ChessGame:
         ChessPrintService.print_board(self.board.bitboards)
 
     def is_ai_turn(self):
-        return (self.isWhiteAI and self.move_number % 2 == constants.BLACK) or (self.isBlackAI and self.move_number % 2 == constants.WHITE)
+        return (self.isWhiteAI and self.move_number % 2 == constants.BLACK) or (
+                self.isBlackAI and self.move_number % 2 == constants.WHITE)
 
     def get_human_move(self):
         str = "White" if self.board.current_player == constants.WHITE else "Black"
@@ -73,7 +74,7 @@ class ChessGame:
 
     def perform_move(self, move):
         if move in self.currentLegalMoves:
-            self.chess_engine.perform_move(move, self.board, move_type="binary", with_validation = False)
+            self.chess_engine.perform_move(move, self.board, move_type="binary", with_validation=False)
             self.move_number += 1
         else:
             print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")

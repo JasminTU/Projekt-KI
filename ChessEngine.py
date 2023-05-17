@@ -2,7 +2,6 @@ from loguru import logger
 from IllegalMoveException import IllegalMoveException
 from ChessPrintService import ChessPrintService
 import constants
-from collections import Counter
 import copy
 
 from constants import NOT_RIGHT_EDGE, NOT_LEFT_EDGE
@@ -302,7 +301,6 @@ class ChessEngine():
         # Mit exakt ist gemeint, dass jeweils der gleiche Spieler am Zug sein muss. Optionen wie das Rochaderecht oder En passant müssen ebenfalls identisch sein.
         # TODO: include rochade, ...
         for sublist in board_list:
-            # print(board_list.count(sublist))
             if board_list.count(sublist) > 2:
                 return True
         return False

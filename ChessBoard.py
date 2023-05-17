@@ -1,8 +1,8 @@
-from loguru import logger
 from ChessEngine import ChessEngine
 from ChessPrintService import ChessPrintService
 import constants
 import copy
+
 
 class ChessBoard:
     def __init__(self):
@@ -17,14 +17,14 @@ class ChessBoard:
         self.bitboards = [0] * 8
 
         # Set initial positions for constants.WHITE, black and all pieces using binary literals
-        self.bitboards[constants.WHITE] =  int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
-        self.bitboards[constants.BLACK] =  int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
-        self.bitboards[constants.PAWN] =   int("0b0000000011111111000000000000000000000000000000001111111100000000", 2)
+        self.bitboards[constants.WHITE] = int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
+        self.bitboards[constants.BLACK] = int("0b1111111111111111000000000000000000000000000000000000000000000000", 2)
+        self.bitboards[constants.PAWN] = int("0b0000000011111111000000000000000000000000000000001111111100000000", 2)
         self.bitboards[constants.KNIGHT] = int("0b0100001000000000000000000000000000000000000000000000000001000010", 2)
         self.bitboards[constants.BISHOP] = int("0b0010010000000000000000000000000000000000000000000000000000100100", 2)
-        self.bitboards[constants.ROOK] =   int("0b1000000100000000000000000000000000000000000000000000000010000001", 2)
-        self.bitboards[constants.QUEEN] =  int("0b0000100000000000000000000000000000000000000000000000000000001000", 2)
-        self.bitboards[constants.KING] =   int("0b0001000000000000000000000000000000000000000000000000000000010000", 2)
+        self.bitboards[constants.ROOK] = int("0b1000000100000000000000000000000000000000000000000000000010000001", 2)
+        self.bitboards[constants.QUEEN] = int("0b0000100000000000000000000000000000000000000000000000000000001000", 2)
+        self.bitboards[constants.KING] = int("0b0001000000000000000000000000000000000000000000000000000000010000", 2)
 
     def load_from_fen(self, fen):
         fen_parts = fen.split(" ")
@@ -65,7 +65,7 @@ class ChessBoard:
         # PrintBitBoardService.print_bitboards(self.bitboards)
         # PrintBitBoardService.print_board(self.bitboards)
 
-    def evaluate_board(self, move = None, move_type="algebraic"):
+    def evaluate_board(self, move=None, move_type="algebraic"):
         # evaluate the board after a move or on current board
         board_after_move = copy.deepcopy(self)
         if move:
@@ -73,20 +73,29 @@ class ChessBoard:
 
         score = 0
         opponent = constants.BLACK if self.current_player == constants.WHITE else constants.WHITE
-        # Evaluate material value: chatgpt constants
-        # score += 1 * (bin(self.bitboards[constants.PAWN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.PAWN] & self.bitboards[opponent]).count("1"))
-        # score += 3 * (bin(self.bitboards[constants.KNIGHT] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.KNIGHT] & self.bitboards[opponent]).count("1"))
-        # score += 3 * (bin(self.bitboards[constants.BISHOP] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.BISHOP] & self.bitboards[opponent]).count("1"))
-        # score += 5 * (bin(self.bitboards[constants.ROOK] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.ROOK] & self.bitboards[opponent]).count("1"))
-        # score += 9 * (bin(self.bitboards[constants.QUEEN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.QUEEN] & self.bitboards[opponent]).count("1"))
 
-        # Evaluate material value: slide constants (pawns are differetiated)
-        score += 50 * (bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[opponent]).count("1"))
-        score += 300 * (bin(board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[opponent]).count("1"))
-        score += 300 * (bin(board_after_move.bitboards[constants.BISHOP] & board_after_move.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.BISHOP] & board_after_move.bitboards[opponent]).count("1"))
-        score += 500 * (bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[opponent]).count("1"))
-        score += 900 * (bin(board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[opponent]).count("1"))
-        score += 2000 * (bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[opponent]).count("1"))
+        # Evaluate material value: slide constants (pawns are differentiated)
+        score += 50 * (
+                bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[self.current_player]).count(
+                    "1") - bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[opponent]).count(
+                "1"))
+        score += 300 * (bin(
+            board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[self.current_player]).count(
+            "1") - bin(board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[opponent]).count("1"))
+        score += 300 * (bin(
+            board_after_move.bitboards[constants.BISHOP] & board_after_move.bitboards[self.current_player]).count(
+            "1") - bin(self.bitboards[constants.BISHOP] & board_after_move.bitboards[opponent]).count("1"))
+        score += 500 * (
+                bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[self.current_player]).count(
+                    "1") - bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[opponent]).count(
+                "1"))
+        score += 900 * (bin(
+            board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[self.current_player]).count(
+            "1") - bin(board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[opponent]).count("1"))
+        score += 2000 * (
+                bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[self.current_player]).count(
+                    "1") - bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[opponent]).count(
+                "1"))
 
         # Evaluate position of kings
         # king_pos = bin(self.bitboards[constants.KING] & self.bitboards[self.current_player]).count("1")
