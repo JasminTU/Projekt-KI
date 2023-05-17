@@ -1,6 +1,6 @@
 from loguru import logger
-from illegalMoveException import IllegalMoveException
-from PrintBitboardService import PrintBitBoardService
+from IllegalMoveException import IllegalMoveException
+from ChessPrintService import ChessPrintService
 import constants
 from collections import Counter
 import copy
@@ -12,7 +12,7 @@ NOT_EDGES = NOT_RIGHT_EDGE & (NOT_RIGHT_EDGE << 1)
 MAX_VALUE = int("0b1111111111111111111111111111111111111111111111111111111111111111", 2)  # for bitwise inversion
 
 
-class Move():
+class ChessEngine():
 
     def __init__(self):
         pass

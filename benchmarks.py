@@ -1,4 +1,4 @@
-from ChessBitboard import ChessBitboard
+from ChessBoard import ChessBoard
 import time
 
 
@@ -12,7 +12,7 @@ class ChessEngineBenchmark:
         num_tests = 1000
 
         for _ in range(num_tests):
-            board = ChessBitboard()
+            board = ChessBoard()
             board.load_from_fen(fen)
 
             start_time = time.time()

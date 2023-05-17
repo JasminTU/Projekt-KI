@@ -1,15 +1,15 @@
 from loguru import logger
-from move import Move
-from PrintBitboardService import PrintBitBoardService
+from ChessEngine import ChessEngine
+from ChessPrintService import ChessPrintService
 import constants
 import copy
 
-class ChessBitboard:
+class ChessBoard:
     def __init__(self):
         self.bitboards = None
         self.initialize_bitboards()
         self.current_player = constants.WHITE
-        self.chess_move = Move()
+        self.chess_move = ChessEngine()
         self.next_player_in_check = False
         self.game_result = None
         self.board_history = []
@@ -121,9 +121,9 @@ class ChessBitboard:
     
 
 if __name__ == "__main__":
-    service = PrintBitBoardService()
-    expectedBoard = ChessBitboard()
-    actualBoard = ChessBitboard()
+    service = ChessPrintService()
+    expectedBoard = ChessBoard()
+    actualBoard = ChessBoard()
     actualBoard.load_from_fen("rnbq1bnr/8/7k/8/8/B1R5/8/RN1QKB2 w Qa - 0 1")
     king_moves = actualBoard.chess_move.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.BISHOP)
     for move in king_moves:

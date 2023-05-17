@@ -1,7 +1,7 @@
-from PrintBitboardService import PrintBitBoardService
-from ChessBitboard import ChessBitboard
+from ChessPrintService import ChessPrintService
+from ChessBoard import ChessBoard
 import constants
-from illegalMoveException import IllegalMoveException
+from IllegalMoveException import IllegalMoveException
 import re
 from loguru import logger
 import sys
@@ -26,16 +26,16 @@ class ChessGame:
                 break
             if self.is_draw(): # more detailed print is in draw function
                 break
-            
+
             if self.is_ai_turn():
                 move = self.get_ai_move()
             else:
                 move = self.chess_engine.algebraic_move_to_binary(self.get_human_move())
-                
+
             self.perform_move(move)
 
     def print_board(self):
-        PrintBitBoardService.print_board(self.board.bitboards)
+        ChessPrintService.print_board(self.board.bitboards)
 
     def is_ai_turn(self):
         return (self.isWhiteAI and self.move_number % 2 == constants.BLACK) or (self.isBlackAI and self.move_number % 2 == constants.WHITE)
@@ -85,5 +85,5 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    game = ChessGame(ChessBitboard(), isBlackAI=True, isWhiteAI=False)
+    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=False)
     game.play()

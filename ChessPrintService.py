@@ -1,7 +1,7 @@
 import constants
 
 
-class PrintBitBoardService:
+class ChessPrintService:
 
     def __init__(self) -> None:
         pass
@@ -10,12 +10,12 @@ class PrintBitBoardService:
     def get_bitboards_string(bitboards):
         bitboards_string = ""
         for i, _ in enumerate(bitboards):
-            bitboards_string += PrintBitBoardService.get_bitboard_string(i, bitboards)
+            bitboards_string += ChessPrintService.get_bitboard_string(i, bitboards)
         return bitboards_string
 
     @staticmethod
     def print_bitboards(bitboards):
-        print(PrintBitBoardService.get_bitboards_string(bitboards))
+        print(ChessPrintService.get_bitboards_string(bitboards))
 
     @staticmethod
     def get_bitboard_string(board_index, bitboards):
@@ -31,7 +31,7 @@ class PrintBitBoardService:
 
     @staticmethod
     def print_bitboard(board_index, bitboard):
-        PrintBitBoardService.get_bitboard_string(board_index, bitboard)
+        ChessPrintService.get_bitboard_string(board_index, bitboard)
         
     @staticmethod
     def print_binary_bitboard(bitboard):
@@ -92,4 +92,4 @@ class PrintBitBoardService:
 
     @staticmethod
     def print_board(bitboards):
-        print(PrintBitBoardService.get_board_string(bitboards))
+        print(ChessPrintService.get_board_string(bitboards))
