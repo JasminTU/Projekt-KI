@@ -1,3 +1,4 @@
+from ChessEngine import ChessEngine
 from ChessBoard import ChessBoard
 import time
 
