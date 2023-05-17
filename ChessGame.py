@@ -87,5 +87,5 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=False)
+    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
     game.play()
