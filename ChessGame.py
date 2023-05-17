@@ -10,7 +10,6 @@ import sys
 class ChessGame:
     def __init__(self, board, isBlackAI=True, isWhiteAI=False):
         self.board = board
-        self.chess_engine = ChessEngine
         self.move_number = 1
         self.isBlackAI = isBlackAI
         self.isWhiteAI = isWhiteAI
@@ -31,7 +30,7 @@ class ChessGame:
             if self.is_ai_turn():
                 move = self.get_ai_move()
             else:
-                move = self.chess_engine.algebraic_move_to_binary(self.get_human_move())
+                move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
 
             self.perform_move(move)
 
@@ -68,13 +67,13 @@ class ChessGame:
         return bestMove
 
     def get_legal_moves(self):
-        moves = self.chess_engine.generate_moves(self.board)
-        legal_moves = self.chess_engine.filter_illegal_moves(self.board, moves)
+        moves = ChessEngine.generate_moves(self.board)
+        legal_moves = ChessEngine.filter_illegal_moves(self.board, moves)
         return legal_moves
 
     def perform_move(self, move):
         if move in self.currentLegalMoves:
-            self.chess_engine.perform_move(move, self.board, move_type="binary", with_validation=False)
+            ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False)
             self.move_number += 1
         else:
             print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")
@@ -83,7 +82,7 @@ class ChessGame:
         return ChessEngine.is_check_mate(self.board)
 
     def is_draw(self):
-        return self.chess_engine.is_draw(self.currentLegalMoves, self.board)
+        return ChessEngine.is_draw(self.currentLegalMoves, self.board)
 
 
 if __name__ == "__main__":

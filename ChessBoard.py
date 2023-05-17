@@ -69,7 +69,7 @@ class ChessBoard:
         # evaluate the board after a move or on current board
         board_after_move = copy.deepcopy(self)
         if move:
-            board_after_move.chess_move.perform_move(move, board_after_move, move_type, with_validation=False)
+            ChessEngine.perform_move(move, board_after_move, move_type, with_validation=False)
 
         score = 0
         opponent = constants.BLACK if self.current_player == constants.WHITE else constants.WHITE
