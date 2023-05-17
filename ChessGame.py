@@ -54,6 +54,7 @@ class ChessGame:
         return re.match(pattern, user_input) is not None
 
     def get_ai_move(self):
+
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
             return sys.exit(1)
@@ -64,6 +65,8 @@ class ChessGame:
             if not bestScore or bestScore < score:
                 bestScore = score
                 bestMove = move
+        str = "White" if self.board.current_player == constants.WHITE else "Black"
+        print(f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(bestMove[0], bestMove[1])}")
         return bestMove
 
     def get_legal_moves(self):
@@ -86,5 +89,5 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
+    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=False)
     game.play()
