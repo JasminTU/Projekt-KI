@@ -66,7 +66,12 @@ class ChessBitboard:
         # PrintBitBoardService.print_bitboards(self.bitboards)
         # PrintBitBoardService.print_board(self.bitboards)
 
-    def evaluate_board(self):
+    def evaluate_board(self, move = None, move_type="algebraic"):
+        # evaluate the board after a move or on current board
+        board_after_move = copy.deepcopy(self)
+        if move:
+            board_after_move.chess_move.perform_move(move, board_after_move, move_type, with_validation=False)
+                
         score = 0
         opponent = constants.BLACK if self.current_player == constants.WHITE else constants.WHITE
         # Evaluate material value: chatgpt constants
@@ -77,12 +82,12 @@ class ChessBitboard:
         # score += 9 * (bin(self.bitboards[constants.QUEEN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.QUEEN] & self.bitboards[opponent]).count("1"))
 
         # Evaluate material value: slide constants (pawns are differetiated)
-        score += 50 * (bin(self.bitboards[constants.PAWN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.PAWN] & self.bitboards[opponent]).count("1"))
-        score += 300 * (bin(self.bitboards[constants.KNIGHT] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.KNIGHT] & self.bitboards[opponent]).count("1"))
-        score += 300 * (bin(self.bitboards[constants.BISHOP] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.BISHOP] & self.bitboards[opponent]).count("1"))
-        score += 500 * (bin(self.bitboards[constants.ROOK] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.ROOK] & self.bitboards[opponent]).count("1"))
-        score += 900 * (bin(self.bitboards[constants.QUEEN] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.QUEEN] & self.bitboards[opponent]).count("1"))
-        score += 2000 * (bin(self.bitboards[constants.KING] & self.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.KING] & self.bitboards[opponent]).count("1"))
+        score += 50 * (bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[opponent]).count("1"))
+        score += 300 * (bin(board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[opponent]).count("1"))
+        score += 300 * (bin(board_after_move.bitboards[constants.BISHOP] & board_after_move.bitboards[self.current_player]).count("1") - bin(self.bitboards[constants.BISHOP] & board_after_move.bitboards[opponent]).count("1"))
+        score += 500 * (bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[opponent]).count("1"))
+        score += 900 * (bin(board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[opponent]).count("1"))
+        score += 2000 * (bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[self.current_player]).count("1") - bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[opponent]).count("1"))
 
         # Evaluate position of kings
         # king_pos = bin(self.bitboards[constants.KING] & self.bitboards[self.current_player]).count("1")
@@ -103,10 +108,9 @@ class ChessBitboard:
     def get_opponent(self, current_player):
         return constants.WHITE if current_player == constants.BLACK else constants.BLACK
 
-    def is_check_mate(self):
+    def is_check_mate(self, legal_moves):
         if not self.is_in_check(self.current_player):
             return False
-        legal_moves = self.chess_move.generate_moves(self)
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
             board_after_move.chess_move.perform_move(move, board_after_move, move_type="binary", with_validation=False)

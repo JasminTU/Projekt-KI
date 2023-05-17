@@ -644,37 +644,43 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
         self.assertIsInCheck(actualBoard)
-        self.assertFalse(actualBoard.is_check_mate())
+        legal_moves = actualBoard.chess_move.generate_moves(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate(legal_moves))
 
     def test_is_check_mate_2(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBQK1NR w KQkq - 0 1")
         self.assertIsInCheck(actualBoard)
-        self.assertFalse(actualBoard.is_check_mate())
+        legal_moves = actualBoard.chess_move.generate_moves(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate(legal_moves))
 
     def test_is_check_mate_3(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNB1K1NR w KQkq - 0 1")
         self.assertIsInCheck(actualBoard)
-        self.assertFalse(actualBoard.is_check_mate())
+        legal_moves = actualBoard.chess_move.generate_moves(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate(legal_moves))
 
     def test_is_check_mate_4(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNB1K2R w KQkq - 0 1")
         self.assertIsInCheck(actualBoard)
-        self.assertFalse(actualBoard.is_check_mate())
+        legal_moves = actualBoard.chess_move.generate_moves(actualBoard)
+        self.assertFalse(actualBoard.is_check_mate(legal_moves))
 
     def test_is_check_mate_5(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/ppppqppp/5p2/8/8/5P2/PPPP1PPP/RNBPKP1R w KQkq - 0 1")
         self.assertIsInCheck(actualBoard)
-        self.assertTrue(actualBoard.is_check_mate())
+        legal_moves = actualBoard.chess_move.generate_moves(actualBoard)
+        self.assertTrue(actualBoard.is_check_mate(legal_moves))
 
     def test_is_check_mate_6(self):
         actualBoard = ChessBitboard()
         actualBoard.load_from_fen("rnb1kbnr/pppp1ppp/4p3/8/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 1")
         self.assertIsInCheck(actualBoard)
-        self.assertTrue(actualBoard.is_check_mate())
+        legal_moves = actualBoard.chess_move.generate_moves(actualBoard)
+        self.assertTrue(actualBoard.is_check_mate(legal_moves))
 
     def test_draw_by_repitition_1(self):
         expectedBoard = ChessBitboard()

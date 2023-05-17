@@ -253,6 +253,7 @@ class Move():
         board.current_player = opponent
         copied_chessBoard = copy.deepcopy(board)
         board.board_history.append(copied_chessBoard.bitboards)
+        
 
     def is_draw(self, legal_moves, chessBitboard):
         # TODO: There is one more draw rule "50-Züge-Regel"
@@ -306,6 +307,14 @@ class Move():
         is_in_check = board_after_move.is_in_check(board.current_player)
         return not is_in_check
 
+    def filter_illegal_moves(self, board, moves):
+        # TODO: this seems a bit inefficient, I would rather select the best possible move and check if it is illgeal than filter all illegal moves
+        legal_moves = [
+            move for move in moves if self.is_move_legal(move, board)
+        ]
+
+        return legal_moves
+    
     def generate_moves(self, board):
         moves = []
         moves += self.get_move_by_figure(board.bitboards, board.current_player, constants.PAWN)
@@ -317,12 +326,6 @@ class Move():
 
         return moves
 
-    def filter_illegal_moves(self, board, moves):
-        legal_moves = [
-            move for move in moves if self.is_move_legal(move, board)
-        ]
-
-        return legal_moves
 
     def print_legal_moves(self, board):
         legal_moves = self.generate_moves(board)
