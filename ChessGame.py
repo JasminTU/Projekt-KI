@@ -9,7 +9,7 @@ import sys
 class ChessGame:
     def __init__(self, board, isBlackAI=True, isWhiteAI=False):
         self.board = board
-        self.chess_engine = board.chess_move
+        self.chess_engine = board.chessEngine
         self.move_number = 1
         self.isBlackAI = isBlackAI
         self.isWhiteAI = isWhiteAI
@@ -78,7 +78,7 @@ class ChessGame:
             print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")
 
     def is_checkmate(self):
-        return self.board.is_check_mate(self.currentLegalMoves)
+        return self.board.chessEngine.is_check_mate(self.board)
 
     def is_draw(self):
         return self.chess_engine.is_draw(self.currentLegalMoves, self.board)

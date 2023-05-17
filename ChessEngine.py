@@ -5,11 +5,7 @@ import constants
 from collections import Counter
 import copy
 
-# Define bitmasks for the edges of the board
-NOT_RIGHT_EDGE = int("0b0111111101111111011111110111111101111111011111110111111101111111", 2)
-NOT_LEFT_EDGE = int("0b1111111011111110111111101111111011111110111111101111111011111110", 2)
-NOT_EDGES = NOT_RIGHT_EDGE & (NOT_RIGHT_EDGE << 1)
-MAX_VALUE = int("0b1111111111111111111111111111111111111111111111111111111111111111", 2)  # for bitwise inversion
+from constants import NOT_RIGHT_EDGE, NOT_LEFT_EDGE
 
 
 class ChessEngine():
@@ -17,8 +13,9 @@ class ChessEngine():
     def __init__(self):
         pass
 
-    def get_pawn_moves(self, bitboards, current_player):
-        empty_squares = ~(bitboards[constants.WHITE] | bitboards[constants.BLACK])
+    @staticmethod
+    def get_pawn_moves(board):
+        empty_squares = ~(board.bitboards[constants.WHITE] | board.bitboards[constants.BLACK])
         pawn_moves = []
 
         white_pawn_bitboard = int(
@@ -28,19 +25,19 @@ class ChessEngine():
             "0b0000000011111111000000000000000000000000000000000000000000000000", 2
         )
 
-        if current_player == constants.WHITE:
-            one_step = (bitboards[constants.PAWN] & bitboards[constants.WHITE]) << 8 & empty_squares
-            two_steps = ((bitboards[constants.PAWN] & white_pawn_bitboard) << 16) & empty_squares
-            captures_left = (bitboards[constants.PAWN] & bitboards[constants.WHITE] & NOT_LEFT_EDGE) << 7 & bitboards[
+        if board.current_player == constants.WHITE:
+            one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE]) << 8 & empty_squares
+            two_steps = ((board.bitboards[constants.PAWN] & white_pawn_bitboard) << 16) & empty_squares
+            captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_LEFT_EDGE) << 7 & board.bitboards[
                 constants.BLACK]
-            captures_right = (bitboards[constants.PAWN] & bitboards[constants.WHITE] & NOT_RIGHT_EDGE) << 9 & bitboards[
+            captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_RIGHT_EDGE) << 9 & board.bitboards[
                 constants.BLACK]
         else:
-            one_step = (bitboards[constants.PAWN] & bitboards[constants.BLACK]) >> 8 & empty_squares
-            two_steps = ((bitboards[constants.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
-            captures_left = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_LEFT_EDGE) >> 9 & bitboards[
+            one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK]) >> 8 & empty_squares
+            two_steps = ((board.bitboards[constants.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
+            captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_LEFT_EDGE) >> 9 & board.bitboards[
                 constants.WHITE]
-            captures_right = (bitboards[constants.PAWN] & bitboards[constants.BLACK] & NOT_RIGHT_EDGE) >> 7 & bitboards[
+            captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_RIGHT_EDGE) >> 7 & board.bitboards[
                 constants.WHITE]
 
         moves = [
@@ -58,22 +55,22 @@ class ChessEngine():
 
                 if move_name == "one_step":
                     from_square = (
-                        to_square >> 8 if current_player == constants.WHITE else to_square << 8
+                        to_square >> 8 if board.current_player == constants.WHITE else to_square << 8
                     )
 
                 if move_name == "two_steps":
                     from_square = (
-                        to_square >> 16 if current_player == constants.WHITE else to_square << 16
+                        to_square >> 16 if board.current_player == constants.WHITE else to_square << 16
                     )
 
                 if move_name == "captures_left":
                     from_square = (
-                        to_square >> 7 if current_player == constants.WHITE else to_square << 9
+                        to_square >> 7 if board.current_player == constants.WHITE else to_square << 9
                     )
 
                 if move_name == "captures_right":
                     from_square = (
-                        to_square >> 9 if current_player == constants.WHITE else to_square << 7
+                        to_square >> 9 if board.current_player == constants.WHITE else to_square << 7
                     )
 
                 pawn_moves.append((from_square, to_square))
@@ -81,11 +78,12 @@ class ChessEngine():
 
         return pawn_moves
 
-    def _get_knight_moves(self, board, player):
+    @staticmethod
+    def _get_knight_moves(board):
         # Define the bitboards for each player
-        knights = board[player] & board[constants.KNIGHT]
-        occupied = board[player]
-        empty = occupied ^ MAX_VALUE
+        knights = board.bitboards[board.current_player] & board.bitboards[constants.KNIGHT]
+        occupied = board.bitboards[board.current_player]
+        empty = occupied ^ constants.MAX_VALUE
         moves = []
         while knights:
             # Get the position of the least significant set bit (i.e., the position of the current constants.KNIGHT)
@@ -108,7 +106,8 @@ class ChessEngine():
             knights &= knights - 1
         return moves
 
-    def _generate_bishop_attacks(self, square, opp_occupied_squares, player_occupied_squares):
+    @staticmethod
+    def _generate_bishop_attacks(square, opp_occupied_squares, player_occupied_squares):
         attacks = 0
         attack_directions = [-9, -7, 7, 9]
 
@@ -131,7 +130,8 @@ class ChessEngine():
                 attacks |= possible_square
         return attacks
 
-    def _generate_rook_attacks(self, square, opp_occupied_squares, player_occupied_squares):
+    @staticmethod
+    def _generate_rook_attacks(square, opp_occupied_squares, player_occupied_squares):
         attacks = 0
         attack_directions = [-8, -1, 1, 8]
 
@@ -153,10 +153,11 @@ class ChessEngine():
                 attacks |= possible_square
         return attacks
 
-    def _get_king_moves(self, bitboards, current_player):
+    @staticmethod
+    def _get_king_moves(board):
         king_moves = []
         king_attack_offsets = (-9, -8, -7, -1, 1, 7, 8, 9)
-        king_position = bitboards[constants.KING] & bitboards[current_player]
+        king_position = board.bitboards[constants.KING] & board.bitboards[board.current_player]
 
         while king_position:
             from_square = king_position & -king_position
@@ -169,43 +170,44 @@ class ChessEngine():
                 if not to_square or to_square.bit_length() > 63:
                     continue
                 # Check if the move captures an opponent's piece or is an empty square
-                if to_square & bitboards[current_player] != 0:
+                if to_square & board.bitboards[board.current_player] != 0:
                     continue
                 king_moves.append((from_square, to_square))
             king_position &= king_position - 1
         return king_moves
-    
-    def get_move_by_figure(self, bitboards, current_player, figure):
+
+    @staticmethod
+    def get_move_by_figure(board, figure):
         figure_moves = []
-        figures = bitboards[figure] & bitboards[current_player]
+        figures = board.bitboards[figure] & board.bitboards[board.get_player()]
 
         while figures:
             from_square = figures & -figures
             if figure == constants.ROOK:
-                attacks = self._generate_rook_attacks(from_square,
-                                                     bitboards[
-                                                         constants.WHITE] if current_player != constants.WHITE else
-                                                     bitboards[constants.BLACK], bitboards[current_player])
+                attacks = ChessEngine._generate_rook_attacks(from_square,
+                                                             board.bitboards[
+                                                                 constants.WHITE] if board.get_player() != constants.WHITE else
+                                                             board.bitboards[constants.BLACK], board.bitboards[board.get_player()])
             elif figure == constants.BISHOP:
-                attacks = self._generate_bishop_attacks(from_square,
-                                                       bitboards[
-                                                           constants.WHITE] if current_player != constants.WHITE else
-                                                       bitboards[constants.BLACK], bitboards[current_player])
+                attacks = ChessEngine._generate_bishop_attacks(from_square,
+                                                               board.bitboards[
+                                                                   constants.WHITE] if board.get_player() != constants.WHITE else
+                                                               board.bitboards[constants.BLACK], board.bitboards[board.get_player()])
             elif figure == constants.QUEEN:
-                attacks = self._generate_rook_attacks(from_square,
-                                                     bitboards[
-                                                         constants.WHITE] if current_player != constants.WHITE else
-                                                     bitboards[constants.BLACK], bitboards[current_player])
-                attacks |= self._generate_bishop_attacks(from_square,
-                                                        bitboards[
-                                                            constants.WHITE] if current_player != constants.WHITE else
-                                                        bitboards[constants.BLACK], bitboards[current_player])
+                attacks = ChessEngine._generate_rook_attacks(from_square,
+                                                             board.bitboards[
+                                                                 constants.WHITE] if board.get_player() != constants.WHITE else
+                                                             board.bitboards[constants.BLACK], board.bitboards[board.get_player()])
+                attacks |= ChessEngine._generate_bishop_attacks(from_square,
+                                                                board.bitboards[
+                                                                    constants.WHITE] if board.get_player() != constants.WHITE else
+                                                                board.bitboards[constants.BLACK], board.bitboards[board.get_player()])
             elif figure == constants.KING:
-                return self._get_king_moves(bitboards, current_player)
+                return ChessEngine._get_king_moves(board)
             elif figure == constants.PAWN:
-                return self.get_pawn_moves(bitboards, current_player)
+                return ChessEngine.get_pawn_moves(board)
             elif figure == constants.KNIGHT:
-                return self._get_knight_moves(bitboards, current_player)
+                return ChessEngine._get_knight_moves(board)
             else:
                 logger.error("Unknown figure: ", figure)
 
@@ -218,18 +220,19 @@ class ChessEngine():
 
         return figure_moves
 
-    def perform_move(self, move, board, move_type="algebraic", with_validation=True):
+    @staticmethod
+    def perform_move(move, board, move_type="algebraic", with_validation=True):
         # TODO: Je nach Verwendung der Funktion würde ich hier nicht nochmal alle legalen moves generieren, da der ausgewählte move bereits legal ist --> Laufzeitverlängerung
         if move_type == "algebraic":
-            move = self.algebraic_move_to_binary(move)
+            move = ChessEngine.algebraic_move_to_binary(move)
         if with_validation:
-            legal_moves = self.filter_illegal_moves(board, self.generate_moves(board))
+            legal_moves = ChessEngine.filter_illegal_moves(board, ChessEngine.generate_moves(board))
             if move not in legal_moves and move_type != "algebraic":
-                raise IllegalMoveException(self.binary_move_to_algebraic(move[0], move[1]))
+                raise IllegalMoveException(ChessEngine.binary_move_to_algebraic(move[0], move[1]))
             if move not in legal_moves:
                 raise IllegalMoveException(move)
         from_square, to_square = move
-        opponent = board.get_opponent(board.current_player)
+        opponent = board.get_opponent()
 
         if board.bitboards[board.current_player] & from_square:
             # Remove the moving piece from its original position
@@ -253,21 +256,48 @@ class ChessEngine():
         board.current_player = opponent
         copied_chessBoard = copy.deepcopy(board)
         board.board_history.append(copied_chessBoard.bitboards)
-        
 
-    def is_draw(self, legal_moves, chessBitboard):
+
+    @staticmethod
+    def is_in_check(board):
+        # move is a tuple containing start and destination bitboards, checks if input player is in check
+        # TODO: king - king face off not included yet
+        boardOpponent = copy.deepcopy(board)
+        boardOpponent.current_player = board.get_opponent()
+        legal_moves_opponent = boardOpponent.chessEngine.generate_moves(boardOpponent)
+        dest_legal_moves = [elem[1] for elem in legal_moves_opponent]
+        in_check = [dest & (board.bitboards[constants.KING] & board.bitboards[board.get_player()]) for dest in
+                    dest_legal_moves]
+        return any(elem != 0 for elem in in_check)
+
+    @staticmethod
+    def is_check_mate(board):
+        if not ChessEngine.is_in_check(board):
+            return False
+        legal_moves = ChessEngine.generate_moves(board)
+        for move in legal_moves:
+            board_after_move = copy.deepcopy(board)
+            board_after_move.chessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+            if not board_after_move.chessEngine.is_in_check(board):
+                board.game_result = board.get_opponent()
+                return False
+        return True
+
+    @staticmethod
+    def is_draw(legal_moves, board):
         # TODO: There is one more draw rule "50-Züge-Regel"
-        if not legal_moves and not chessBitboard.is_in_check(chessBitboard.current_player):
+        if not legal_moves and not board.is_in_check(board):
             print("Draw by Patt!")
-            chessBitboard.game_result = constants.WHITE if chessBitboard.current_player == constants.BLACK else constants.BLACK
+            board.game_result = constants.WHITE if board.current_player == constants.BLACK else constants.BLACK
             return True
-        if self._is_repetition_draw(chessBitboard.board_history):
+        if ChessEngine._is_repetition_draw(board.board_history):
             print("Draw by repetition!")
-            chessBitboard.game_result = constants.WHITE if chessBitboard.current_player == constants.BLACK else constants.BLACK
+            board.game_result = constants.WHITE if board.current_player == constants.BLACK else constants.BLACK
             return True
         return False
 
-    def _is_repetition_draw(self, board_list):
+    @staticmethod
+    def _is_repetition_draw(board_list):
         # Wenn in einer Schachpartie dreimal die exakt gleiche Stellung auf dem Brett auftritt, endet die Partie in einem Remis. 
         # Mit exakt ist gemeint, dass jeweils der gleiche Spieler am Zug sein muss. Optionen wie das Rochaderecht oder En passant müssen ebenfalls identisch sein.
         # TODO: include rochade, ...
@@ -277,7 +307,8 @@ class ChessEngine():
                 return True
         return False
 
-    def algebraic_move_to_binary(self, move):
+    @staticmethod
+    def algebraic_move_to_binary(move):
         def algebraic_field_to_binary(algebraic):
             col_names = "abcdefgh"
             row_names = "12345678"
@@ -298,37 +329,38 @@ class ChessEngine():
         from_square = algebraic_field_to_binary(from_algebraic)
         to_square = algebraic_field_to_binary(to_algebraic)
 
-        return (from_square, to_square)
+        return from_square, to_square
 
     @staticmethod
     def is_move_legal(move, board):
         board_after_move = copy.deepcopy(board)
-        board_after_move.chess_move.perform_move(move, board_after_move, move_type="binary", with_validation=False)
-        is_in_check = board_after_move.is_in_check(board.current_player)
+        board_after_move.chessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+        is_in_check = board_after_move.chessEngine.is_in_check(board)
         return not is_in_check
 
-    def filter_illegal_moves(self, board, moves):
-        # TODO: this seems a bit inefficient, I would rather select the best possible move and check if it is illgeal than filter all illegal moves
+    @staticmethod
+    def filter_illegal_moves(board, moves):
         legal_moves = [
-            move for move in moves if self.is_move_legal(move, board)
+            move for move in moves if ChessEngine.is_move_legal(move, board)
         ]
 
         return legal_moves
-    
-    def generate_moves(self, board):
+
+    @staticmethod
+    def generate_moves(board):
         moves = []
-        moves += self.get_move_by_figure(board.bitboards, board.current_player, constants.PAWN)
-        moves += self.get_move_by_figure(board.bitboards, board.current_player, constants.KNIGHT)
-        moves += self.get_move_by_figure(board.bitboards, board.current_player, constants.BISHOP)
-        moves += self.get_move_by_figure(board.bitboards, board.current_player, constants.ROOK)
-        moves += self.get_move_by_figure(board.bitboards, board.current_player, constants.QUEEN)
-        moves += self.get_move_by_figure(board.bitboards, board.current_player, constants.KING)
+        moves += board.chessEngine.get_move_by_figure(board, constants.PAWN)
+        moves += board.chessEngine.get_move_by_figure(board, constants.KNIGHT)
+        moves += board.chessEngine.get_move_by_figure(board, constants.BISHOP)
+        moves += board.chessEngine.get_move_by_figure(board, constants.ROOK)
+        moves += board.chessEngine.get_move_by_figure(board, constants.QUEEN)
+        moves += board.chessEngine.get_move_by_figure(board, constants.KING)
 
         return moves
 
-
-    def print_legal_moves(self, board):
-        legal_moves = self.generate_moves(board)
+    @staticmethod
+    def print_legal_moves(board):
+        legal_moves = ChessEngine.generate_moves(board)
         print(
             "\nLegal moves for the current player ({}):".format(
                 "constants.WHITE" if board.current_player == constants.WHITE else "constants.BLACK"
@@ -336,9 +368,10 @@ class ChessEngine():
         )
         for move in legal_moves:
             from_square, to_square = move
-            print(self.binary_move_to_algebraic(from_square, to_square))
+            print(ChessEngine.binary_move_to_algebraic(from_square, to_square))
 
-    def binary_move_to_algebraic(self, from_square, to_square):
+    @staticmethod
+    def binary_move_to_algebraic(from_square, to_square):
         def binary_field_to_algebraic(field):
             col_names = "abcdefgh"
             row_names = "12345678"

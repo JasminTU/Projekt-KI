@@ -9,7 +9,7 @@ class ChessBoard:
         self.bitboards = None
         self.initialize_bitboards()
         self.current_player = constants.WHITE
-        self.chess_move = ChessEngine()
+        self.chessEngine = ChessEngine()
         self.next_player_in_check = False
         self.game_result = None
         self.board_history = []
@@ -71,7 +71,7 @@ class ChessBoard:
         board_after_move = copy.deepcopy(self)
         if move:
             board_after_move.chess_move.perform_move(move, board_after_move, move_type, with_validation=False)
-                
+
         score = 0
         opponent = constants.BLACK if self.current_player == constants.WHITE else constants.WHITE
         # Evaluate material value: chatgpt constants
@@ -94,39 +94,21 @@ class ChessBoard:
         # if king_pos in range(4, 12) or king_pos in range(52, 60): # define some range in the center of the field
         #     score += 3
         return score
-    
-    def is_in_check(self, player):
-        # move is a tuple containing start and destination bitboards, checks if input player is in check
-        # TODO: king - king face off not included yet
-        boardOpponent = copy.deepcopy(self)
-        boardOpponent.current_player = self.get_opponent(player)
-        legal_moves_opponent = self.chess_move.generate_moves(boardOpponent)
-        dest_legal_moves = [elem[1] for elem in legal_moves_opponent]
-        in_check = [dest & (self.bitboards[constants.KING] & self.bitboards[player]) for dest in dest_legal_moves]
-        return any(elem != 0 for elem in in_check)
 
-    def get_opponent(self, current_player):
-        return constants.WHITE if current_player == constants.BLACK else constants.BLACK
+    def get_opponent(self):
+        return constants.WHITE if self.current_player == constants.BLACK else constants.BLACK
 
-    def is_check_mate(self, legal_moves):
-        if not self.is_in_check(self.current_player):
-            return False
-        for move in legal_moves:
-            board_after_move = copy.deepcopy(self)
-            board_after_move.chess_move.perform_move(move, board_after_move, move_type="binary", with_validation=False)
-            if not board_after_move.is_in_check(self.current_player):
-                self.game_result = self.get_opponent(self.current_player)
-                return False
-        return True
-    
+    def get_player(self):
+        return self.current_player
+
 
 if __name__ == "__main__":
     service = ChessPrintService()
     expectedBoard = ChessBoard()
     actualBoard = ChessBoard()
     actualBoard.load_from_fen("rnbq1bnr/8/7k/8/8/B1R5/8/RN1QKB2 w Qa - 0 1")
-    king_moves = actualBoard.chess_move.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.BISHOP)
+    king_moves = actualBoard.chessEngine.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.BISHOP)
     for move in king_moves:
-        alg = actualBoard.chess_move.binary_move_to_algebraic(move[0], move[1])
+        alg = actualBoard.chessEngine.binary_move_to_algebraic(move[0], move[1])
         print(alg)
     # actualBoard.chess_move.print_legal_moves(actualBoard)

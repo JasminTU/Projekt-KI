@@ -18,8 +18,8 @@ class ChessEngineBenchmark:
             start_time = time.time()
 
             # Your chess engine implementation
-            moves = board.chess_move.generate_moves(board)
-            moves = board.chess_move.filter_illegal_moves(board, moves)
+            moves = board.chessEngine.generate_moves(board)
+            moves = board.chessEngine.filter_illegal_moves(board, moves)
 
             end_time = time.time()
             elapsed_time = end_time - start_time
