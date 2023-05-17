@@ -183,24 +183,12 @@ class ChessEngine():
         while figures:
             from_square = figures & -figures
             if figure == constants.ROOK:
-                attacks = ChessEngine._generate_rook_attacks(from_square,
-                                                             board.bitboards[
-                                                                 constants.WHITE] if board.current_player != constants.WHITE else
-                                                             board.bitboards[constants.BLACK], board.bitboards[board.current_player])
+                attacks = ChessEngine._generate_rook_attacks(from_square, board.bitboards[constants.WHITE] if board.current_player != constants.WHITE else board.bitboards[constants.BLACK], board.bitboards[board.current_player])
             elif figure == constants.BISHOP:
-                attacks = ChessEngine._generate_bishop_attacks(from_square,
-                                                               board.bitboards[
-                                                                   constants.WHITE] if board.current_player != constants.WHITE else
-                                                               board.bitboards[constants.BLACK], board.bitboards[board.current_player])
+                attacks = ChessEngine._generate_bishop_attacks(from_square, board.bitboards[constants.WHITE] if board.current_player != constants.WHITE else board.bitboards[constants.BLACK], board.bitboards[board.current_player])
             elif figure == constants.QUEEN:
-                attacks = ChessEngine._generate_rook_attacks(from_square,
-                                                             board.bitboards[
-                                                                 constants.WHITE] if board.current_player != constants.WHITE else
-                                                             board.bitboards[constants.BLACK], board.bitboards[board.current_player])
-                attacks |= ChessEngine._generate_bishop_attacks(from_square,
-                                                                board.bitboards[
-                                                                    constants.WHITE] if board.current_player != constants.WHITE else
-                                                                board.bitboards[constants.BLACK], board.bitboards[board.current_player])
+                attacks = ChessEngine._generate_rook_attacks(from_square, board.bitboards[constants.WHITE] if board.current_player != constants.WHITE else board.bitboards[constants.BLACK], board.bitboards[board.current_player])
+                attacks |= ChessEngine._generate_bishop_attacks(from_square,board.bitboards[constants.WHITE] if board.current_player != constants.WHITE else board.bitboards[constants.BLACK], board.bitboards[board.current_player])
             elif figure == constants.KING:
                 return ChessEngine._get_king_moves(board)
             elif figure == constants.PAWN:
