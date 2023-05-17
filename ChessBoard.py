@@ -10,7 +10,6 @@ class ChessBoard:
         self.initialize_bitboards()
         self.current_player = constants.WHITE
         self.chessEngine = ChessEngine()
-        self.next_player_in_check = False
         self.game_result = None
         self.board_history = []
 

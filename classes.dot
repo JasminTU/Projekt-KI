@@ -1,0 +1,5 @@
+digraph "classes" {
+rankdir=BT
+charset="utf-8"
+"ChessBitboard.ChessBitboard" [color="black", fontcolor="black", label=<{ChessBitboard|bitboards : list, NoneType<br ALIGN="LEFT"/>board_history : list<br ALIGN="LEFT"/>chess_move : Move<br ALIGN="LEFT"/>current_player : int<br ALIGN="LEFT"/>game_result : int, NoneType<br ALIGN="LEFT"/>next_player_in_check : bool<br ALIGN="LEFT"/>|evaluate_board(move, move_type)<br ALIGN="LEFT"/>get_opponent(current_player)<br ALIGN="LEFT"/>initialize_bitboards()<br ALIGN="LEFT"/>is_check_mate(legal_moves)<br ALIGN="LEFT"/>is_in_check(player)<br ALIGN="LEFT"/>load_from_fen(fen)<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+}
