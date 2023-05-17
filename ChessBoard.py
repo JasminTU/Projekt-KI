@@ -95,11 +95,9 @@ class ChessBoard:
         #     score += 3
         return score
 
-    def get_opponent(self):
-        return constants.WHITE if self.current_player == constants.BLACK else constants.BLACK
-
-    def get_player(self):
-        return self.current_player
+    @staticmethod
+    def get_opponent(player):
+        return constants.WHITE if player == constants.BLACK else constants.BLACK
 
 
 if __name__ == "__main__":
