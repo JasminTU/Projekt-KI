@@ -1,15 +1,15 @@
 from ChessPrintService import ChessPrintService
 from ChessBoard import ChessBoard
+from ChessEngine import ChessEngine
 import constants
-from IllegalMoveException import IllegalMoveException
 import re
 from loguru import logger
 import sys
 
+
 class ChessGame:
     def __init__(self, board, isBlackAI=True, isWhiteAI=False):
         self.board = board
-        self.chess_engine = board.chessEngine
         self.move_number = 1
         self.isBlackAI = isBlackAI
         self.isWhiteAI = isWhiteAI
@@ -24,13 +24,13 @@ class ChessGame:
                 winner = "White" if self.board.game_result == constants.WHITE else "Black"
                 print("Checkmate! Winner is ", winner)
                 break
-            if self.is_draw(): # more detailed print is in draw function
+            if self.is_draw():  # more detailed print is in draw function
                 break
 
             if self.is_ai_turn():
                 move = self.get_ai_move()
             else:
-                move = self.chess_engine.algebraic_move_to_binary(self.get_human_move())
+                move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
 
             self.perform_move(move)
 
@@ -38,7 +38,8 @@ class ChessGame:
         ChessPrintService.print_board(self.board.bitboards)
 
     def is_ai_turn(self):
-        return (self.isWhiteAI and self.move_number % 2 == constants.BLACK) or (self.isBlackAI and self.move_number % 2 == constants.WHITE)
+        return (self.isWhiteAI and self.move_number % 2 == constants.BLACK) or (
+                self.isBlackAI and self.move_number % 2 == constants.WHITE)
 
     def get_human_move(self):
         str = "White" if self.board.current_player == constants.WHITE else "Black"
@@ -66,24 +67,24 @@ class ChessGame:
         return bestMove
 
     def get_legal_moves(self):
-        moves = self.chess_engine.generate_moves(self.board)
-        legal_moves = self.chess_engine.filter_illegal_moves(self.board, moves)
+        moves = ChessEngine.generate_moves(self.board)
+        legal_moves = ChessEngine.filter_illegal_moves(self.board, moves)
         return legal_moves
 
     def perform_move(self, move):
         if move in self.currentLegalMoves:
-            self.chess_engine.perform_move(move, self.board, move_type="binary", with_validation = False)
+            ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False)
             self.move_number += 1
         else:
             print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")
 
     def is_checkmate(self):
-        return self.board.chessEngine.is_check_mate(self.board)
+        return ChessEngine.is_check_mate(self.board)
 
     def is_draw(self):
-        return self.chess_engine.is_draw(self.currentLegalMoves, self.board)
+        return ChessEngine.is_draw(self.currentLegalMoves, self.board)
 
 
 if __name__ == "__main__":
-    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=False)
+    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
     game.play()

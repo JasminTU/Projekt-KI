@@ -1,3 +1,4 @@
+from ChessEngine import ChessEngine
 from ChessBoard import ChessBoard
 import time
 
@@ -18,8 +19,8 @@ class ChessEngineBenchmark:
             start_time = time.time()
 
             # Your chess engine implementation
-            moves = board.chessEngine.generate_moves(board)
-            moves = board.chessEngine.filter_illegal_moves(board, moves)
+            moves = ChessEngine.generate_moves(board)
+            moves = ChessEngine.filter_illegal_moves(board, moves)
 
             end_time = time.time()
             elapsed_time = end_time - start_time
