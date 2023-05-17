@@ -257,7 +257,6 @@ class ChessEngine():
         copied_chessBoard = copy.deepcopy(board)
         board.board_history.append(copied_chessBoard.bitboards)
 
-
     @staticmethod
     def is_in_check(board, isOpponent=False):
         # move is a tuple containing start and destination bitboards, checks if input player is in check
@@ -265,7 +264,7 @@ class ChessEngine():
         player = board.current_player if not isOpponent else board.get_opponent(board.current_player)
         boardOpponent = copy.deepcopy(board)
         boardOpponent.current_player = board.get_opponent(player)
-        legal_moves_opponent = boardOpponent.chessEngine.generate_moves(boardOpponent)
+        legal_moves_opponent = ChessEngine.generate_moves(boardOpponent)
         dest_legal_moves = [elem[1] for elem in legal_moves_opponent]
         in_check = [dest & (board.bitboards[constants.KING] & board.bitboards[player]) for dest in
                     dest_legal_moves]
@@ -335,7 +334,7 @@ class ChessEngine():
     @staticmethod
     def is_move_legal(move, board):
         board_after_move = copy.deepcopy(board)
-        board_after_move.chessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+        ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
         is_in_check = ChessEngine.is_in_check(board_after_move, isOpponent=True)
         return not is_in_check
 
@@ -350,12 +349,12 @@ class ChessEngine():
     @staticmethod
     def generate_moves(board):
         moves = []
-        moves += board.chessEngine.get_move_by_figure(board, constants.PAWN)
-        moves += board.chessEngine.get_move_by_figure(board, constants.KNIGHT)
-        moves += board.chessEngine.get_move_by_figure(board, constants.BISHOP)
-        moves += board.chessEngine.get_move_by_figure(board, constants.ROOK)
-        moves += board.chessEngine.get_move_by_figure(board, constants.QUEEN)
-        moves += board.chessEngine.get_move_by_figure(board, constants.KING)
+        moves += ChessEngine.get_move_by_figure(board, constants.PAWN)
+        moves += ChessEngine.get_move_by_figure(board, constants.KNIGHT)
+        moves += ChessEngine.get_move_by_figure(board, constants.BISHOP)
+        moves += ChessEngine.get_move_by_figure(board, constants.ROOK)
+        moves += ChessEngine.get_move_by_figure(board, constants.QUEEN)
+        moves += ChessEngine.get_move_by_figure(board, constants.KING)
 
         return moves
 

@@ -9,7 +9,6 @@ class ChessBoard:
         self.bitboards = None
         self.initialize_bitboards()
         self.current_player = constants.WHITE
-        self.chessEngine = ChessEngine()
         self.next_player_in_check = False
         self.game_result = None
         self.board_history = []
@@ -105,8 +104,8 @@ if __name__ == "__main__":
     expectedBoard = ChessBoard()
     actualBoard = ChessBoard()
     actualBoard.load_from_fen("rnbq1bnr/8/7k/8/8/B1R5/8/RN1QKB2 w Qa - 0 1")
-    king_moves = actualBoard.chessEngine.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.BISHOP)
+    king_moves = ChessEngine.get_move_by_figure(actualBoard.bitboards, actualBoard.current_player, constants.BISHOP)
     for move in king_moves:
-        alg = actualBoard.chessEngine.binary_move_to_algebraic(move[0], move[1])
+        alg = ChessEngine.binary_move_to_algebraic(move[0], move[1])
         print(alg)
     # actualBoard.chess_move.print_legal_moves(actualBoard)
