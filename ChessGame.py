@@ -58,16 +58,17 @@ class ChessGame:
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
             return sys.exit(1)
-        bestMove = None
-        bestScore = None
-        for move in self.currentLegalMoves:
-            score = self.board.evaluate_board(move, move_type="binary")
-            if not bestScore or bestScore < score:
-                bestScore = score
-                bestMove = move
+        best_move = self.board.iterative_depth_search(4)
+        # bestMove = None
+        # bestScore = None
+        # for move in self.currentLegalMoves:
+        #     score = self.board.evaluate_board(move, move_type="binary")
+        #     if not bestScore or bestScore < score:
+        #         bestScore = score
+        #         bestMove = move
         str = "White" if self.board.current_player == constants.WHITE else "Black"
-        print(f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(bestMove[0], bestMove[1])}")
-        return bestMove
+        print(f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1])}")
+        return best_move
 
     def get_legal_moves(self):
         moves = ChessEngine.generate_moves(self.board)

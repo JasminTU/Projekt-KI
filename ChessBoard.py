@@ -2,6 +2,7 @@ from ChessEngine import ChessEngine
 from ChessPrintService import ChessPrintService
 import constants
 import copy
+import math
 
 
 class ChessBoard:
@@ -102,6 +103,53 @@ class ChessBoard:
         # if king_pos in range(4, 12) or king_pos in range(52, 60): # define some range in the center of the field
         #     score += 3
         return score
+    
+    def iterative_depth_search(self, max_depth):
+        best_score = None
+        best_move = None
+        # current player is always max player
+        for depth in range(1, max_depth):
+            score, move = self.alpha_beta_max(-math.inf, math.inf, depth)
+            if best_score is None or score > best_score:
+                best_score = score
+                best_move = move
+        return best_move
+                
+        
+    
+    def alpha_beta_max(self, alpha, beta, depth_left):
+        if depth_left == 0:
+            return self.evaluate_board(), None
+        moves = ChessEngine.generate_moves(self)
+        legal_moves = ChessEngine.filter_illegal_moves(self, moves)
+        best_move = None
+        for move in legal_moves:
+            board_after_move = copy.deepcopy(self)
+            ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+            score, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1)
+            if score >= beta:
+                return beta, None
+            if score > alpha:
+                best_move = move
+                alpha = score
+        return alpha, best_move
+    
+    def alpha_beta_min(self, alpha, beta, depth_left):
+        if depth_left == 0:
+            return - self.evaluate_board(), None
+        moves = ChessEngine.generate_moves(self)
+        legal_moves = ChessEngine.filter_illegal_moves(self, moves)
+        best_move = None
+        for move in legal_moves:
+            board_after_move = copy.deepcopy(self)
+            ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+            score, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1)
+            if score <= alpha:
+                return alpha, None
+            if score < beta:
+                best_move = move
+                beta = score
+        return beta, best_move
 
     @staticmethod
     def get_opponent(player):
