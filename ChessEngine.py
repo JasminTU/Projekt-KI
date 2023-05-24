@@ -241,8 +241,11 @@ class ChessEngine():
 
         # Switch the current player
         board.current_player = opponent
+        # Add board to history for draw by repitition
         copied_chessBoard = copy.deepcopy(board)
         board.board_history.append(copied_chessBoard.bitboards)
+        # Increase pawn counter for draw by 50 moves
+        board.pawn_not_moved_counter = 0 if (from_square & board.bitboards[constants.PAWN]) != 0 else board.pawn_not_moved_counter + 1
 
     @staticmethod
     def is_in_check(board, isOpponent=False):
@@ -275,11 +278,15 @@ class ChessEngine():
         # TODO: There is one more draw rule "50-Züge-Regel"
         if not legal_moves and not board.is_in_check(board):
             print("Draw by Patt!")
-            board.game_result = constants.WHITE if board.current_player == constants.BLACK else constants.BLACK
+            board.game_result = constants.DRAW
             return True
         if ChessEngine._is_repetition_draw(board.board_history):
             print("Draw by repetition!")
-            board.game_result = constants.WHITE if board.current_player == constants.BLACK else constants.BLACK
+            board.game_result = constants.DRAW
+            return True
+        if board.pawn_not_moved_counter >= 50:
+            print("Draw by no pawn moved for 50 moves!")
+            board.game_result = constants.DRAW
             return True
         return False
 

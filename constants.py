@@ -1,4 +1,5 @@
 BOARD_SIZE = 8
+DRAW = -1
 WHITE = 0
 BLACK = 1
 PAWN = 2

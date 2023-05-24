@@ -13,6 +13,7 @@ class ChessBoard:
         self.chessEngine = ChessEngine()
         self.game_result = None
         self.board_history = []
+        self.pawn_not_moved_counter = 0
 
     def initialize_bitboards(self):
         self.bitboards = [0] * 8
@@ -158,4 +159,5 @@ class ChessBoard:
 
 if __name__ == "__main__":
     board = ChessBoard()
-    board.evaluate_board()
+    board.load_from_fen("2N5/8/8/8/8/8/8/8 w - - 0 1")
+    board.chessEngine.print_legal_moves(board)
