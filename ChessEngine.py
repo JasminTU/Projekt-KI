@@ -287,7 +287,18 @@ class ChessEngine():
                 board.game_result = board.get_opponent(board.current_player)
                 return False
         return True
-
+    
+    @staticmethod
+    def is_king_on_the_hill(board):
+        CENTER_FIELDS = int("0b0000000000000000000000000001100000011000000000000000000000000000", 2)
+        if board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[constants.WHITE]:
+            board.game_result = constants.WHITE
+            return True
+        elif board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[constants.BLACK]:
+            board.game_result = constants.BLACK
+            return True
+        return False
+    
     @staticmethod
     def is_draw(legal_moves, board):
         # TODO: There is one more draw rule "50-Züge-Regel"

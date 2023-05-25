@@ -74,7 +74,7 @@ class ChessBoard:
             ChessEngine.perform_move(move, board_after_move, move_type, with_validation=False)
 
         score = 0
-        opponent = constants.BLACK if self.current_player == constants.WHITE else constants.WHITE
+        opponent = self.get_opponent(self.current_player)
 
         # Evaluate material value: slide constants (pawns are differentiated)
         score += 50 * (
@@ -100,12 +100,16 @@ class ChessBoard:
                 "1"))
 
         # Evaluate position of kings
-        # king_pos = bin(self.bitboards[constants.KING] & self.bitboards[self.current_player]).count("1")
-        # if king_pos in range(4, 12) or king_pos in range(52, 60): # define some range in the center of the field
-        #     score += 3
+        CENTER_FIELDS = int("0b0000000000000000000000000001100000011000000000000000000000000000", 2)
+        if board_after_move.bitboards[constants.KING] & CENTER_FIELDS & board_after_move.bitboards[self.current_player]:
+            score += 100000
+        if board_after_move.bitboards[constants.KING] & CENTER_FIELDS & board_after_move.bitboards[opponent]:
+            score -= 100000
+        
         return score
     
     def iterative_depth_search(self, max_depth):
+        # TODO: end game functionality is not yet implemented for evaluate_board() --> alpha beta doesnt stop even though one player may has already won
         best_score = None
         best_move = None
         # current player is always max player
@@ -159,5 +163,7 @@ class ChessBoard:
 
 if __name__ == "__main__":
     board = ChessBoard()
+    service = ChessPrintService()
+    service.print_binary_bitboard(int("0b0000000000000000000000000001100000011000000000000000000000000000", 2))
     board.load_from_fen("8/8/8/8/8/8/2p5/8 b - - 0 1")
-    board.chessEngine.print_legal_moves(board)
+    # board.chessEngine.print_legal_moves(board)

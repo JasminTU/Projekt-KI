@@ -33,6 +33,11 @@ class ChessGame:
                 move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
 
             self.perform_move(move)
+            
+            if ChessEngine.is_king_on_the_hill(self.board):
+                winner = "White" if self.board.game_result == constants.WHITE else "Black"
+                print("Checkmate! Winner is ", winner)
+                break
 
     def print_board(self):
         ChessPrintService.print_board(self.board.bitboards)
