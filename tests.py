@@ -1,6 +1,7 @@
 import unittest
 from ChessBoard import ChessBoard
 from ChessEngine import ChessEngine
+from ChessGame import ChessGame
 from IllegalMoveException import IllegalMoveException
 import constants
 from ChessPrintService import ChessPrintService
@@ -761,9 +762,26 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard.load_from_fen("8/8/8/8/8/8/8/2q5 b - - 0 1")
         ChessEngine.perform_move('c2c1', actualBoard)
         self.assertEqualBitboards(expectedBoard, actualBoard)
-        
-        
-        
+
+    def test_alpha_beta_1(self):
+        actualBoard = ChessBoard()
+        expectedBoard = ChessBoard()
+        actualBoard.load_from_fen("r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1")
+        actualGame = ChessGame(actualBoard, isBlackAI=True, isWhiteAI=True)
+        actualGame.process_next_move(4)
+        expectedBoard.load_from_fen("r2qk1nr/8/2n3P1/p1bP3p/3pPPb1/p1N5/8/R1B1KBNR b KQkq - 0 1")
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+
+    def test_alpha_beta_2(self):
+        actualBoard = ChessBoard()
+        expectedBoard = ChessBoard()
+        actualBoard.load_from_fen("rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1")
+        actualGame = ChessGame(actualBoard, isBlackAI=True, isWhiteAI=True)
+        actualGame.process_next_move(4)
+        expectedBoard.load_from_fen("rnbqkbnr/p1pppppp/8/1Q6/8/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1")
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+
+
     # def test_en_passant(self):
     #     actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")
     #     ChessEngine.perform_move('f5e6', actualBoard)
