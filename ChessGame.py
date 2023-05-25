@@ -8,7 +8,7 @@ import sys
 
 
 class ChessGame:
-    def __init__(self, board, isBlackAI=True, isWhiteAI=False):
+    def __init__(self, board, isBlackAI=True, isWhiteAI=True):
         self.board = board
         self.move_number = 1
         self.isBlackAI = isBlackAI
@@ -17,24 +17,28 @@ class ChessGame:
 
     def play(self):
         while True:
-            self.print_board()
-            self.currentLegalMoves = self.get_legal_moves()
-            # Check for draw and checkmate before the move is exercised
-            if self.is_draw():  # more detailed print is in draw function
+            if self.process_next_move():
                 break
 
-            if self.is_ai_turn():
-                move = self.get_ai_move()
-            else:
-                move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
+    def process_next_move(self, max_depth=4):
+        self.print_board()
+        self.currentLegalMoves = self.get_legal_moves()
+        # Check for draw and checkmate before the move is exercised
+        if self.is_draw():  # more detailed print is in draw function
+            return True
 
-            self.perform_move(move)
-            
-            if self.opponent_is_check_mate() or ChessEngine.player_is_king_on_the_hill(self.board):
-                winner = "White" if self.board.game_result == constants.WHITE else "Black"
-                print("Checkmate! Winner is ", winner)
-                break
+        if self.opponent_is_check_mate() or ChessEngine.player_is_king_on_the_hill(self.board):
+            winner = "White" if self.board.game_result == constants.WHITE else "Black"
+            print("Checkmate! Winner is ", winner)
+            return True
 
+        if self.is_ai_turn():
+            move = self.get_ai_move(max_depth)
+        else:
+            move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
+
+        self.perform_move(move)
+        return False
 
     def print_board(self):
         ChessPrintService.print_board(self.board.bitboards)
@@ -55,12 +59,12 @@ class ChessGame:
         pattern = r'^[a-h][1-8][a-h][1-8]$'
         return re.match(pattern, user_input) is not None
 
-    def get_ai_move(self):
+    def get_ai_move(self, max_depth):
 
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
             return sys.exit(1)
-        best_move = self.board.iterative_depth_search(4)
+        best_move = self.board.iterative_depth_search(max_depth)
         # bestMove = None
         # bestScore = None
         # for move in self.currentLegalMoves:
