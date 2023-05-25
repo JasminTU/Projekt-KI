@@ -773,6 +773,32 @@ class TestChessBitboard(unittest.TestCase):
         self.assertEqualBitboards(expectedBoard, actualBoard)
         self.assertTrue(ChessEngine.is_draw(ChessEngine.generate_moves(actualBoard), actualBoard))
 
+    def test_convert_pawn_1(self):
+        actualBoard = ChessBoard()
+        expectedBoard = ChessBoard()
+        actualBoard.load_from_fen("8/5P2/8/8/8/8/8/8 w - - 0 1")
+        expectedBoard.load_from_fen("5Q2/8/8/8/8/8/8/8 w - - 0 1")
+        ChessEngine.perform_move('f7f8', actualBoard)
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+    def test_convert_pawn_2(self):
+        actualBoard = ChessBoard()
+        expectedBoard = ChessBoard()
+        actualBoard.load_from_fen("6p1/5P2/8/8/8/8/8/8 w - - 0 1")
+        expectedBoard.load_from_fen("6Q1/8/8/8/8/8/8/8 w - - 0 1")
+        ChessEngine.perform_move('f7g8', actualBoard)
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+    def test_convert_pawn_3(self):
+        actualBoard = ChessBoard()
+        expectedBoard = ChessBoard()
+        actualBoard.load_from_fen("8/8/8/8/8/8/2p5/8 b - - 0 1")
+        expectedBoard.load_from_fen("8/8/8/8/8/8/8/2q5 b - - 0 1")
+        ChessEngine.perform_move('c2c1', actualBoard)
+        self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+        
+        
     # def test_en_passant(self):
     #     actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")
     #     ChessEngine.perform_move('f5e6', actualBoard)

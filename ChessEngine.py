@@ -217,7 +217,7 @@ class ChessEngine():
             if move not in legal_moves and move_type != "algebraic":
                 raise IllegalMoveException(ChessEngine.binary_move_to_algebraic(move[0], move[1]))
             if move not in legal_moves:
-                raise IllegalMoveException(move)
+                raise IllegalMoveException(ChessEngine.binary_move_to_algebraic(move[0], move[1]))
         from_square, to_square = move
         opponent = board.get_opponent(board.current_player)
 
@@ -239,6 +239,8 @@ class ChessEngine():
             else:
                 board.bitboards[piece] &= ~to_square
 
+        # convert the pawn if it moves to last row
+        ChessEngine._convert_pawn(board, to_square)
         # Switch the current player
         board.current_player = opponent
         # Add board to history for draw by repitition
@@ -246,6 +248,19 @@ class ChessEngine():
         board.board_history.append(copied_chessBoard.bitboards)
         # Increase pawn counter for draw by 50 moves
         board.pawn_not_moved_counter = 0 if (from_square & board.bitboards[constants.PAWN]) != 0 else board.pawn_not_moved_counter + 1
+
+    @staticmethod
+    def _convert_pawn(board, to_square):
+        TOP_EDGE = constants.NOT_TOP_EDGE ^ constants.MAX_VALUE # invert not top edge
+        BOTTOM_EDGE = constants.NOT_BOTTOM_EDGE ^ constants.MAX_VALUE # invert not bottom edge
+        
+        if board.bitboards[constants.PAWN] & to_square & (TOP_EDGE | BOTTOM_EDGE):
+            
+            # TODO: add some functionality that selects the best possible figure to convert the pawn to
+            best_convertable_figure = constants.QUEEN
+            board.bitboards[constants.PAWN] &= ~to_square
+            board.bitboards[best_convertable_figure] |= to_square
+        
 
     @staticmethod
     def is_in_check(board, isOpponent=False):

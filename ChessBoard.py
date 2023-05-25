@@ -159,5 +159,5 @@ class ChessBoard:
 
 if __name__ == "__main__":
     board = ChessBoard()
-    board.load_from_fen("2N5/8/8/8/8/8/8/8 w - - 0 1")
+    board.load_from_fen("8/8/8/8/8/8/2p5/8 b - - 0 1")
     board.chessEngine.print_legal_moves(board)
