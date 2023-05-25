@@ -277,6 +277,7 @@ class ChessEngine():
 
     @staticmethod
     def is_check_mate(board):
+        # checks if current player is in check mate --> current player lost
         if not ChessEngine.is_in_check(board):
             return False
         legal_moves = ChessEngine.generate_moves(board)
@@ -289,13 +290,25 @@ class ChessEngine():
         return True
     
     @staticmethod
-    def is_king_on_the_hill(board):
+    def opponent_is_check_mate(board):
+        # checks if opponent is in check mate --> opponent lost
+        if not ChessEngine.is_in_check(board, isOpponent=True):
+            return False
+        legal_moves = ChessEngine.generate_moves(board)
+        for move in legal_moves:
+            board_after_move = copy.deepcopy(board)
+            ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+            if not ChessEngine.is_in_check(board_after_move, isOpponent=False):
+                board.game_result = board.current_player
+                return False
+        return True
+    
+    @staticmethod
+    def player_is_king_on_the_hill(board):
+        # checks if current player has won
         CENTER_FIELDS = int("0b0000000000000000000000000001100000011000000000000000000000000000", 2)
-        if board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[constants.WHITE]:
-            board.game_result = constants.WHITE
-            return True
-        elif board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[constants.BLACK]:
-            board.game_result = constants.BLACK
+        if board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[board.current_player]:
+            board.game_result = board.current_player
             return True
         return False
     
@@ -315,6 +328,10 @@ class ChessEngine():
             board.game_result = constants.DRAW
             return True
         return False
+    
+    @staticmethod
+    def is_game_over(board):
+        return ChessEngine.is_check_mate(board) or ChessEngine.player_is_king_on_the_hill(board) or ChessEngine.opponent_is_check_mate(board)
 
     @staticmethod
     def _is_repetition_draw(board_list):

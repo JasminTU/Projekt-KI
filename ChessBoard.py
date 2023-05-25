@@ -68,48 +68,101 @@ class ChessBoard:
         # PrintBitBoardService.print_board(self.bitboards)
 
     def evaluate_board(self, move=None, move_type="algebraic"):
-        # evaluate the board after a move or on current board
+        # Evaluate the board after a move or on current board
+        # The evaluation method should be symmetric
+        # TODO: there are a lot of hardcoded values to compute the score, need for improvement
+        
         board_after_move = copy.deepcopy(self)
         if move:
             ChessEngine.perform_move(move, board_after_move, move_type, with_validation=False)
-
+            
+        CENTER__MASK = int("0b0000000000000000001111000011110000111100001111000000000000000000", 2)
         score = 0
         opponent = self.get_opponent(self.current_player)
+        piece_values = {
+            constants.PAWN: 1, constants.KNIGHT: 3, constants.BISHOP: 3, constants.ROOK: 5, constants.QUEEN: 9, constants.KING: 20
+        }
+        occupied_squares = self.bitboards[constants.WHITE] | self.bitboards[constants.BLACK]
+        while occupied_squares:
+            square = occupied_squares & -occupied_squares
+            occupied_squares &= occupied_squares - 1
+            piece = self._get_piece_at_square(square)
+            piece_value = piece_values[piece]
+            score += piece_value if square & self.bitboards[self.current_player] else -piece_value
+            # Add bonus points for controlling the center
+            if square & CENTER__MASK:
+                row, col = self._get_row_col_from_square(square)
+                center_distance = abs(row - 3.5) + abs(col - 3.5)
+                score += 0.5 / (center_distance + 1) if square & self.bitboards[self.current_player] else - 0.5 / (center_distance + 1)
+            
+            # Penalty for pieces near the enemy king
+            if square & self.bitboards[self.current_player]:
+                enemy_king_pos = self.bitboards[opponent] & self.bitboards[constants.KING]
+                distance_to_enemy_king = self._square_distance(square, enemy_king_pos)
+                score -= 0.2 / (distance_to_enemy_king + 1)
+            # Bonus for enemy pieces near the current players king
+            if square & self.bitboards[opponent]:
+                king_pos = self.bitboards[self.current_player] & self.bitboards[constants.KING]
+                distance_to_own_king = self._square_distance(square, king_pos)
+                score += 0.2 / (distance_to_own_king + 1)
 
-        # Evaluate material value: slide constants (pawns are differentiated)
-        score += 50 * (
-                bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[self.current_player]).count(
-                    "1") - bin(board_after_move.bitboards[constants.PAWN] & board_after_move.bitboards[opponent]).count(
-                "1"))
-        score += 300 * (bin(
-            board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[self.current_player]).count(
-            "1") - bin(board_after_move.bitboards[constants.KNIGHT] & board_after_move.bitboards[opponent]).count("1"))
-        score += 300 * (bin(
-            board_after_move.bitboards[constants.BISHOP] & board_after_move.bitboards[self.current_player]).count(
-            "1") - bin(self.bitboards[constants.BISHOP] & board_after_move.bitboards[opponent]).count("1"))
-        score += 500 * (
-                bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[self.current_player]).count(
-                    "1") - bin(board_after_move.bitboards[constants.ROOK] & board_after_move.bitboards[opponent]).count(
-                "1"))
-        score += 900 * (bin(
-            board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[self.current_player]).count(
-            "1") - bin(board_after_move.bitboards[constants.QUEEN] & board_after_move.bitboards[opponent]).count("1"))
-        score += 2000 * (
-                bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[self.current_player]).count(
-                    "1") - bin(board_after_move.bitboards[constants.KING] & board_after_move.bitboards[opponent]).count(
-                "1"))
-
-        # Evaluate position of kings
-        CENTER_FIELDS = int("0b0000000000000000000000000001100000011000000000000000000000000000", 2)
-        if board_after_move.bitboards[constants.KING] & CENTER_FIELDS & board_after_move.bitboards[self.current_player]:
-            score += 100000
-        if board_after_move.bitboards[constants.KING] & CENTER_FIELDS & board_after_move.bitboards[opponent]:
-            score -= 100000
+        # Evaluate king's safety
+        if ChessEngine.is_in_check(self):
+            score -= 1  # Penalty for own king in check
+        else:
+            score += 1  # Bonus for king's safety
+        if ChessEngine.is_check_mate(self):
+            score -= 100  # Penalty for own king in check mate
+        if ChessEngine.opponent_is_check_mate(self) or ChessEngine.player_is_king_on_the_hill(self):
+            score += 100
+            
+        # Bonus for king's position near the center
+        king_position = self.bitboards[self.current_player] & self.bitboards[constants.KING]
+        row, col = self._get_row_col_from_square(king_position)
+        center_distance = abs(row - 3.5) + abs(col - 3.5)
+        score += 10 / (center_distance + 1)
+        # Penalty for opponent king's position near the center
+        opp_king_position = self.bitboards[opponent] & self.bitboards[constants.KING]
+        row, col = self._get_row_col_from_square(opp_king_position)
+        center_distance = abs(row - 3.5) + abs(col - 3.5)
+        score -= 10 / (center_distance + 1)
+        
+        # TODO: evaluate pawn position and pawn type; calculate a (negative?) score for draw;
         
         return score
     
+    def _square_distance(self, square1, square2):
+        # Assuming square1 and square2 are bitboards with a single bit set to 1
+        row1, col1 = self._get_row_col_from_square(square1)
+        row2, col2 = self._get_row_col_from_square(square2)
+        distance = max(abs(row1 - row2), abs(col1 - col2))
+        return distance
+    
+    def _get_row_col_from_square(self, square):
+        # Assuming square is a bitboard with a single bit set to 1
+        index = square.bit_length() - 1  # Get the index of the set bit
+
+        row, col = divmod(index, 8)  # Divide index by 8 to get row and column
+
+        return row, col
+
+    
+    def _get_piece_at_square(self, square):
+        if self.bitboards[constants.PAWN] & square:
+            return constants.PAWN
+        if self.bitboards[constants.KNIGHT] & square:
+            return constants.KNIGHT
+        if self.bitboards[constants.BISHOP] & square:
+            return constants.BISHOP
+        if self.bitboards[constants.ROOK] & square:
+            return constants.ROOK
+        if self.bitboards[constants.QUEEN] & square:
+            return constants.QUEEN
+        if self.bitboards[constants.KING] & square:
+            return constants.KING
+    
     def iterative_depth_search(self, max_depth):
-        # TODO: end game functionality is not yet implemented for evaluate_board() --> alpha beta doesnt stop even though one player may has already won
+        # TODO: end game score should be revised
         best_score = None
         best_move = None
         # current player is always max player
@@ -123,7 +176,7 @@ class ChessBoard:
         
     
     def alpha_beta_max(self, alpha, beta, depth_left):
-        if depth_left == 0:
+        if depth_left == 0 or ChessEngine.is_game_over(self):
             return self.evaluate_board(), None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -131,6 +184,8 @@ class ChessBoard:
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+            if ChessEngine.is_draw(legal_moves, self): # check for draw before calling min, because we need the legal moves
+                return -self.evaluate_board()
             score, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1)
             if score >= beta:
                 return beta, None
@@ -140,7 +195,7 @@ class ChessBoard:
         return alpha, best_move
     
     def alpha_beta_min(self, alpha, beta, depth_left):
-        if depth_left == 0:
+        if depth_left == 0 or ChessEngine.is_game_over(self):
             return - self.evaluate_board(), None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -148,6 +203,8 @@ class ChessBoard:
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
+            if ChessEngine.is_draw(legal_moves, self): # check for draw before calling max, because we need the legal moves
+                return self.evaluate_board()
             score, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1)
             if score <= alpha:
                 return alpha, None
@@ -163,7 +220,5 @@ class ChessBoard:
 
 if __name__ == "__main__":
     board = ChessBoard()
-    service = ChessPrintService()
-    service.print_binary_bitboard(int("0b0000000000000000000000000001100000011000000000000000000000000000", 2))
-    board.load_from_fen("8/8/8/8/8/8/2p5/8 b - - 0 1")
-    # board.chessEngine.print_legal_moves(board)
+    board.load_from_fen("3k4/2p2p2/8/8/8/8/2PK1P2/8 w - - 0 1")
+    print(board.evaluate_board())

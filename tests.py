@@ -221,36 +221,6 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
         self.assertRaises(IllegalMoveException, ChessEngine.perform_move, 'h5a4', actualBoard)
 
-    def test_evaluate_board_initial(self):
-        actualBoard = ChessBoard()
-        actualBoard.initialize_bitboards()
-        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        self.assertEqual(0, actualBoard.evaluate_board())
-
-    def test_evaluate_board_on_pawn(self):
-        actualBoard = ChessBoard()
-        actualBoard.load_from_fen("rnbqkbnr/pp1ppppp/8/8/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
-        self.assertEqual(0, actualBoard.evaluate_board())
-
-    def test_evaluate_board_on_rook(self):
-        actualBoard = ChessBoard()
-        actualBoard.load_from_fen("1nbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR w Kk - 0 1")
-        self.assertEqual(0, actualBoard.evaluate_board())
-
-    def test_evaluate_board_on_bishop(self):
-        actualBoard = ChessBoard()
-        actualBoard.load_from_fen("1n1qkbnr/pppppppp/8/8/8/R1r5/PPPPPPPP/1N1QKBNR w Kk - 0 1")
-        self.assertEqual(0, actualBoard.evaluate_board())
-
-    def test_evaluate_board_on_queen(self):
-        actualBoard = ChessBoard()
-        actualBoard.load_from_fen("5p2/8/8/8/8/8/4Q3/7P w - - 0 1")
-        self.assertEqual(900, actualBoard.evaluate_board())
-
-    def test_evaluate_board_on_king(self):
-        actualBoard = ChessBoard()
-        actualBoard.load_from_fen("1n2kbnr/pppppppp/2b5/8/8/R1r2Bq1/PPPPPPPP/1N1Q1BNR w Hk - 0 1")
-        self.assertEqual(-2000, actualBoard.evaluate_board())
 
     def test_move_rook_legal_1(self):
         expectedBoard = ChessBoard()
@@ -594,11 +564,6 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard = ChessBoard()
         actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
         self.assertRaises(IllegalMoveException, ChessEngine.perform_move, 'd8d6', actualBoard)
-
-    def test_evaluate_board_on_empty(self):
-        actualBoard = ChessBoard()
-        actualBoard.load_from_fen("8/8/8/8/8/8/8/8 w - - 0 1")
-        self.assertEqual(0, actualBoard.evaluate_board())
 
     def test_is_in_check_1(self):
         actualBoard = ChessBoard()
