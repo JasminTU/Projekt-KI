@@ -3,6 +3,7 @@ from ChessPrintService import ChessPrintService
 import constants
 import copy
 import math
+from loguru import logger
 
 
 class ChessBoard:
@@ -71,39 +72,39 @@ class ChessBoard:
         # Evaluate the board after a move or on current board
         # The evaluation method should be symmetric
         # TODO: there are a lot of hardcoded values to compute the score, need for improvement
-        
         board_after_move = copy.deepcopy(self)
         if move:
             ChessEngine.perform_move(move, board_after_move, move_type, with_validation=False)
             
         CENTER__MASK = int("0b0000000000000000001111000011110000111100001111000000000000000000", 2)
         score = 0
-        opponent = self.get_opponent(self.current_player)
+        opponent = board_after_move.get_opponent(self.current_player) # this is correct, since we always want to evaluate the board for the current player, before or after his move
         piece_values = {
             constants.PAWN: 1, constants.KNIGHT: 3, constants.BISHOP: 3, constants.ROOK: 5, constants.QUEEN: 9, constants.KING: 20
         }
-        occupied_squares = self.bitboards[constants.WHITE] | self.bitboards[constants.BLACK]
+        occupied_squares = board_after_move.bitboards[constants.WHITE] | board_after_move.bitboards[constants.BLACK]
+
         while occupied_squares:
             square = occupied_squares & -occupied_squares
+            piece = board_after_move._get_piece_at_square(square, board_after_move.bitboards[constants.WHITE] | board_after_move.bitboards[constants.BLACK])
             occupied_squares &= occupied_squares - 1
-            piece = self._get_piece_at_square(square)
             piece_value = piece_values[piece]
-            score += piece_value if square & self.bitboards[self.current_player] else -piece_value
+            score += piece_value if square & board_after_move.bitboards[self.current_player] else -piece_value
             # Add bonus points for controlling the center
             if square & CENTER__MASK:
-                row, col = self._get_row_col_from_square(square)
+                row, col = board_after_move._get_row_col_from_square(square)
                 center_distance = abs(row - 3.5) + abs(col - 3.5)
-                score += 0.5 / (center_distance + 1) if square & self.bitboards[self.current_player] else - 0.5 / (center_distance + 1)
+                score += 0.5 / (center_distance + 1) if square & board_after_move.bitboards[self.current_player] else - 0.5 / (center_distance + 1)
             
             # Penalty for pieces near the enemy king
-            if square & self.bitboards[self.current_player]:
-                enemy_king_pos = self.bitboards[opponent] & self.bitboards[constants.KING]
-                distance_to_enemy_king = self._square_distance(square, enemy_king_pos)
+            if square & board_after_move.bitboards[self.current_player]:
+                enemy_king_pos = board_after_move.bitboards[opponent] & board_after_move.bitboards[constants.KING]
+                distance_to_enemy_king = board_after_move._square_distance(square, enemy_king_pos)
                 score -= 0.2 / (distance_to_enemy_king + 1)
             # Bonus for enemy pieces near the current players king
-            if square & self.bitboards[opponent]:
-                king_pos = self.bitboards[self.current_player] & self.bitboards[constants.KING]
-                distance_to_own_king = self._square_distance(square, king_pos)
+            if square & board_after_move.bitboards[opponent]:
+                king_pos = board_after_move.bitboards[self.current_player] & board_after_move.bitboards[constants.KING]
+                distance_to_own_king = board_after_move._square_distance(square, king_pos)
                 score += 0.2 / (distance_to_own_king + 1)
 
         # Evaluate king's safety
@@ -147,7 +148,7 @@ class ChessBoard:
         return row, col
 
     
-    def _get_piece_at_square(self, square):
+    def _get_piece_at_square(self, square, occupied_squares):
         if self.bitboards[constants.PAWN] & square:
             return constants.PAWN
         if self.bitboards[constants.KNIGHT] & square:
@@ -160,6 +161,12 @@ class ChessBoard:
             return constants.QUEEN
         if self.bitboards[constants.KING] & square:
             return constants.KING
+        service = ChessPrintService()
+        print("Black and white (with or statement): \n")
+        service.print_binary_bitboard(occupied_squares)
+        print("Supposed Occupied field (according to black and white bitboard): \n")
+        print(ChessEngine.binary_field_to_algebraic(square))
+        logger.error("Error in method _get_piece_at_square(). No figure is on the input square: {}. \n Given the board: {}", ChessEngine.binary_field_to_algebraic(square), service.print_board(self.bitboards))
     
     def iterative_depth_search(self, max_depth):
         # TODO: end game score should be revised
@@ -177,6 +184,8 @@ class ChessBoard:
     
     def alpha_beta_max(self, alpha, beta, depth_left):
         if depth_left == 0 or ChessEngine.is_game_over(self):
+            service = ChessPrintService()
+            service.print_board(self.bitboards)
             return self.evaluate_board(), None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -184,7 +193,7 @@ class ChessBoard:
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
-            if ChessEngine.is_draw(legal_moves, self): # check for draw before calling min, because we need the legal moves
+            if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling min, because we need the legal moves
                 return -self.evaluate_board()
             score, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1)
             if score >= beta:
@@ -203,7 +212,7 @@ class ChessBoard:
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
-            if ChessEngine.is_draw(legal_moves, self): # check for draw before calling max, because we need the legal moves
+            if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling max, because we need the legal moves
                 return self.evaluate_board()
             score, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1)
             if score <= alpha:
@@ -220,5 +229,4 @@ class ChessBoard:
 
 if __name__ == "__main__":
     board = ChessBoard()
-    board.load_from_fen("3k4/2p2p2/8/8/8/8/2PK1P2/8 w - - 0 1")
-    print(board.evaluate_board())
+

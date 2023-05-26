@@ -408,16 +408,18 @@ class ChessEngine():
 
     @staticmethod
     def binary_move_to_algebraic(from_square, to_square):
-        def binary_field_to_algebraic(field):
-            col_names = "abcdefgh"
-            row_names = "12345678"
 
-            col = col_names[(field.bit_length() - 1) % 8]
-            row = row_names[(field.bit_length() - 1) // 8]
-
-            return f"{col}{row}"
-
-        from_field = binary_field_to_algebraic(from_square)
-        to_field = binary_field_to_algebraic(to_square)
+        from_field = ChessEngine.binary_field_to_algebraic(from_square)
+        to_field = ChessEngine.binary_field_to_algebraic(to_square)
 
         return f"{from_field}{to_field}"
+    
+    @staticmethod
+    def binary_field_to_algebraic(field):
+        col_names = "abcdefgh"
+        row_names = "12345678"
+
+        col = col_names[(field.bit_length() - 1) % 8]
+        row = row_names[(field.bit_length() - 1) // 8]
+
+        return f"{col}{row}"

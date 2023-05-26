@@ -27,10 +27,6 @@ class ChessGame:
         if self.is_draw():  # more detailed print is in draw function
             return True
 
-        if self.opponent_is_check_mate() or ChessEngine.player_is_king_on_the_hill(self.board):
-            winner = "White" if self.board.game_result == constants.WHITE else "Black"
-            print("Checkmate! Winner is ", winner)
-            return True
 
         if self.is_ai_turn():
             move = self.get_ai_move(max_depth)
@@ -38,6 +34,11 @@ class ChessGame:
             move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
 
         self.perform_move(move)
+        
+        if self.opponent_is_check_mate() or ChessEngine.player_is_king_on_the_hill(self.board):
+            winner = "White" if self.board.game_result == constants.WHITE else "Black"
+            print("Checkmate! Winner is ", winner)
+            return True
         return False
 
     def print_board(self):
@@ -96,5 +97,16 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
-    game.play()
+    # game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
+    # game.play()
+    
+    
+    service = ChessPrintService()
+    board = ChessBoard()
+    board.load_from_fen("r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1")
+    # print(board.current_player)
+    # service.print_board(board.bitboards)
+    game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
+    game.process_next_move(3)
+    # service.print_board(board.bitboards)
+    # print(board.evaluate_board())
