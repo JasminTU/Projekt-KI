@@ -78,7 +78,7 @@ class ChessBoard:
             
         CENTER__MASK = int("0b0000000000000000001111000011110000111100001111000000000000000000", 2)
         score = 0
-        opponent = board_after_move.get_opponent(self.current_player) # this is correct, since we always want to evaluate the board for the current player, before or after his move
+        opponent = ChessBoard.get_opponent(self.current_player) # this is correct, since we always want to evaluate the board for the current player, before or after his move
         piece_values = {
             constants.PAWN: 1, constants.KNIGHT: 3, constants.BISHOP: 3, constants.ROOK: 5, constants.QUEEN: 9, constants.KING: 20
         }
@@ -194,7 +194,7 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling min, because we need the legal moves
-                return -self.evaluate_board()
+                return -board_after_move.evaluate_board()
             score, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1)
             if score >= beta:
                 return beta, None
@@ -213,7 +213,7 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling max, because we need the legal moves
-                return self.evaluate_board()
+                return board_after_move.evaluate_board()
             score, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1)
             if score <= alpha:
                 return alpha, None
