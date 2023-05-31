@@ -209,7 +209,6 @@ class ChessEngine():
 
     @staticmethod
     def perform_move(move, board, move_type="algebraic", with_validation=True):
-        # TODO: Je nach Verwendung der Funktion würde ich hier nicht nochmal alle legalen moves generieren, da der ausgewählte move bereits legal ist --> Laufzeitverlängerung
         if move_type == "algebraic":
             move = ChessEngine.algebraic_move_to_binary(move)
         if with_validation:
@@ -222,23 +221,25 @@ class ChessEngine():
         opponent = board.get_opponent(board.current_player)
 
         if board.bitboards[board.current_player] & from_square:
-            # Remove the moving piece from its original position
-            board.bitboards[board.current_player] &= ~from_square
-            # Remove a possibly captured piece from the destination
-            board.bitboards[opponent] &= ~to_square
-            # Move the piece to the new position
+            board.bitboards[board.current_player] &= (from_square ^ constants.MAX_VALUE)
+            board.bitboards[opponent] &= (to_square ^ constants.MAX_VALUE)
             board.bitboards[board.current_player] |= to_square
+        elif board.bitboards[opponent] & from_square:
+            board.bitboards[opponent] &= (from_square ^ constants.MAX_VALUE)
+            board.bitboards[board.current_player] &= (to_square ^ constants.MAX_VALUE)
+            board.bitboards[opponent] |= to_square
+        else:
+            logger.error("Error in method perform_move(). There is no figure on th eposition from_square: {}", ChessEngine.binary_field_to_algebraic(from_square))
 
         for piece in range(constants.PAWN, constants.KING + 1):
+            # Remove a possibly captured piece from the destination
+            board.bitboards[piece] &= (to_square ^ constants.MAX_VALUE)
             if board.bitboards[piece] & from_square:
                 # Remove the moving piece from its original position
-                board.bitboards[piece] &= ~from_square
+                board.bitboards[piece] &= (from_square ^ constants.MAX_VALUE)
                 # Move the piece to the new position
                 board.bitboards[piece] |= to_square
-            # Remove a possibly captured piece from the destination
-            else:
-                board.bitboards[piece] &= ~to_square
-
+        
         # convert the pawn if it moves to last row
         ChessEngine._convert_pawn(board, to_square)
         # Switch the current player

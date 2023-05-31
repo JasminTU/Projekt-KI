@@ -86,7 +86,7 @@ class ChessBoard:
 
         while occupied_squares:
             square = occupied_squares & -occupied_squares
-            piece = board_after_move._get_piece_at_square(square, board_after_move.bitboards[constants.WHITE] | board_after_move.bitboards[constants.BLACK])
+            piece = board_after_move._get_piece_at_square(square)
             occupied_squares &= occupied_squares - 1
             piece_value = piece_values[piece]
             score += piece_value if square & board_after_move.bitboards[self.current_player] else -piece_value
@@ -148,7 +148,7 @@ class ChessBoard:
         return row, col
 
     
-    def _get_piece_at_square(self, square, occupied_squares):
+    def _get_piece_at_square(self, square):
         if self.bitboards[constants.PAWN] & square:
             return constants.PAWN
         if self.bitboards[constants.KNIGHT] & square:
@@ -162,10 +162,6 @@ class ChessBoard:
         if self.bitboards[constants.KING] & square:
             return constants.KING
         service = ChessPrintService()
-        print("Black and white (with or statement): \n")
-        service.print_binary_bitboard(occupied_squares)
-        print("Supposed Occupied field (according to black and white bitboard): \n")
-        print(ChessEngine.binary_field_to_algebraic(square))
         logger.error("Error in method _get_piece_at_square(). No figure is on the input square: {}. \n Given the board: {}", ChessEngine.binary_field_to_algebraic(square), service.print_board(self.bitboards))
     
     def iterative_depth_search(self, max_depth):
@@ -184,8 +180,6 @@ class ChessBoard:
     
     def alpha_beta_max(self, alpha, beta, depth_left):
         if depth_left == 0 or ChessEngine.is_game_over(self):
-            service = ChessPrintService()
-            service.print_board(self.bitboards)
             return self.evaluate_board(), None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)

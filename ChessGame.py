@@ -97,16 +97,13 @@ class ChessGame:
 
 
 if __name__ == "__main__":
-    # game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
-    # game.play()
+    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
+    game.play()
     
-    
-    service = ChessPrintService()
-    board = ChessBoard()
-    board.load_from_fen("r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1")
-    # print(board.current_player)
-    # service.print_board(board.bitboards)
-    game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
-    game.process_next_move(3)
+    # service = ChessPrintService()
+    # board = ChessBoard()
+    # board.load_from_fen("r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1")
+    # game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
+    # game.process_next_move(4)
     # service.print_board(board.bitboards)
     # print(board.evaluate_board())
