@@ -170,7 +170,7 @@ class ChessBoard:
         best_move = None
         # current player is always max player
         counter = 0
-        for depth in range(1, max_depth):
+        for depth in range(1, max_depth+1):
             score, tmp_counter, move = self.alpha_beta_max(-math.inf, math.inf, depth, with_cut_off)
             counter += tmp_counter
             if best_score is None or score > best_score:

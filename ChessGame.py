@@ -20,16 +20,16 @@ class ChessGame:
             if self.process_next_move():
                 break
 
-    def process_next_move(self, max_depth=4):
-        self.print_board()
+    def process_next_move(self, max_depth=4, print_board=True):
+        if print_board:
+            self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
         # Check for draw and checkmate before the move is exercised
         if self.is_draw():  # more detailed print is in draw function
             return True
 
-
         if self.is_ai_turn():
-            move = self.get_ai_move(max_depth)
+            move = self.get_ai_move(max_depth, print_board)
         else:
             move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
 
@@ -60,7 +60,7 @@ class ChessGame:
         pattern = r'^[a-h][1-8][a-h][1-8]$'
         return re.match(pattern, user_input) is not None
 
-    def get_ai_move(self, max_depth):
+    def get_ai_move(self, max_depth, print_move=True):
 
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
@@ -74,7 +74,8 @@ class ChessGame:
         #         bestScore = score
         #         bestMove = move
         str = "White" if self.board.current_player == constants.WHITE else "Black"
-        print(f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1])}")
+        if print_move:
+            print(f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1])}")
         return best_move
 
     def get_legal_moves(self):
