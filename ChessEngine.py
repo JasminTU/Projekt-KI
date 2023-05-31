@@ -305,11 +305,12 @@ class ChessEngine():
         return True
     
     @staticmethod
-    def player_is_king_on_the_hill(board):
+    def opponent_is_king_on_the_hill(board):
         # checks if current player has won
         CENTER_FIELDS = int("0b0000000000000000000000000001100000011000000000000000000000000000", 2)
-        if board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[board.current_player]:
-            board.game_result = board.current_player
+        opponent = board.get_opponent(board.current_player)
+        if board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[opponent]:
+            board.game_result = opponent
             return True
         return False
     
@@ -332,7 +333,7 @@ class ChessEngine():
     
     @staticmethod
     def is_game_over(board):
-        return ChessEngine.is_check_mate(board) or ChessEngine.player_is_king_on_the_hill(board) or ChessEngine.opponent_is_check_mate(board)
+        return ChessEngine.is_check_mate(board) or ChessEngine.opponent_is_king_on_the_hill(board) or ChessEngine.opponent_is_check_mate(board)
 
     @staticmethod
     def _is_repetition_draw(board_list):

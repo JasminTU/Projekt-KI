@@ -35,7 +35,7 @@ class ChessGame:
 
         self.perform_move(move)
         
-        if self.opponent_is_check_mate() or ChessEngine.player_is_king_on_the_hill(self.board):
+        if self.opponent_is_check_mate() or ChessEngine.opponent_is_king_on_the_hill(self.board):
             winner = "White" if self.board.game_result == constants.WHITE else "Black"
             print("Checkmate! Winner is ", winner)
             return True
@@ -65,7 +65,7 @@ class ChessGame:
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
             return sys.exit(1)
-        best_move = self.board.iterative_depth_search(max_depth)
+        best_move, _ = self.board.iterative_depth_search(max_depth)
         # bestMove = None
         # bestScore = None
         # for move in self.currentLegalMoves:

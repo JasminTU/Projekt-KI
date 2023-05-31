@@ -780,6 +780,12 @@ class TestChessBitboard(unittest.TestCase):
         actualGame.process_next_move(4)
         expectedBoard.load_from_fen("rnbqkbnr/p1pppppp/8/1Q6/8/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+    def test_alpha_beta_2(self):
+        actualBoard = ChessBoard()
+        actualBoard.load_from_fen("r1bqk1nr/8/2n3P1/p1bP4/4KPp1/p1N5/8/R1B2BNR b HAkq - 0 1")
+        self.assertTrue(ChessEngine.is_game_over(actualBoard))
+
 
 
     # def test_en_passant(self):
