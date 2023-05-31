@@ -95,17 +95,6 @@ class ChessBoard:
                 row, col = board_after_move._get_row_col_from_square(square)
                 center_distance = abs(row - 3.5) + abs(col - 3.5)
                 score += 0.5 / (center_distance + 1) if square & board_after_move.bitboards[self.current_player] else - 0.5 / (center_distance + 1)
-            
-            # Penalty for pieces near the enemy king
-            if square & board_after_move.bitboards[self.current_player]:
-                enemy_king_pos = board_after_move.bitboards[opponent] & board_after_move.bitboards[constants.KING]
-                distance_to_enemy_king = board_after_move._square_distance(square, enemy_king_pos)
-                score -= 0.2 / (distance_to_enemy_king + 1)
-            # Bonus for enemy pieces near the current players king
-            if square & board_after_move.bitboards[opponent]:
-                king_pos = board_after_move.bitboards[self.current_player] & board_after_move.bitboards[constants.KING]
-                distance_to_own_king = board_after_move._square_distance(square, king_pos)
-                score += 0.2 / (distance_to_own_king + 1)
 
         # Evaluate king's safety
         if ChessEngine.is_in_check(self):
@@ -116,7 +105,6 @@ class ChessBoard:
             score -= 100  # Penalty for own king in check mate
         if ChessEngine.opponent_is_check_mate(self):
             score += 100
-            
         # Bonus for king's position near the center
         king_position = self.bitboards[self.current_player] & self.bitboards[constants.KING]
         row, col = self._get_row_col_from_square(king_position)
@@ -190,9 +178,12 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling min, because we need the legal moves
-                return -board_after_move.evaluate_board(), counter, None
-            score, tmp_counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter+1,  with_cut_off)
-            counter += tmp_counter
+                score = -board_after_move.evaluate_board()
+                counter += 1
+            else:
+                score, tmp_counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter+1,  with_cut_off)
+                counter += tmp_counter
+                
             if score >= beta:
                 return beta, counter, None
             if score > alpha:
@@ -210,9 +201,12 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling max, because we need the legal moves
-                return board_after_move.evaluate_board(), counter, None
-            score, tmp_counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter+1, with_cut_off)
-            counter += tmp_counter
+                score = board_after_move.evaluate_board()
+                counter += 1
+            else:
+                score, tmp_counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter+1, with_cut_off)
+                counter += tmp_counter
+                
             if score <= alpha:
                 return alpha, counter, None
             if score < beta:

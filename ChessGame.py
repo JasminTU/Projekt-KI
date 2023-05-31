@@ -102,8 +102,8 @@ if __name__ == "__main__":
     
     # service = ChessPrintService()
     # board = ChessBoard()
-    # board.load_from_fen("r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1")
-    # game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
-    # game.process_next_move(4)
+    # board.load_from_fen("8/8/8/4k3/8/8/3K2R1/1R6 w - - 0 1")
+    # score = board.evaluate_board()
+    # print(score)
     # service.print_board(board.bitboards)
     # print(board.evaluate_board())
