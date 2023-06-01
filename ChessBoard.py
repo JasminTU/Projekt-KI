@@ -185,19 +185,16 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
-                return -board_after_move.evaluate_board(), counter + 1, None
-            if with_cut_off:
-                score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter, with_cut_off)
-                if score >= beta:
-                    return beta, counter, None
-                if score > alpha:
-                    best_move = move
-                    alpha = score
+                score = -board_after_move.evaluate_board()
+                counter += 1
             else:
                 score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter, with_cut_off)
-                if score > alpha:
-                    best_move = move
-                    alpha = score
+            
+            if score >= beta and with_cut_off:
+                return beta, counter, None
+            if score > alpha:
+                best_move = move
+                alpha = score
         return alpha, counter, best_move
 
     def alpha_beta_min(self, alpha, beta, depth_left, counter, with_cut_off=True):
@@ -210,19 +207,15 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
-                return board_after_move.evaluate_board(), counter + 1, None
-            if with_cut_off:
-                score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter, with_cut_off)
-                if score <= alpha:
-                    return alpha, counter, None
-                if score < beta:
-                    best_move = move
-                    beta = score
+                score = -board_after_move.evaluate_board()
+                counter += 1
             else:
                 score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter, with_cut_off)
-                if score < beta:
-                    best_move = move
-                    beta = score
+            if score <= alpha and with_cut_off:
+                return alpha, counter, None
+            if score < beta:
+                best_move = move
+                beta = score
         return beta, counter, best_move
 
     @staticmethod

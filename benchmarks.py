@@ -39,7 +39,7 @@ class ChessEngineBenchmark:
         num_tests = 1
 
         print(f"FEN: {fen}")
-        for depth in range(1, 4):
+        for depth in range(1, 3):
             for _ in range(num_tests):
                 board = ChessBoard()
                 board.load_from_fen(fen)
