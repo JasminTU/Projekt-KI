@@ -20,7 +20,7 @@ class ChessGame:
             if self.process_next_move() == "checkmate" or self.process_next_move() == "draw":
                 break
 
-    def process_next_move(self, max_depth=4, print_board=True):
+    def process_next_move(self, max_depth=4, print_board=True, with_cut_off=True):
         if print_board:
             self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
@@ -29,7 +29,7 @@ class ChessGame:
             return "draw"
 
         if self.is_ai_turn():
-            move, counter = self.get_ai_move(max_depth, print_board)
+            move, counter = self.get_ai_move(max_depth, print_board, with_cut_off)
         else:
             move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
 
@@ -39,7 +39,7 @@ class ChessGame:
             winner = "White" if self.board.game_result == constants.WHITE else "Black"
             print("Checkmate! Winner is ", winner)
             return "checkmate"
-        return counter
+        return move, counter
 
     def print_board(self):
         ChessPrintService.print_board(self.board.bitboards)
@@ -60,19 +60,12 @@ class ChessGame:
         pattern = r'^[a-h][1-8][a-h][1-8]$'
         return re.match(pattern, user_input) is not None
 
-    def get_ai_move(self, max_depth, print_move=True):
+    def get_ai_move(self, max_depth, print_move=True, with_cut_off=True):
 
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
             return sys.exit(1)
-        best_move, counter = self.board.iterative_depth_search(max_depth)
-        # bestMove = None
-        # bestScore = None
-        # for move in self.currentLegalMoves:
-        #     score = self.board.evaluate_board(move, move_type="binary")
-        #     if not bestScore or bestScore < score:
-        #         bestScore = score
-        #         bestMove = move
+        best_move, counter = self.board.iterative_depth_search(max_depth, with_cut_off)
         str = "White" if self.board.current_player == constants.WHITE else "Black"
         if print_move:
             print(f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1])}")
