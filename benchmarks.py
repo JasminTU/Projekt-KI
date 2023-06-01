@@ -21,8 +21,8 @@ class ChessEngineBenchmark:
             start_time = time.time()
 
             # Your chess engine implementation
-            max_depth = 4
-            best_move, counter = board.iterative_depth_search(max_depth)
+            moves = ChessEngine.generate_moves(board)
+            moves = ChessEngine.filter_illegal_moves(board, moves)
 
             end_time = time.time()
             elapsed_time = end_time - start_time

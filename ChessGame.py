@@ -20,7 +20,7 @@ class ChessGame:
             if self.process_next_move():
                 break
 
-    def process_next_move(self, max_depth=4, print_board=True):
+    def process_next_move(self, max_depth=3, print_board=True):
         if print_board:
             self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
