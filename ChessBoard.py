@@ -95,6 +95,17 @@ class ChessBoard:
                 row, col = board_after_move._get_row_col_from_square(square)
                 center_distance = abs(row - 3.5) + abs(col - 3.5)
                 score += 0.5 / (center_distance + 1) if square & board_after_move.bitboards[self.current_player] else - 0.5 / (center_distance + 1)
+            
+            # Penalty for pieces near the enemy king
+            if square & board_after_move.bitboards[self.current_player]:
+                enemy_king_pos = board_after_move.bitboards[opponent] & board_after_move.bitboards[constants.KING]
+                distance_to_enemy_king = board_after_move._square_distance(square, enemy_king_pos)
+                score -= 0.2 / (distance_to_enemy_king + 1)
+            # Bonus for enemy pieces near the current players king
+            if square & board_after_move.bitboards[opponent]:
+                king_pos = board_after_move.bitboards[self.current_player] & board_after_move.bitboards[constants.KING]
+                distance_to_own_king = board_after_move._square_distance(square, king_pos)
+                score += 0.2 / (distance_to_own_king + 1)
 
         # Evaluate king's safety
         if ChessEngine.is_in_check(self):
@@ -105,6 +116,7 @@ class ChessBoard:
             score -= 100  # Penalty for own king in check mate
         if ChessEngine.opponent_is_check_mate(self):
             score += 100
+            
         # Bonus for king's position near the center
         king_position = self.bitboards[self.current_player] & self.bitboards[constants.KING]
         row, col = self._get_row_col_from_square(king_position)
@@ -151,62 +163,49 @@ class ChessBoard:
             return constants.KING
         service = ChessPrintService()
         logger.error("Error in method _get_piece_at_square(). No figure is on the input square: {}. \n Given the board: {}", ChessEngine.binary_field_to_algebraic(square), service.print_board(self.bitboards))
-    
-    def iterative_depth_search(self, max_depth, with_cut_off = True):
-        # TODO: end game score should be revised
+
+    def iterative_depth_search(self, max_depth, with_cut_off=True):
         best_score = None
         best_move = None
-        # current player is always max player
         counter = 0
-        for depth in range(1, max_depth+1):
-            score, tmp_counter, move = self.alpha_beta_max(-math.inf, math.inf, depth, with_cut_off)
-            counter += tmp_counter
+        for depth in range(1, max_depth + 1):
+            score, counter, move = self.alpha_beta_max(-math.inf, math.inf, depth, counter, with_cut_off)
             if best_score is None or score > best_score:
                 best_score = score
                 best_move = move
         return best_move, counter
-                
-        
-    
-    def alpha_beta_max(self, alpha, beta, depth_left, counter = 0, with_cut_off = True):
+
+    def alpha_beta_max(self, alpha, beta, depth_left, counter, with_cut_off=True):
         if depth_left == 0 or ChessEngine.is_game_over(self):
-            return self.evaluate_board(), counter, None
+            return self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
         best_move = None
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
-            if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling min, because we need the legal moves
-                score = -board_after_move.evaluate_board()
-                counter += 1
-            else:
-                score, tmp_counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter+1,  with_cut_off)
-                counter += tmp_counter
-                
+            if ChessEngine.is_draw(legal_moves, board_after_move):
+                return -board_after_move.evaluate_board(), counter + 1, None
+            score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter, with_cut_off)
             if score >= beta:
                 return beta, counter, None
             if score > alpha:
                 best_move = move
                 alpha = score
         return alpha, counter, best_move
-    
-    def alpha_beta_min(self, alpha, beta, depth_left, counter = 0, with_cut_off = True):
+
+    def alpha_beta_min(self, alpha, beta, depth_left, counter, with_cut_off=True):
         if depth_left == 0 or ChessEngine.is_game_over(self):
-            return -self.evaluate_board(), counter, None
+            return -self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
         best_move = None
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
-            if ChessEngine.is_draw(legal_moves, board_after_move): # check for draw before calling max, because we need the legal moves
-                score = board_after_move.evaluate_board()
-                counter += 1
-            else:
-                score, tmp_counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter+1, with_cut_off)
-                counter += tmp_counter
-                
+            if ChessEngine.is_draw(legal_moves, board_after_move):
+                return board_after_move.evaluate_board(), counter + 1, None
+            score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter, with_cut_off)
             if score <= alpha:
                 return alpha, counter, None
             if score < beta:

@@ -48,7 +48,7 @@ class ChessEngineBenchmark:
                 start_time = time.time()
 
                 # process_next_move() calls iterative_depth_search()
-                game.process_next_move(depth, False)
+                counter = game.process_next_move(depth, print_board=False)
 
                 end_time = time.time()
                 elapsed_time = end_time - start_time
@@ -57,6 +57,7 @@ class ChessEngineBenchmark:
             average_time = total_time / num_tests
             average_time = round(average_time, 4)  # Round to 4 decimal places
             print(f"Depth: {depth}")
+            print(f"Counter: {counter}")
             print(f"Time per test: {average_time:.4f} seconds\n")
 
     def benchmark_fen1(self):
@@ -79,11 +80,21 @@ class ChessEngineBenchmark:
         fen2 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
         self.benchmark_chess_engine_alpha_beta(fen2)
 
+    def benchmark_fen_alpha_beta3(self):
+        fen3 = "2k5/6q1/3P1P2/4N3/8/1K6/8/8 w - - 0 1"
+        self.benchmark_chess_engine_alpha_beta(fen3)
+
+    def benchmark_fen_alpha_beta4(self):
+        fen4 = "r2qr1k1/p4ppp/2Q1b3/4N3/5B2/3BnP2/PP4PP/R4RK1 w - - 0 19"
+        self.benchmark_chess_engine_alpha_beta(fen4)
+
 
 if __name__ == "__main__":
     benchmark = ChessEngineBenchmark()
     # benchmark.benchmark_fen1()
     # benchmark.benchmark_fen2()
     # benchmark.benchmark_fen3()
-    benchmark.benchmark_fen_alpha_beta1()
-    benchmark.benchmark_fen_alpha_beta2()
+    # benchmark.benchmark_fen_alpha_beta1()
+    # benchmark.benchmark_fen_alpha_beta2()
+    # benchmark.benchmark_fen_alpha_beta3()
+    benchmark.benchmark_fen_alpha_beta4()
