@@ -4,6 +4,7 @@ import constants
 import copy
 import math
 from loguru import logger
+import time
 
 
 class ChessBoard:
@@ -164,15 +165,21 @@ class ChessBoard:
         service = ChessPrintService()
         logger.error("Error in method _get_piece_at_square(). No figure is on the input square: {}. \n Given the board: {}", ChessEngine.binary_field_to_algebraic(square), service.print_board(self.bitboards))
 
-    def iterative_depth_search(self, max_depth, with_cut_off=True):
+    def iterative_depth_search(self, max_depth, time_limit = 12000, with_cut_off=True):
         best_score = None
         best_move = None
         counter = 0
+        start_time = time.time()
+        
         for depth in range(1, max_depth + 1):
             score, counter, move = self.alpha_beta_max(-math.inf, math.inf, depth, counter, with_cut_off)
             if best_score is None or score > best_score:
                 best_score = score
                 best_move = move
+                
+            # elapsed_time = time.time() - start_time
+            # if elapsed_time >= time_limit:
+            #     break
         return best_move, counter
 
     def alpha_beta_max(self, alpha, beta, depth_left, counter, with_cut_off=True):
