@@ -20,7 +20,7 @@ class ChessGame:
             if self.process_next_move() == "checkmate" or self.process_next_move() == "draw":
                 break
 
-    def process_next_move(self, max_depth=4, print_board=True, with_cut_off=True):
+    def process_next_move(self, max_depth=3, print_board=True, with_cut_off=True):
         if print_board:
             self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
