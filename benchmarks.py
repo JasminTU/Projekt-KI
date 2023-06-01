@@ -38,6 +38,10 @@ class ChessEngineBenchmark:
         total_time = 0.0
         num_tests = 1
 
+        if with_cut_off:
+            print("Alpha-Beta")
+        else:
+            print("MinMax")
         print(f"FEN: {fen}")
         for depth in range(1, 3):
             for _ in range(num_tests):
