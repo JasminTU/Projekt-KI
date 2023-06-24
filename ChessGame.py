@@ -25,9 +25,13 @@ class ChessGame:
             self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
         # Check for draw and checkmate before the move is exercised
-        if self.is_draw():  # more detailed print is in draw function
+        if ChessEngine.is_draw(self.currentLegalMoves, self.board):  # more detailed print is in draw function
             return "draw"
-
+        if ChessEngine.is_check_mate() or ChessEngine.opponent_is_king_on_the_hill(self.board):
+            winner = "White" if self.board.game_result == constants.WHITE else "Black"
+            print("Checkmate! Winner is ", winner)
+            return "checkmate"
+        
         if self.is_ai_turn():
             move, counter = self.get_ai_move(max_depth, print_board, with_cut_off)
         else:
@@ -35,10 +39,6 @@ class ChessGame:
 
         self.perform_move(move)
         
-        if self.opponent_is_check_mate() or ChessEngine.opponent_is_king_on_the_hill(self.board):
-            winner = "White" if self.board.game_result == constants.WHITE else "Black"
-            print("Checkmate! Winner is ", winner)
-            return "checkmate"
         return move, counter
 
     def print_board(self):
@@ -82,12 +82,6 @@ class ChessGame:
             self.move_number += 1
         else:
             print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")
-
-    def opponent_is_check_mate(self):
-        return ChessEngine.opponent_is_check_mate(self.board)
-
-    def is_draw(self):
-        return ChessEngine.is_draw(self.currentLegalMoves, self.board)
 
 
 if __name__ == "__main__":
