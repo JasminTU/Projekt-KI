@@ -222,6 +222,11 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
         self.assertRaises(IllegalMoveException, ChessEngine.perform_move, 'h5a4', actualBoard)
 
+    def test_move_pawn_illegal_4(self):
+        actualBoard = ChessBoard()
+        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNB1KBNR b KQkq - 0 1")
+        self.assertRaises(IllegalMoveException, ChessEngine.perform_move, 'e2e4', actualBoard)
+
 
     def test_move_rook_legal_1(self):
         expectedBoard = ChessBoard()
