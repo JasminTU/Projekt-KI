@@ -222,8 +222,6 @@ class ChessBoard:
                     return entry['value'], counter + 1, entry['flag'], None
                 elif entry['flag'] == 'lowerbound':
                     alpha = max(alpha, entry['value'])
-                elif entry['flag'] == 'upperbound':
-                    beta = min(beta, entry['value'])
 
                 if alpha >= beta:
                     return entry['value'], counter + 1, entry['flag'], None
@@ -261,8 +259,6 @@ class ChessBoard:
             if entry['depth'] >= depth:
                 if entry['flag'] == 'exact':
                     return entry['value'], counter + 1, entry['flag'], None
-                elif entry['flag'] == 'lowerbound':
-                    alpha = max(alpha, entry['value'])
                 elif entry['flag'] == 'upperbound':
                     beta = min(beta, entry['value'])
 

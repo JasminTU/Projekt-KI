@@ -207,6 +207,14 @@ class TestChessBitboard(unittest.TestCase):
         ChessEngine.perform_move('f5g4', actualBoard)
         expectedBoard.load_from_fen("rnbqkbnr/ppppp1pp/8/8/6p1/8/PPPPPP1P/RNBQKBNR b KQkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+    def test_move_pawn_legal_11(self):
+        expectedBoard = ChessBoard()
+        actualBoard = ChessBoard()
+        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        ChessEngine.perform_move('e2e4', actualBoard)
+        expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
+        self.assertEqualBitboards(expectedBoard, actualBoard)
 
     def test_move_pawn_illegal_1(self):
         actualBoard = ChessBoard()
