@@ -397,6 +397,33 @@ class ChessEngine():
         return moves
 
     @staticmethod
+    def get_figure_at_field(board, field):
+        for figure in range(2, constants.KING):
+            if board.bitboards[figure] & field != 0:
+                return figure
+        return -1
+
+    @staticmethod
+    def get_figure_value(figure):
+        if figure == -1:
+            return 0
+        return {
+            constants.PAWN: 1,
+            constants.KNIGHT: 3,
+            constants.BISHOP: 3,
+            constants.ROOK: 5,
+            constants.QUEEN: 9,
+            constants.KING: 20,
+        }.get(figure, 0)
+
+    @staticmethod
+    def get_move_value(board, move):
+        from_square, to_square = move
+        victim = ChessEngine.get_figure_at_field(board, to_square)
+        aggressor = ChessEngine.get_figure_at_field(board, from_square)
+        return ChessEngine.get_figure_value(victim) - ChessEngine.get_figure_value(aggressor) if victim != -1 else 0
+
+    @staticmethod
     def print_legal_moves(board):
         legal_moves = ChessEngine.generate_moves(board)
         print(
