@@ -17,23 +17,16 @@ class ChessEngine():
         empty_squares = ~(board.bitboards[constants.WHITE] | board.bitboards[constants.BLACK])
         pawn_moves = []
 
-        white_pawn_bitboard = int(
-            "0b0000000000000000000000000000000000000000000000001111111100000000", 2
-        )
-        black_pawn_bitboard = int(
-            "0b0000000011111111000000000000000000000000000000000000000000000000", 2
-        )
-
         if board.current_player == constants.WHITE:
             one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & constants.NOT_TOP_EDGE) << 8 & empty_squares
-            two_steps = ((board.bitboards[constants.PAWN] & white_pawn_bitboard) << 16) & empty_squares
+            two_steps = one_step << 8 & empty_squares
             captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_LEFT_EDGE & constants.NOT_TOP_EDGE) << 7 & board.bitboards[
                 constants.BLACK]
             captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_RIGHT_EDGE & constants.NOT_TOP_EDGE) << 9 & board.bitboards[
                 constants.BLACK]
         else:
             one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & constants.NOT_BOTTOM_EDGE) >> 8 & empty_squares
-            two_steps = ((board.bitboards[constants.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
+            two_steps = one_step >> 8 & empty_squares
             captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_LEFT_EDGE & constants.NOT_BOTTOM_EDGE) >> 9 & board.bitboards[
                 constants.WHITE]
             captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_RIGHT_EDGE & constants.NOT_BOTTOM_EDGE) >> 7 & board.bitboards[

@@ -86,7 +86,7 @@ class ChessBoard:
         score = 0
         opponent = ChessBoard.get_opponent(self.current_player) # this is correct, since we always want to evaluate the board for the current player, before or after his move
         piece_values = {
-            constants.PAWN: 1, constants.KNIGHT: 3, constants.BISHOP: 3, constants.ROOK: 5, constants.QUEEN: 9, constants.KING: 20
+            constants.PAWN: 1, constants.KNIGHT: 3, constants.BISHOP: 3, constants.ROOK: 5, constants.QUEEN: 9, constants.KING: 200
         }
         occupied_squares = board_after_move.bitboards[constants.WHITE] | board_after_move.bitboards[constants.BLACK]
 
@@ -137,6 +137,7 @@ class ChessBoard:
         # TODO: evaluate pawn position and pawn type; calculate a (negative?) score for draw;
         
         return score
+    
     
     def _square_distance(self, square1, square2):
         # Assuming square1 and square2 are bitboards with a single bit set to 1
