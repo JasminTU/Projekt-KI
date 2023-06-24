@@ -191,7 +191,7 @@ class ChessBoard:
         start_time = time.time()
         
         for depth in range(1, max_depth + 1):
-            score, counter, move = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, with_cut_off)
+            score, counter, _,  move = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, with_cut_off)
             if best_score is None or score > best_score:
                 best_score = score
                 best_move = move
@@ -219,17 +219,17 @@ class ChessBoard:
             if entry['depth'] >= depth:
                 print("yes")
                 if entry['flag'] == 'exact':
-                    return entry['value'], counter + 1, None
+                    return entry['value'], counter + 1, entry['flag'], None
                 elif entry['flag'] == 'lowerbound':
                     alpha = max(alpha, entry['value'])
                 elif entry['flag'] == 'upperbound':
                     beta = min(beta, entry['value'])
 
                 if alpha >= beta:
-                    return entry['value'], counter + 1, None
+                    return entry['value'], counter + 1, entry['flag'], None
         # alpha beta:
         if depth_left == 0 or ChessEngine.is_game_over(self):
-            return self.evaluate_board(), counter + 1, None
+            return self.evaluate_board(), counter + 1, "exact", None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
         best_move = None
@@ -238,16 +238,17 @@ class ChessBoard:
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
                 score = -board_after_move.evaluate_board()
+                flag = "exact"
             else:
-                score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
-                self.store_hash_board_state(depth, score, type="lowerbound")
+                score, counter, flag, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
+                board_after_move.store_hash_board_state(depth, score, type=flag)
             
             if score >= beta and with_cut_off == True:
-                return beta, counter+1, None
+                return beta, counter+1, "lowerbound", None
             if score > alpha:
                 best_move = move
                 alpha = score
-        return alpha, counter+1, best_move
+        return alpha, counter+1, flag, best_move
 
     def alpha_beta_min(self, alpha, beta, depth_left, depth, counter, with_cut_off=True):
         # transposition table:
@@ -258,17 +259,17 @@ class ChessBoard:
             if entry['depth'] >= depth:
                 print("yes")
                 if entry['flag'] == 'exact':
-                    return entry['value'], counter + 1, None
+                    return entry['value'], counter + 1, entry['flag'], None
                 elif entry['flag'] == 'lowerbound':
                     alpha = max(alpha, entry['value'])
                 elif entry['flag'] == 'upperbound':
                     beta = min(beta, entry['value'])
 
                 if alpha >= beta:
-                    return entry['value'], counter + 1, None
+                    return entry['value'], counter + 1, entry['flag'], None
         # alpha beta:
         if depth_left == 0 or ChessEngine.is_game_over(self):
-            return -self.evaluate_board(), counter + 1, None
+            return -self.evaluate_board(), counter + 1, "exact", None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
         best_move = None
@@ -277,16 +278,17 @@ class ChessBoard:
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
                 score = board_after_move.evaluate_board()
+                flag = "exact"
             else:
-                score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
-                self.store_hash_board_state(depth, score, type="upperbound")
+                score, counter, flag,  _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
+                board_after_move.store_hash_board_state(depth, score, type=flag)
                 
             if score <= alpha and with_cut_off == True:
-                return alpha, counter+1, None
+                return alpha, counter+1, "upperbound", None
             if score < beta:
                 best_move = move
                 beta = score
-        return beta, counter+1, best_move
+        return beta, counter+1, flag, best_move
 
     @staticmethod
     def get_opponent(player):
