@@ -204,6 +204,7 @@ class ChessBoard:
     def transposition_table(self, depth, counter, alpha, beta):
         hash_key = self.zobrist_board_hash()
         if hash_key in self.hash_table:
+            print(counter)
             entry = self.hash_table[hash_key]
             # the stored depth has to be larger than the current depth to be meaningful
             if entry['depth'] >= depth:
@@ -220,6 +221,7 @@ class ChessBoard:
 
     def store_hash_board_state(self, depth, score, type):
         hash_key = self.zobrist_board_hash()
+        #print(hash_key)
         self.hash_table[hash_key] = {
             'depth': depth,
             'flag': type, # type is either exact, upperbound or lowerbound
@@ -229,9 +231,7 @@ class ChessBoard:
     def alpha_beta_max(self, alpha, beta, depth_left, depth,  counter, with_cut_off=True):
         if self.transposition_table(depth, counter, alpha, beta) is not None:
             return self.transposition_table(depth, counter, alpha, beta)
-        
         if depth_left == 0 or ChessEngine.is_game_over(self):
-            self.store_hash_board_state(depth, self.evaluate_board(), type="exact")
             return self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -243,9 +243,9 @@ class ChessBoard:
                 score = -board_after_move.evaluate_board()
             else:
                 score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
+                self.store_hash_board_state(depth, score, type="lowerbound")
             
             if score >= beta and with_cut_off == True:
-                self.store_hash_board_state(depth, score, type="lowerbound")
                 return beta, counter+1, None
             if score > alpha:
                 best_move = move
@@ -257,7 +257,6 @@ class ChessBoard:
             return self.transposition_table(depth, counter, alpha, beta)
         
         if depth_left == 0 or ChessEngine.is_game_over(self):
-            self.store_hash_board_state(depth, -self.evaluate_board(), type="exact")
             return -self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -269,8 +268,9 @@ class ChessBoard:
                 score = board_after_move.evaluate_board()
             else:
                 score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
-            if score <= alpha and with_cut_off == True:
                 self.store_hash_board_state(depth, score, type="upperbound")
+                
+            if score <= alpha and with_cut_off == True:
                 return alpha, counter+1, None
             if score < beta:
                 best_move = move
