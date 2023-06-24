@@ -193,16 +193,15 @@ class ChessBoard:
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
                 score = -board_after_move.evaluate_board()
-                counter += 1
             else:
                 score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter, with_cut_off)
             
             if score >= beta and with_cut_off:
-                return beta, counter, None
+                return beta, counter+1, None
             if score > alpha:
                 best_move = move
                 alpha = score
-        return alpha, counter, best_move
+        return alpha, counter+1, best_move
 
     def alpha_beta_min(self, alpha, beta, depth_left, counter, with_cut_off=True):
         if depth_left == 0 or ChessEngine.is_game_over(self):
@@ -215,15 +214,14 @@ class ChessBoard:
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
                 score = -board_after_move.evaluate_board()
-                counter += 1
             else:
                 score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter, with_cut_off)
             if score <= alpha and with_cut_off:
-                return alpha, counter, None
+                return alpha, counter+1, None
             if score < beta:
                 best_move = move
                 beta = score
-        return beta, counter, best_move
+        return beta, counter+1, best_move
 
     @staticmethod
     def get_opponent(player):
