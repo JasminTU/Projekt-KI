@@ -201,24 +201,6 @@ class ChessBoard:
             #     break
         return best_move, counter
 
-    def transposition_table(self, depth, counter, alpha, beta):
-        hash_key = self.zobrist_board_hash()
-        if hash_key in self.hash_table:
-            print(counter)
-            entry = self.hash_table[hash_key]
-            # the stored depth has to be larger than the current depth to be meaningful
-            if entry['depth'] >= depth:
-                if entry['flag'] == 'exact':
-                    return entry['value'], counter + 1, None
-                elif entry['flag'] == 'lowerbound':
-                    alpha = max(alpha, entry['value'])
-                elif entry['flag'] == 'upperbound':
-                    beta = min(beta, entry['value'])
-
-                if alpha >= beta:
-                    return entry['value'], counter + 1, None
-        return None
-
     def store_hash_board_state(self, depth, score, type):
         hash_key = self.zobrist_board_hash()
         #print(hash_key)
@@ -229,8 +211,23 @@ class ChessBoard:
         }
 
     def alpha_beta_max(self, alpha, beta, depth_left, depth,  counter, with_cut_off=True):
-        if self.transposition_table(depth, counter, alpha, beta) is not None:
-            return self.transposition_table(depth, counter, alpha, beta)
+        # transposition table:
+        hash_key = self.zobrist_board_hash()
+        if hash_key in self.hash_table:
+            entry = self.hash_table[hash_key]
+            # the stored depth has to be larger than the current depth to be meaningful
+            if entry['depth'] >= depth:
+                print("yes")
+                if entry['flag'] == 'exact':
+                    return entry['value'], counter + 1, None
+                elif entry['flag'] == 'lowerbound':
+                    alpha = max(alpha, entry['value'])
+                elif entry['flag'] == 'upperbound':
+                    beta = min(beta, entry['value'])
+
+                if alpha >= beta:
+                    return entry['value'], counter + 1, None
+        # alpha beta:
         if depth_left == 0 or ChessEngine.is_game_over(self):
             return self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
@@ -253,9 +250,23 @@ class ChessBoard:
         return alpha, counter+1, best_move
 
     def alpha_beta_min(self, alpha, beta, depth_left, depth, counter, with_cut_off=True):
-        if self.transposition_table(depth, counter, alpha, beta) is not None:
-            return self.transposition_table(depth, counter, alpha, beta)
-        
+        # transposition table:
+        hash_key = self.zobrist_board_hash()
+        if hash_key in self.hash_table:
+            entry = self.hash_table[hash_key]
+            # the stored depth has to be larger than the current depth to be meaningful
+            if entry['depth'] >= depth:
+                print("yes")
+                if entry['flag'] == 'exact':
+                    return entry['value'], counter + 1, None
+                elif entry['flag'] == 'lowerbound':
+                    alpha = max(alpha, entry['value'])
+                elif entry['flag'] == 'upperbound':
+                    beta = min(beta, entry['value'])
+
+                if alpha >= beta:
+                    return entry['value'], counter + 1, None
+        # alpha beta:
         if depth_left == 0 or ChessEngine.is_game_over(self):
             return -self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
