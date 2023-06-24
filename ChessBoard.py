@@ -7,6 +7,10 @@ from loguru import logger
 import time
 import numpy as np
 
+HASH_BOARD = np.random.randint(0, pow(2, 64), size=(64,12), dtype='uint64')
+RANDOM_INT_WHITE = int(np.random.randint(0, pow(2, 64), dtype='uint64'))
+RANDOM_INT_BLACK = int(np.random.randint(0, pow(2, 64), dtype='uint64'))
+hash_table = {}
 
 class ChessBoard:
     def __init__(self):
@@ -17,10 +21,6 @@ class ChessBoard:
         self.game_result = None
         self.board_history = []
         self.pawn_not_moved_counter = 0
-        self.hash_board = np.random.randint(0, pow(2, 64), size=(64,12), dtype='uint64')
-        self.random_int_white = int(np.random.randint(0, pow(2, 64), dtype='uint64'))
-        self.random_int_black = int(np.random.randint(0, pow(2, 64), dtype='uint64'))
-        self.hash_table = {}
 
     def initialize_bitboards(self):
         self.bitboards = [0] * 8
@@ -172,15 +172,15 @@ class ChessBoard:
 
 
     def zobrist_board_hash(self):
-        hash = self.random_int_white if self.current_player == constants.WHITE else self.random_int_black
+        hash = RANDOM_INT_WHITE if self.current_player == constants.WHITE else RANDOM_INT_BLACK
         occupied_fields = self.bitboards[constants.WHITE] | self.bitboards[constants.BLACK]
         while occupied_fields:
             figure_square = occupied_fields & -occupied_fields
             occupied_fields &= occupied_fields - 1
             figure = self._get_piece_at_square(figure_square)
             cell = figure_square.bit_length() - 1
-            # hash_board assignes each cell and each figure a random value, by xor with each piece we get a unique hash for each board state
-            num = self.hash_board[cell][figure - 2 if figure_square & self.bitboards[constants.WHITE] else figure + 4]
+            # HASH_BOARD assignes each cell and each figure a random value, by xor with each piece we get a unique hash for each board state
+            num = HASH_BOARD[cell][figure - 2 if figure_square & self.bitboards[constants.WHITE] else figure + 4]
             hash ^= int(num)
         return hash
 
@@ -189,6 +189,8 @@ class ChessBoard:
         best_move = None
         counter = 0
         start_time = time.time()
+        global hash_table
+        hash_table = {}
         
         for depth in range(1, max_depth + 1):
             score, counter, _,  move = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, with_cut_off)
@@ -203,8 +205,7 @@ class ChessBoard:
 
     def store_hash_board_state(self, depth, score, type):
         hash_key = self.zobrist_board_hash()
-        #print(hash_key)
-        self.hash_table[hash_key] = {
+        hash_table[hash_key] = {
             'depth': depth,
             'flag': type, # type is either exact, upperbound or lowerbound
             'value': score 
@@ -213,11 +214,10 @@ class ChessBoard:
     def alpha_beta_max(self, alpha, beta, depth_left, depth,  counter, with_cut_off=True):
         # transposition table:
         hash_key = self.zobrist_board_hash()
-        if hash_key in self.hash_table:
-            entry = self.hash_table[hash_key]
+        if hash_key in hash_table:
+            entry = hash_table[hash_key]
             # the stored depth has to be larger than the current depth to be meaningful
             if entry['depth'] >= depth:
-                print("yes")
                 if entry['flag'] == 'exact':
                     return entry['value'], counter + 1, entry['flag'], None
                 elif entry['flag'] == 'lowerbound':
@@ -227,8 +227,11 @@ class ChessBoard:
 
                 if alpha >= beta:
                     return entry['value'], counter + 1, entry['flag'], None
+
         # alpha beta:
-        if depth_left == 0 or ChessEngine.is_game_over(self):
+        if depth_left == 0:
+            return self.evaluate_board(), counter + 1, "lowerbound", None
+        elif ChessEngine.is_game_over(self):
             return self.evaluate_board(), counter + 1, "exact", None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -241,8 +244,7 @@ class ChessBoard:
                 flag = "exact"
             else:
                 score, counter, flag, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
-                board_after_move.store_hash_board_state(depth, score, type=flag)
-            
+                board_after_move.store_hash_board_state(depth + 1, score, type=flag)
             if score >= beta and with_cut_off == True:
                 return beta, counter+1, "lowerbound", None
             if score > alpha:
@@ -253,11 +255,10 @@ class ChessBoard:
     def alpha_beta_min(self, alpha, beta, depth_left, depth, counter, with_cut_off=True):
         # transposition table:
         hash_key = self.zobrist_board_hash()
-        if hash_key in self.hash_table:
-            entry = self.hash_table[hash_key]
+        if hash_key in hash_table:
+            entry = hash_table[hash_key]
             # the stored depth has to be larger than the current depth to be meaningful
             if entry['depth'] >= depth:
-                print("yes")
                 if entry['flag'] == 'exact':
                     return entry['value'], counter + 1, entry['flag'], None
                 elif entry['flag'] == 'lowerbound':
@@ -267,8 +268,11 @@ class ChessBoard:
 
                 if alpha >= beta:
                     return entry['value'], counter + 1, entry['flag'], None
+
         # alpha beta:
-        if depth_left == 0 or ChessEngine.is_game_over(self):
+        if depth_left == 0:
+            return -self.evaluate_board(), counter + 1, "upperbound", None
+        elif ChessEngine.is_game_over(self):
             return -self.evaluate_board(), counter + 1, "exact", None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -281,7 +285,7 @@ class ChessBoard:
                 flag = "exact"
             else:
                 score, counter, flag,  _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
-                board_after_move.store_hash_board_state(depth, score, type=flag)
+                board_after_move.store_hash_board_state(depth + 1, score, type=flag)
                 
             if score <= alpha and with_cut_off == True:
                 return alpha, counter+1, "upperbound", None
