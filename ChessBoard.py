@@ -5,6 +5,7 @@ import copy
 import math
 from loguru import logger
 import time
+import numpy as np
 
 
 class ChessBoard:
@@ -16,6 +17,10 @@ class ChessBoard:
         self.game_result = None
         self.board_history = []
         self.pawn_not_moved_counter = 0
+        self.hash_board = np.random.randint(0, pow(2, 64), size=(64,12), dtype='uint64')
+        self.random_int_white = int(np.random.randint(0, pow(2, 64), dtype='uint64'))
+        self.random_int_black = int(np.random.randint(0, pow(2, 64), dtype='uint64'))
+        self.hash_table = {}
 
     def initialize_bitboards(self):
         self.bitboards = [0] * 8
@@ -165,14 +170,28 @@ class ChessBoard:
         service = ChessPrintService()
         logger.error("Error in method _get_piece_at_square(). No figure is on the input square: {}. \n Given the board: {}", ChessEngine.binary_field_to_algebraic(square), service.print_board(self.bitboards))
 
-    def iterative_depth_search(self, max_depth, time_limit = 12000, with_cut_off=True):
+
+    def zobrist_board_hash(self):
+        hash = self.random_int_white if self.current_player == constants.WHITE else self.random_int_black
+        occupied_fields = self.bitboards[constants.WHITE] | self.bitboards[constants.BLACK]
+        while occupied_fields:
+            figure_square = occupied_fields & -occupied_fields
+            occupied_fields &= occupied_fields - 1
+            figure = self._get_piece_at_square(figure_square)
+            cell = figure_square.bit_length() - 1
+            # hash_board assignes each cell and each figure a random value, by xor with each piece we get a unique hash for each board state
+            num = self.hash_board[cell][figure - 2 if figure_square & self.bitboards[constants.WHITE] else figure + 4]
+            hash ^= int(num)
+        return hash
+
+    def iterative_depth_search(self, max_depth, with_cut_off=True, time_limit = 12000):
         best_score = None
         best_move = None
         counter = 0
         start_time = time.time()
         
         for depth in range(1, max_depth + 1):
-            score, counter, move = self.alpha_beta_max(-math.inf, math.inf, depth, counter, with_cut_off)
+            score, counter, move = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, with_cut_off)
             if best_score is None or score > best_score:
                 best_score = score
                 best_move = move
@@ -182,8 +201,37 @@ class ChessBoard:
             #     break
         return best_move, counter
 
-    def alpha_beta_max(self, alpha, beta, depth_left, counter, with_cut_off=True):
+    def transposition_table(self, depth, counter, alpha, beta):
+        hash_key = self.zobrist_board_hash()
+        if hash_key in self.hash_table:
+            entry = self.hash_table[hash_key]
+            # the stored depth has to be larger than the current depth to be meaningful
+            if entry['depth'] >= depth:
+                if entry['flag'] == 'exact':
+                    return entry['value'], counter + 1, None
+                elif entry['flag'] == 'lowerbound':
+                    alpha = max(alpha, entry['value'])
+                elif entry['flag'] == 'upperbound':
+                    beta = min(beta, entry['value'])
+
+                if alpha >= beta:
+                    return entry['value'], counter + 1, None
+        return None
+
+    def store_hash_board_state(self, depth, score, type):
+        hash_key = self.zobrist_board_hash()
+        self.hash_table[hash_key] = {
+            'depth': depth,
+            'flag': type, # type is either exact, upperbound or lowerbound
+            'value': score 
+        }
+
+    def alpha_beta_max(self, alpha, beta, depth_left, depth,  counter, with_cut_off=True):
+        if self.transposition_table(depth, counter, alpha, beta) is not None:
+            return self.transposition_table(depth, counter, alpha, beta)
+        
         if depth_left == 0 or ChessEngine.is_game_over(self):
+            self.store_hash_board_state(depth, self.evaluate_board(), type="exact")
             return self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -193,19 +241,23 @@ class ChessBoard:
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
                 score = -board_after_move.evaluate_board()
-                counter += 1
             else:
-                score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, counter, with_cut_off)
+                score, counter, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
             
-            if score >= beta and with_cut_off:
-                return beta, counter, None
+            if score >= beta and with_cut_off == True:
+                self.store_hash_board_state(depth, score, type="lowerbound")
+                return beta, counter+1, None
             if score > alpha:
                 best_move = move
                 alpha = score
-        return alpha, counter, best_move
+        return alpha, counter+1, best_move
 
-    def alpha_beta_min(self, alpha, beta, depth_left, counter, with_cut_off=True):
+    def alpha_beta_min(self, alpha, beta, depth_left, depth, counter, with_cut_off=True):
+        if self.transposition_table(depth, counter, alpha, beta) is not None:
+            return self.transposition_table(depth, counter, alpha, beta)
+        
         if depth_left == 0 or ChessEngine.is_game_over(self):
+            self.store_hash_board_state(depth, -self.evaluate_board(), type="exact")
             return -self.evaluate_board(), counter + 1, None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
@@ -214,16 +266,16 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
-                score = -board_after_move.evaluate_board()
-                counter += 1
+                score = board_after_move.evaluate_board()
             else:
-                score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, counter, with_cut_off)
-            if score <= alpha and with_cut_off:
-                return alpha, counter, None
+                score, counter, _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
+            if score <= alpha and with_cut_off == True:
+                self.store_hash_board_state(depth, score, type="upperbound")
+                return alpha, counter+1, None
             if score < beta:
                 best_move = move
                 beta = score
-        return beta, counter, best_move
+        return beta, counter+1, best_move
 
     @staticmethod
     def get_opponent(player):
