@@ -253,7 +253,7 @@ class ChessEngine():
         copied_chessBoard = copy.deepcopy(board)
         board.board_history.append(copied_chessBoard.bitboards)
         # Increase pawn counter for draw by 50 moves
-        board.pawn_not_moved_counter = 0 if (from_square & board.bitboards[constants.PAWN]) != 0 else board.pawn_not_moved_counter + 1
+        board.pawn_not_moved_counter = 0 if (to_square & board.bitboards[constants.PAWN]) != 0 else board.pawn_not_moved_counter + 1
         # Check for game phase
         if board.opening_bitboard & from_square:
             board.opening_bitboard ^= from_square
@@ -292,8 +292,8 @@ class ChessEngine():
         # checks if current player is in check mate --> current player lost
         if not ChessEngine.is_in_check(board):
             return False
-        legal_moves = ChessEngine.generate_moves(board)
-        for move in legal_moves:
+        moves = ChessEngine.generate_moves(board)
+        for move in moves:
             board_after_move = copy.deepcopy(board)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=True):
@@ -306,8 +306,8 @@ class ChessEngine():
         # checks if opponent is in check mate --> opponent lost
         if not ChessEngine.is_in_check(board, isOpponent=True):
             return False
-        legal_moves = ChessEngine.generate_moves(board)
-        for move in legal_moves:
+        moves = ChessEngine.generate_moves(board)
+        for move in moves:
             board_after_move = copy.deepcopy(board)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=False):
@@ -328,7 +328,7 @@ class ChessEngine():
     @staticmethod
     def is_draw(legal_moves, board):
         # TODO: There is one more draw rule "50-Züge-Regel"
-        if not legal_moves and not board.is_in_check(board):
+        if not legal_moves and not ChessEngine.is_in_check(board):
             print("Draw by Patt!")
             board.game_result = constants.DRAW
             return True
@@ -337,6 +337,7 @@ class ChessEngine():
             board.game_result = constants.DRAW
             return True
         if board.pawn_not_moved_counter >= 50:
+            print("Draw by pawn not moved!")
             board.game_result = constants.DRAW
             return True
         return False

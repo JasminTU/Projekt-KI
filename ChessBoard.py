@@ -194,7 +194,7 @@ class ChessBoard:
             
         # 2. Piece count: midgame -> endgame: In general, the midgame is characterized by a higher number of pieces on the board, while the endgame typically has fewer pieces remaining
         if self.game_phase == "midgame":
-            piece_count_limit = 8 # at 8 remaining pieces, we enter the endgame
+            piece_count_limit = 16 # at 8 remaining pieces, we enter the endgame
             all_pieces = self.bitboards[constants.WHITE] | self.bitboards[constants.BLACK]
             count_pieces = ChessBoard._count_set_bits(all_pieces)
             if count_pieces <= piece_count_limit:
@@ -412,29 +412,49 @@ if __name__ == "__main__":
     # board.evaluate_board()
     
     board = ChessBoard()
-    board.load_from_fen("rn2k3/pp4pp/4p3/2P1N3/3P1B2/2N5/1P4PP/R4K1R b KQq - 0 1")
+    board.load_from_fen("2Q5/R5p1/5k1p/2p5/4pB2/2N5/1P4PP/5K1R w - - 0 1")
     best_move, counter = board.iterative_depth_search(3, True)
     ChessEngine.perform_move(best_move, board, move_type="binary")
-    service.print_binary_bitboard(board.bitboards[constants.WHITE])
-    service.print_binary_bitboard(board.bitboards[constants.BLACK])
-    print(board.bitboards[constants.WHITE].bit_length() - 1)
-    print(board.bitboards[constants.BLACK].bit_length() - 1)
+    # service.print_binary_bitboard(board.bitboards[constants.WHITE])
+    # service.print_binary_bitboard(board.bitboards[constants.BLACK])
+
     print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
     
     best_move, counter = board.iterative_depth_search(3, True)
-    ChessEngine.perform_move(best_move, board, move_type="binary")
-    service.print_binary_bitboard(board.bitboards[constants.WHITE])
-    service.print_binary_bitboard(board.bitboards[constants.BLACK])
-    print(board.bitboards[constants.WHITE].bit_length() - 1)
-    print(board.bitboards[constants.BLACK].bit_length() - 1)
     print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    ChessEngine.perform_move(best_move, board, move_type="binary")
+    
+    best_move, counter = board.iterative_depth_search(3, True)
+    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    ChessEngine.perform_move(best_move, board, move_type="binary")
+    
+    best_move, counter = board.iterative_depth_search(3, True)
+    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    ChessEngine.perform_move(best_move, board, move_type="binary")
+    
+    best_move, counter = board.iterative_depth_search(3, True)
+    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    ChessEngine.perform_move(best_move, board, move_type="binary")
+    
+    best_move, counter = board.iterative_depth_search(3, True)
+    print(best_move)
+    moves = ChessEngine.get_move_by_figure(board, constants.KING)
+    legal_moves = ChessEngine.filter_illegal_moves(board, moves)
+    print(legal_moves)
+    print(ChessEngine.is_check_mate(board))
+    # print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    # ChessEngine.perform_move(best_move, board, move_type="binary")
+    # service.print_binary_bitboard(board.bitboards[constants.WHITE])
+    # service.print_binary_bitboard(board.bitboards[constants.BLACK])
+    # print(board.bitboards[constants.WHITE].bit_length() - 1)
+    # print(board.bitboards[constants.BLACK].bit_length() - 1)
 
     # for piece in range(2, 8):
     #     print(board.bitboards[piece].bit_length() - 1)
     # service.print_binary_bitboard(board.bitboards[constants.WHITE])
     # service.print_binary_bitboard(board.bitboards[constants.BLACK])
     
-    from_square = 1125899906842624
-    to_square = 73786976294838206464
-    print(to_square.bit_length() - 1)
-    
+    # moves = ChessEngine.get_move_by_figure(board, constants.KING)
+    # legal_moves = ChessEngine.filter_illegal_moves(board, moves)
+    # for move in legal_moves:
+    #     print(ChessEngine.binary_move_to_algebraic(move[0], move[1]))
