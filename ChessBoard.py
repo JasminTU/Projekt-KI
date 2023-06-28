@@ -81,7 +81,7 @@ class ChessBoard:
         # Evaluate the board after a move or on current board
         # The evaluation method should be symmetric
         # TODO: there are a lot of hardcoded values to compute the score, need for improvement
-        game_phase = "midgame"
+        self.game_phase = "midgame"
         board_after_move = copy.deepcopy(self)
         if move:
             ChessEngine.perform_move(move, board_after_move, move_type, with_validation=False)
@@ -94,7 +94,7 @@ class ChessBoard:
         
         occupied_squares = board_after_move.bitboards[constants.WHITE] | board_after_move.bitboards[constants.BLACK]
         
-        piece_values = constants.PIECE_VALUES_MIDGAME if game_phase == "midgame" or game_phase == "opening" else constants.PIECE_VALUES_ENDGAME
+        piece_values = constants.PIECE_VALUES_MIDGAME if self.game_phase == "midgame" or self.game_phase == "opening" else constants.PIECE_VALUES_ENDGAME
 
         while occupied_squares:
             square = occupied_squares & -occupied_squares
@@ -107,7 +107,7 @@ class ChessBoard:
             
             # Bonus based on the pawn structure: isolated, passed and connected
             if piece == constants.PAWN:
-                board_after_move._get_pawn_value(square, game_phase)
+                board_after_move._get_pawn_value(square)
                 
             # Bonus points for controlling the center
             if square & CENTER__MASK:
@@ -115,11 +115,11 @@ class ChessBoard:
                 center_distance = abs(row - 3.5) + abs(col - 3.5)
                 score += CENTER_CONTROL_VALUE / (center_distance + 1) if square & board_after_move.bitboards[self.current_player] else - CENTER_CONTROL_VALUE / (center_distance + 1)
             
-            # Bonus based on the position of the figure: Piece square tables for mid and endgame
+            # Bonus based on the position of the figure: Piece square tables for opening, midgame and endgame
             if square & board_after_move.bitboards[self.current_player]:
-                score += constants.get_figure_value(self.current_player, square.bit_length() - 1, piece, game_phase)
+                score += constants.get_figure_value(self.current_player, square.bit_length() - 1, piece, self.game_phase)
             elif square & board_after_move.bitboards[opponent]:
-                score -= constants.get_figure_value(opponent, square.bit_length() - 1, piece, game_phase)
+                score -= constants.get_figure_value(opponent, square.bit_length() - 1, piece, self.game_phase)
                 
             # Penalty for pieces near the enemy king
             if square & board_after_move.bitboards[self.current_player]:
@@ -155,7 +155,7 @@ class ChessBoard:
         
         return score
     
-    def _get_pawn_value(self, pawn_position, game_phase):
+    def _get_pawn_value(self, pawn_position):
         """
         Define the pawn value based on its positioning to other figures: isolated, connected, passed
         See: https://en.wikipedia.org/wiki/Chess_piece_relative_value
@@ -164,9 +164,9 @@ class ChessBoard:
         bitboard = self.bitboards[constants.PAWN] & self.bitboards[self.current_player]
         opponent_pawns = self.bitboards[constants.PAWN] & self.bitboards[self.get_opponent(self.current_player)]
 
-        if game_phase == "midgame":
+        if self.game_phase == "midgame" or self.game_phase == "opening":
             pawn_value = constants.PIECE_VALUES_MIDGAME[constants.PAWN]
-        elif game_phase == "endgame":
+        elif self.game_phase == "endgame":
             pawn_value = constants.PIECE_VALUES_ENDGAME[constants.PAWN]
         else:
             logger.error("Error in _get_pawn_value(): No such game phase.")
