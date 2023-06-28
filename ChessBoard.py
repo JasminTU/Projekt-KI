@@ -93,7 +93,8 @@ class ChessBoard:
 
         
         occupied_squares = board_after_move.bitboards[constants.WHITE] | board_after_move.bitboards[constants.BLACK]
-        piece_values = constants.PIECE_VALUES_MIDGAME if game_phase == "midgame" else constants.PIECE_VALUES_ENDGAME
+        
+        piece_values = constants.PIECE_VALUES_MIDGAME if game_phase == "midgame" or game_phase == "opening" else constants.PIECE_VALUES_ENDGAME
 
         while occupied_squares:
             square = occupied_squares & -occupied_squares
