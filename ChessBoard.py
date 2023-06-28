@@ -183,7 +183,7 @@ class ChessBoard:
     
     def set_game_phase(self):
         # 1. Piece developement: Opening -> midgame
-        if board.opening_count >= 7 & self.game_phase == "opening":
+        if self.game_phase == "opening" and self.opening_count >= 7:
             self.game_phase = "midgame"
             
         # 2. Piece count: midgame -> endgame: In general, the midgame is characterized by a higher number of pieces on the board, while the endgame typically has fewer pieces remaining
