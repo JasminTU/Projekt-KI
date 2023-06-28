@@ -14,7 +14,7 @@ class ChessEngine():
 
     @staticmethod
     def get_pawn_moves(board):
-        empty_squares = ~(board.bitboards[constants.WHITE] | board.bitboards[constants.BLACK])
+        empty_squares = (board.bitboards[constants.WHITE] | board.bitboards[constants.BLACK]) ^ constants.MAX_VALUE
         pawn_moves = []
 
         if board.current_player == constants.WHITE:
@@ -64,6 +64,9 @@ class ChessEngine():
                     from_square = (
                         to_square >> 9 if board.current_player == constants.WHITE else to_square << 7
                     )
+                if to_square.bit_length() - 1 > 63:
+                    logger.error("Unhandled invalid operation: bitlength over 63, which might cause unexpected errors...")
+
 
                 pawn_moves.append((from_square, to_square))
                 move &= move - 1
@@ -223,7 +226,13 @@ class ChessEngine():
             board.bitboards[opponent] |= to_square
         else:
             logger.error("Error in method perform_move(). There is no figure on th eposition from_square: {}", ChessEngine.binary_field_to_algebraic(from_square))
-
+        
+        # for debugging:
+        if board.bitboards[board.current_player].bit_length() - 1 > 63:
+            logger.error("Unhandled invalid operation in bitboards.[{}]: bitlength over 63, which might cause unexpected errors...", board.current_player)
+        if board.bitboards[opponent].bit_length() - 1 > 63:
+            logger.error("Unhandled invalid operation in bitboards.[{}]: bitlength over 63, which might cause unexpected errors...", opponent)
+        
         for piece in range(constants.PAWN, constants.KING + 1):
             # Remove a possibly captured piece from the destination
             board.bitboards[piece] &= (to_square ^ constants.MAX_VALUE)
@@ -232,6 +241,9 @@ class ChessEngine():
                 board.bitboards[piece] &= (from_square ^ constants.MAX_VALUE)
                 # Move the piece to the new position
                 board.bitboards[piece] |= to_square
+            # for debugging:
+            if board.bitboards[piece].bit_length() - 1 > 63:
+                logger.error("Unhandled invalid operation in bitboards.[{}]: bitlength over 63, which might cause unexpected errors...", piece)
         
         # convert the pawn if it moves to last row
         ChessEngine._convert_pawn(board, to_square)
@@ -325,7 +337,6 @@ class ChessEngine():
             board.game_result = constants.DRAW
             return True
         if board.pawn_not_moved_counter >= 50:
-            print("Draw by no pawn moved for 50 moves!")
             board.game_result = constants.DRAW
             return True
         return False

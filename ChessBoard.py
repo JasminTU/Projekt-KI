@@ -390,11 +390,51 @@ class ChessBoard:
 
 
 if __name__ == "__main__":
-    board = ChessBoard()
-    board.load_from_fen("rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNB1KBNR w KQkq - 0 1")
+    # board = ChessBoard()
+    # board.load_from_fen("rn2k3/pp4p1/4p2p/2P1N3/3P1B2/2N5/1P4PP/R4K1R w KQq - 0 1")
     service = ChessPrintService()
     pawn = int("0b0000000000000000000000000000000000000000000000000000000000010000", 2)
     # pawn=int("0b0000000000000000000000000000000000010000000000001111111111111111", 2)
     #      int("0b0000000000000000000000000000000000000000000000001111111111111111", 2)
-    service.print_binary_bitboard(pawn)
-    board.evaluate_board()
+    # figure_square = 73786976294838206464
+    # figure = 2
+    # cell = 66
+    # occupied_fields = 0
+    # white = 73786976364229083809
+    # black = 1387971252102103040
+    
+    # binary_number = bin(figure_square)[2:]
+    # binary_number_with_newlines = '\n'.join(binary_number[i:i+8] for i in range(0, len(binary_number), 8))
+    # print(binary_number_with_newlines)    
+    # print(figure_square.bit_length() - 1)
+
+    # service.print_binary_bitboard(black)
+    # board.evaluate_board()
+    
+    board = ChessBoard()
+    board.load_from_fen("rn2k3/pp4pp/4p3/2P1N3/3P1B2/2N5/1P4PP/R4K1R b KQq - 0 1")
+    best_move, counter = board.iterative_depth_search(3, True)
+    ChessEngine.perform_move(best_move, board, move_type="binary")
+    service.print_binary_bitboard(board.bitboards[constants.WHITE])
+    service.print_binary_bitboard(board.bitboards[constants.BLACK])
+    print(board.bitboards[constants.WHITE].bit_length() - 1)
+    print(board.bitboards[constants.BLACK].bit_length() - 1)
+    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    
+    best_move, counter = board.iterative_depth_search(3, True)
+    ChessEngine.perform_move(best_move, board, move_type="binary")
+    service.print_binary_bitboard(board.bitboards[constants.WHITE])
+    service.print_binary_bitboard(board.bitboards[constants.BLACK])
+    print(board.bitboards[constants.WHITE].bit_length() - 1)
+    print(board.bitboards[constants.BLACK].bit_length() - 1)
+    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+
+    # for piece in range(2, 8):
+    #     print(board.bitboards[piece].bit_length() - 1)
+    # service.print_binary_bitboard(board.bitboards[constants.WHITE])
+    # service.print_binary_bitboard(board.bitboards[constants.BLACK])
+    
+    from_square = 1125899906842624
+    to_square = 73786976294838206464
+    print(to_square.bit_length() - 1)
+    
