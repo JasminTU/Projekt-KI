@@ -242,7 +242,13 @@ class ChessEngine():
         board.board_history.append(copied_chessBoard.bitboards)
         # Increase pawn counter for draw by 50 moves
         board.pawn_not_moved_counter = 0 if (from_square & board.bitboards[constants.PAWN]) != 0 else board.pawn_not_moved_counter + 1
-
+        # Check for game phase
+        if board.opening_bitboard & from_square:
+            board.opening_bitboard ^= from_square
+            board.opening_count += 1
+        # Update the game phase after each move
+        board.set_game_phase()
+        
     @staticmethod
     def _convert_pawn(board, to_square):
         TOP_EDGE = constants.NOT_TOP_EDGE ^ constants.MAX_VALUE # invert not top edge
