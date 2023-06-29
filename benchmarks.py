@@ -34,7 +34,7 @@ class ChessEngineBenchmark:
         print(f"Average time per test: {average_time} milliseconds\n")
 
     @staticmethod
-    def benchmark_chess_engine_alpha_beta(fen, with_cut_off=True):
+    def benchmark_chess_engine_alpha_beta(fen, depth, with_cut_off=True):
         total_time = 0.0
         num_tests = 1
 
@@ -43,27 +43,27 @@ class ChessEngineBenchmark:
         else:
             print("MinMax")
         print(f"FEN: {fen}")
-        for depth in range(1, 4):
-            for _ in range(num_tests):
-                board = ChessBoard()
-                board.load_from_fen(fen)
-                game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
+        
+        for _ in range(num_tests):
+            board = ChessBoard()
+            board.load_from_fen(fen)
+            game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
 
-                start_time = time.time()
+            start_time = time.time()
 
-                # process_next_move() calls iterative_depth_search()
-                move, counter = game.process_next_move(depth, print_board=False, with_cut_off=with_cut_off)
+            # process_next_move() calls iterative_depth_search()
+            move, counter = game.process_next_move(depth, print_board=False, with_cut_off=with_cut_off)
 
-                end_time = time.time()
-                elapsed_time = end_time - start_time
-                total_time += elapsed_time
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            total_time += elapsed_time
 
-            average_time = total_time / num_tests
-            average_time = round(average_time, 4)  # Round to 4 decimal places
-            print(f"Depth: {depth}")
-            print(f"Counter: {counter}")
-            print(f"Best Move: {ChessEngine.binary_move_to_algebraic(move[0], move[1])}")
-            print(f"Time: {average_time:.4f} seconds\n")
+        average_time = total_time / num_tests
+        average_time = round(average_time, 4)  # Round to 4 decimal places
+        print(f"Depth: {depth}")
+        print(f"Counter: {counter}")
+        print(f"Best Move: {ChessEngine.binary_move_to_algebraic(move[0], move[1])}")
+        print(f"Time: {average_time:.4f} seconds\n")
 
     def benchmark_fen1(self):
         fen1 = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w"
@@ -79,35 +79,35 @@ class ChessEngineBenchmark:
 
     def benchmark_fen_alpha_beta1(self):
         fen1 = "r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen1)
+        self.benchmark_chess_engine_alpha_beta(fen1, depth=4)
 
     def benchmark_fen_alpha_beta2(self):
         fen2 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen2)
+        self.benchmark_chess_engine_alpha_beta(fen2, depth=4)
 
     def benchmark_fen_alpha_beta3(self):
         fen3 = "2k5/6q1/3P1P2/4N3/8/1K6/8/8 w - - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen3)
+        self.benchmark_chess_engine_alpha_beta(fen3, depth=4)
 
     def benchmark_fen_alpha_beta4(self):
         fen4 = "r2qr1k1/p4ppp/2Q1b3/4N3/5B2/3BnP2/PP4PP/R4RK1 w - - 0 19"
-        self.benchmark_chess_engine_alpha_beta(fen4)
+        self.benchmark_chess_engine_alpha_beta(fen4, depth=4)
 
-    def benchmark_fen_minmax1(self):
-        fen1 = "r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen1, with_cut_off=False)
+    # def benchmark_fen_minmax1(self):
+    #     fen1 = "r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1"
+    #     self.benchmark_chess_engine_alpha_beta(fen1, with_cut_off=False)
 
-    def benchmark_fen_minmax2(self):
-        fen2 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen2, with_cut_off=False)
+    # def benchmark_fen_minmax2(self):
+    #     fen2 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
+    #     self.benchmark_chess_engine_alpha_beta(fen2, with_cut_off=False)
 
-    def benchmark_fen_minmax3(self):
-        fen3 = "2k5/6q1/3P1P2/4N3/8/1K6/8/8 w - - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen3, with_cut_off=False)
+    # def benchmark_fen_minmax3(self):
+    #     fen3 = "2k5/6q1/3P1P2/4N3/8/1K6/8/8 w - - 0 1"
+    #     self.benchmark_chess_engine_alpha_beta(fen3, with_cut_off=False)
 
-    def benchmark_fen_minmax4(self):
-        fen4 = "r2qr1k1/p4ppp/2Q1b3/4N3/5B2/3BnP2/PP4PP/R4RK1 w - - 0 19"
-        self.benchmark_chess_engine_alpha_beta(fen4, with_cut_off=False)
+    # def benchmark_fen_minmax4(self):
+    #     fen4 = "r2qr1k1/p4ppp/2Q1b3/4N3/5B2/3BnP2/PP4PP/R4RK1 w - - 0 19"
+    #     self.benchmark_chess_engine_alpha_beta(fen4, with_cut_off=False)
 
 
 if __name__ == "__main__":
@@ -116,10 +116,10 @@ if __name__ == "__main__":
     # benchmark.benchmark_fen2()
     # benchmark.benchmark_fen3()
     benchmark.benchmark_fen_alpha_beta1()
-    benchmark.benchmark_fen_minmax1()
+    # benchmark.benchmark_fen_minmax1()
     benchmark.benchmark_fen_alpha_beta2()
-    benchmark.benchmark_fen_minmax2()
-    # benchmark.benchmark_fen_alpha_beta3()
+    # benchmark.benchmark_fen_minmax2()
+    benchmark.benchmark_fen_alpha_beta3()
     # benchmark.benchmark_fen_minmax3()
-    # benchmark.benchmark_fen_alpha_beta4()
+    benchmark.benchmark_fen_alpha_beta4()
     # benchmark.benchmark_fen_minmax4()

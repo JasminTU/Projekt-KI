@@ -25,8 +25,12 @@ class ChessGame:
             self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
         # Check for draw and checkmate before the move is exercised
-        if self.is_draw():  # more detailed print is in draw function
+        if ChessEngine.is_draw(self.currentLegalMoves, self.board):  # more detailed print is in draw function
             return "draw"
+        if ChessEngine.is_check_mate(self.board) or ChessEngine.opponent_is_king_on_the_hill(self.board):
+            winner = "White" if self.board.game_result == constants.WHITE else "Black"
+            print("Checkmate! Winner is ", winner)
+            return "checkmate"
 
         if self.is_ai_turn():
             move, counter = self.get_ai_move(max_depth, print_board, with_cut_off)
@@ -34,12 +38,7 @@ class ChessGame:
             move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
 
         self.perform_move(move)
-        
-        if self.opponent_is_check_mate() or ChessEngine.opponent_is_king_on_the_hill(self.board):
-            winner = "White" if self.board.game_result == constants.WHITE else "Black"
-            print("Checkmate! Winner is ", winner)
-            return "checkmate"
-        return move, counter
+
 
     def print_board(self):
         ChessPrintService.print_board(self.board.bitboards)
@@ -64,7 +63,7 @@ class ChessGame:
 
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
-            return sys.exit(1)
+            sys.exit(1)
         best_move, counter = self.board.iterative_depth_search(max_depth, with_cut_off)
         str = "White" if self.board.current_player == constants.WHITE else "Black"
         if print_move:
@@ -83,15 +82,11 @@ class ChessGame:
         else:
             print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")
 
-    def opponent_is_check_mate(self):
-        return ChessEngine.opponent_is_check_mate(self.board)
-
-    def is_draw(self):
-        return ChessEngine.is_draw(self.currentLegalMoves, self.board)
-
 
 if __name__ == "__main__":
-    game = ChessGame(ChessBoard(), isBlackAI=True, isWhiteAI=True)
+    board = ChessBoard()
+    # board.load_from_fen("2Q5/R5p1/5k1p/2p5/4pB2/2N5/1P4PP/5K1R w - - 0 1")
+    game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
     game.play()
     
     # service = ChessPrintService()

@@ -207,6 +207,14 @@ class TestChessBitboard(unittest.TestCase):
         ChessEngine.perform_move('f5g4', actualBoard)
         expectedBoard.load_from_fen("rnbqkbnr/ppppp1pp/8/8/6p1/8/PPPPPP1P/RNBQKBNR b KQkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
+        
+    def test_move_pawn_legal_11(self):
+        expectedBoard = ChessBoard()
+        actualBoard = ChessBoard()
+        actualBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        ChessEngine.perform_move('e2e4', actualBoard)
+        expectedBoard.load_from_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
+        self.assertEqualBitboards(expectedBoard, actualBoard)
 
     def test_move_pawn_illegal_1(self):
         actualBoard = ChessBoard()
@@ -786,7 +794,26 @@ class TestChessBitboard(unittest.TestCase):
         actualBoard.load_from_fen("r1bqk1nr/8/2n3P1/p1bP4/4KPp1/p1N5/8/R1B2BNR b HAkq - 0 1")
         self.assertTrue(ChessEngine.is_game_over(actualBoard))
 
-
+    def test_zobrist_board_hash_1(self):
+        actualBoard = ChessBoard()
+        actualBoard.load_from_fen("8/8/2r5/8/8/8/4B3/8 w - - 0 1")
+        
+        old_hash = actualBoard.zobrist_board_hash()
+        ChessEngine.perform_move('e2d3', actualBoard)
+        actualBoard.current_player = constants.WHITE
+        ChessEngine.perform_move('d3e2', actualBoard)
+        actualBoard.current_player = constants.WHITE
+        new_hash = actualBoard.zobrist_board_hash()
+        self.assertEqual(old_hash, new_hash)
+        
+    def test_zobrist_board_hash_2(self):
+        actualBoard = ChessBoard()
+        actualBoard.load_from_fen("8/8/2r5/8/8/8/4B3/8 w - - 0 1")
+        actualBoard.current_player = constants.BLACK
+        black_hash = actualBoard.zobrist_board_hash()
+        actualBoard.current_player = constants.WHITE
+        white_hash = actualBoard.zobrist_board_hash()
+        self.assertNotEqual(black_hash, white_hash)
 
     # def test_en_passant(self):
     #     actualBoard.load_from_fen("4k3/8/8/4pP2/8/8/8/4K3 w - e6 0 2")

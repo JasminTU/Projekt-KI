@@ -14,26 +14,19 @@ class ChessEngine():
 
     @staticmethod
     def get_pawn_moves(board):
-        empty_squares = ~(board.bitboards[constants.WHITE] | board.bitboards[constants.BLACK])
+        empty_squares = (board.bitboards[constants.WHITE] | board.bitboards[constants.BLACK]) ^ constants.MAX_VALUE
         pawn_moves = []
-
-        white_pawn_bitboard = int(
-            "0b0000000000000000000000000000000000000000000000001111111100000000", 2
-        )
-        black_pawn_bitboard = int(
-            "0b0000000011111111000000000000000000000000000000000000000000000000", 2
-        )
 
         if board.current_player == constants.WHITE:
             one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & constants.NOT_TOP_EDGE) << 8 & empty_squares
-            two_steps = ((board.bitboards[constants.PAWN] & white_pawn_bitboard) << 16) & empty_squares
+            two_steps = one_step << 8 & empty_squares
             captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_LEFT_EDGE & constants.NOT_TOP_EDGE) << 7 & board.bitboards[
                 constants.BLACK]
             captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_RIGHT_EDGE & constants.NOT_TOP_EDGE) << 9 & board.bitboards[
                 constants.BLACK]
         else:
             one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & constants.NOT_BOTTOM_EDGE) >> 8 & empty_squares
-            two_steps = ((board.bitboards[constants.PAWN] & black_pawn_bitboard) >> 16) & empty_squares
+            two_steps = one_step >> 8 & empty_squares
             captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_LEFT_EDGE & constants.NOT_BOTTOM_EDGE) >> 9 & board.bitboards[
                 constants.WHITE]
             captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_RIGHT_EDGE & constants.NOT_BOTTOM_EDGE) >> 7 & board.bitboards[
@@ -71,6 +64,9 @@ class ChessEngine():
                     from_square = (
                         to_square >> 9 if board.current_player == constants.WHITE else to_square << 7
                     )
+                if to_square.bit_length() - 1 > 63:
+                    logger.error("Unhandled invalid operation: bitlength over 63, which might cause unexpected errors...")
+
 
                 pawn_moves.append((from_square, to_square))
                 move &= move - 1
@@ -230,7 +226,13 @@ class ChessEngine():
             board.bitboards[opponent] |= to_square
         else:
             logger.error("Error in method perform_move(). There is no figure on th eposition from_square: {}", ChessEngine.binary_field_to_algebraic(from_square))
-
+        
+        # for debugging:
+        if board.bitboards[board.current_player].bit_length() - 1 > 63:
+            logger.error("Unhandled invalid operation in bitboards.[{}]: bitlength over 63, which might cause unexpected errors...", board.current_player)
+        if board.bitboards[opponent].bit_length() - 1 > 63:
+            logger.error("Unhandled invalid operation in bitboards.[{}]: bitlength over 63, which might cause unexpected errors...", opponent)
+        
         for piece in range(constants.PAWN, constants.KING + 1):
             # Remove a possibly captured piece from the destination
             board.bitboards[piece] &= (to_square ^ constants.MAX_VALUE)
@@ -239,6 +241,9 @@ class ChessEngine():
                 board.bitboards[piece] &= (from_square ^ constants.MAX_VALUE)
                 # Move the piece to the new position
                 board.bitboards[piece] |= to_square
+            # for debugging:
+            if board.bitboards[piece].bit_length() - 1 > 63:
+                logger.error("Unhandled invalid operation in bitboards.[{}]: bitlength over 63, which might cause unexpected errors...", piece)
         
         # convert the pawn if it moves to last row
         ChessEngine._convert_pawn(board, to_square)
@@ -248,8 +253,14 @@ class ChessEngine():
         copied_chessBoard = copy.deepcopy(board)
         board.board_history.append(copied_chessBoard.bitboards)
         # Increase pawn counter for draw by 50 moves
-        board.pawn_not_moved_counter = 0 if (from_square & board.bitboards[constants.PAWN]) != 0 else board.pawn_not_moved_counter + 1
-
+        board.pawn_not_moved_counter = 0 if (to_square & board.bitboards[constants.PAWN]) != 0 else board.pawn_not_moved_counter + 1
+        # Check for game phase
+        if board.opening_bitboard & from_square:
+            board.opening_bitboard ^= from_square
+            board.opening_count += 1
+        # Update the game phase after each move
+        board.set_game_phase()
+        
     @staticmethod
     def _convert_pawn(board, to_square):
         TOP_EDGE = constants.NOT_TOP_EDGE ^ constants.MAX_VALUE # invert not top edge
@@ -281,8 +292,8 @@ class ChessEngine():
         # checks if current player is in check mate --> current player lost
         if not ChessEngine.is_in_check(board):
             return False
-        legal_moves = ChessEngine.generate_moves(board)
-        for move in legal_moves:
+        moves = ChessEngine.generate_moves(board)
+        for move in moves:
             board_after_move = copy.deepcopy(board)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=True):
@@ -295,8 +306,8 @@ class ChessEngine():
         # checks if opponent is in check mate --> opponent lost
         if not ChessEngine.is_in_check(board, isOpponent=True):
             return False
-        legal_moves = ChessEngine.generate_moves(board)
-        for move in legal_moves:
+        moves = ChessEngine.generate_moves(board)
+        for move in moves:
             board_after_move = copy.deepcopy(board)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=False):
@@ -317,7 +328,7 @@ class ChessEngine():
     @staticmethod
     def is_draw(legal_moves, board):
         # TODO: There is one more draw rule "50-Züge-Regel"
-        if not legal_moves and not board.is_in_check(board):
+        if not legal_moves and not ChessEngine.is_in_check(board):
             print("Draw by Patt!")
             board.game_result = constants.DRAW
             return True
@@ -326,7 +337,7 @@ class ChessEngine():
             board.game_result = constants.DRAW
             return True
         if board.pawn_not_moved_counter >= 50:
-            print("Draw by no pawn moved for 50 moves!")
+            print("Draw by pawn not moved!")
             board.game_result = constants.DRAW
             return True
         return False
