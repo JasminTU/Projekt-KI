@@ -327,6 +327,7 @@ class ChessBoard:
             return self.evaluate_board(), counter + 1, "exact", None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
+        legal_moves = sorted(legal_moves, key=lambda move: ChessEngine.get_move_value(self, move), reverse=True)
         best_move = None
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
@@ -366,6 +367,7 @@ class ChessBoard:
             return -self.evaluate_board(), counter + 1, "exact", None
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
+        legal_moves = sorted(legal_moves, key=lambda move: ChessEngine.get_move_value(self, move), reverse=True)
         best_move = None
         for move in legal_moves:
             board_after_move = copy.deepcopy(self)
