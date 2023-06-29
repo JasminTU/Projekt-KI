@@ -19,14 +19,14 @@ class ChessEngine():
 
         if board.current_player == constants.WHITE:
             one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & constants.NOT_TOP_EDGE) << 8 & empty_squares
-            two_steps = one_step << 8 & empty_squares
+            two_steps = ((board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & constants.INITIAL_WHITE_PAWN_POSITIONS) << 8 & empty_squares) << 8 & empty_squares
             captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_LEFT_EDGE & constants.NOT_TOP_EDGE) << 7 & board.bitboards[
                 constants.BLACK]
             captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.WHITE] & NOT_RIGHT_EDGE & constants.NOT_TOP_EDGE) << 9 & board.bitboards[
                 constants.BLACK]
         else:
             one_step = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & constants.NOT_BOTTOM_EDGE) >> 8 & empty_squares
-            two_steps = one_step >> 8 & empty_squares
+            two_steps = ((board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & constants.INITIAL_BLACK_PAWN_POSITIONS) >> 8 & empty_squares) >> 8 & empty_squares
             captures_left = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_LEFT_EDGE & constants.NOT_BOTTOM_EDGE) >> 9 & board.bitboards[
                 constants.WHITE]
             captures_right = (board.bitboards[constants.PAWN] & board.bitboards[constants.BLACK] & NOT_RIGHT_EDGE & constants.NOT_BOTTOM_EDGE) >> 7 & board.bitboards[
