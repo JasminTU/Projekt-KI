@@ -134,12 +134,12 @@ class ChessBoard:
 
         # Evaluate king's safety
         if ChessEngine.is_in_check(self):
-            score -= 100  # Penalty for own king in check
+            score -= 200  # Penalty for own king in check
         else:
             score += 100  # Bonus for king's safety
         if ChessEngine.is_game_over(self):
-            score -= 100000  # Penalty for own king in check mate
-        if ChessEngine.opponent_is_check_mate(self):
+            score -= 100000
+        if ChessEngine.is_game_won(self):
             score += 100000
             
         # Bonus for king's position near the center
@@ -281,7 +281,7 @@ class ChessBoard:
             hash ^= int(num)
         return hash
 
-    def iterative_depth_search(self, max_depth, with_cut_off=True, time_limit = 15):
+    def iterative_depth_search(self, max_depth = 4, time_limit = 15, with_cut_off=True, with_time_limit = True, with_max_depth = False):
         """
         This method iterates through the levels of the search tree, 
         which is way faster in combination with move ordering and transposition tables.
@@ -294,12 +294,14 @@ class ChessBoard:
         start_time = time.time()
         global hash_table
         hash_table = {}
+        if with_time_limit and not with_max_depth:
+            max_depth = 10000 # take an insane large value, since we have a time limit
         
         for depth in range(1, max_depth + 1):
             score, counter, _,  move = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, with_cut_off)
-            logger.debug("Vorläufig bester Zug: ", ChessEngine.binary_move_to_algebraic(move[0], move[1]),  ", Tiefe: ", depth, "Score: ", score)
+            logger.debug("Vorläufig bester Zug: {}, Tiefe: {}, Score: {}".format(ChessEngine.binary_move_to_algebraic(move[0], move[1]), depth, score))
             elapsed_time = time.time() - start_time
-            if elapsed_time >= time_limit:
+            if elapsed_time >= time_limit and with_time_limit:
                 break
         return move, counter
 
@@ -339,7 +341,7 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
-                score = -board_after_move.evaluate_board()
+                score = -board_after_move.evaluate_board() # negative because we evaluate the board for the oppponent already
                 flag = "exact"
             else:
                 score, counter, flag, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
@@ -379,7 +381,7 @@ class ChessBoard:
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
-                score = board_after_move.evaluate_board()
+                score = board_after_move.evaluate_board() # negative because we evaluate the board for the oppponent already
                 flag = "exact"
             else:
                 score, counter, flag,  _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)

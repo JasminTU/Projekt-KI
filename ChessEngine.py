@@ -352,7 +352,7 @@ class ChessEngine():
     @staticmethod
     def is_game_won(board):
         """
-        Returns True if the board.current_player lost, otherwise False
+        Returns True if the board.current_player won, otherwise False
         """
         return ChessEngine.opponent_is_check_mate(board) or ChessEngine.player_is_king_on_the_hill(board, board.current_player)
 
