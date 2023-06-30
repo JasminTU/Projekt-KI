@@ -20,7 +20,7 @@ class ChessGame:
             if self.process_next_move(max_depth, time_limit) == "checkmate" or self.process_next_move(max_depth, time_limit) == "draw":
                 break
 
-    def process_next_move(self, max_depth, time_limit, print_board=True, with_cut_off=True):
+    def process_next_move(self, max_depth, time_limit, print_board=True, with_cut_off=True, with_time_limit = True):
         if print_board:
             self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
@@ -33,11 +33,13 @@ class ChessGame:
             return "checkmate"
 
         if self.is_ai_turn():
-            move, counter = self.get_ai_move(max_depth, time_limit, print_board, with_cut_off)
+            move, counter = self.get_ai_move(max_depth, time_limit, print_board, with_cut_off, with_time_limit)
         else:
             move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
+            counter = -1
 
         self.perform_move(move)
+        return move, counter
 
 
     def print_board(self):
@@ -59,12 +61,12 @@ class ChessGame:
         pattern = r'^[a-h][1-8][a-h][1-8]$'
         return re.match(pattern, user_input) is not None
 
-    def get_ai_move(self, max_depth, time_limit, print_move=True, with_cut_off=True):
+    def get_ai_move(self, max_depth, time_limit, print_move=True, with_cut_off=True, with_time_limit = True):
 
         if len(self.currentLegalMoves) == 0:
             logger.error("List is empty. This case should be captured as a check mate or draw!")
             sys.exit(1)
-        best_move, counter = self.board.iterative_depth_search(time_limit = time_limit, with_cut_off= with_cut_off, with_time_limit = True)
+        best_move, counter = self.board.iterative_depth_search(max_depth=max_depth, time_limit = time_limit, with_cut_off= with_cut_off, with_time_limit = with_time_limit)
         str = "White" if self.board.current_player == constants.WHITE else "Black"
         if print_move:
             print(f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1])}")

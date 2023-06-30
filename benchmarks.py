@@ -52,7 +52,7 @@ class ChessEngineBenchmark:
             start_time = time.time()
 
             # process_next_move() calls iterative_depth_search()
-            move, counter = game.process_next_move(depth, print_board=False, with_cut_off=with_cut_off)
+            move, counter = game.process_next_move(depth, print_board=False, with_cut_off=with_cut_off, time_limit=10, with_time_limit=False)
 
             end_time = time.time()
             elapsed_time = end_time - start_time
@@ -79,18 +79,18 @@ class ChessEngineBenchmark:
 
     def benchmark_fen_alpha_beta1(self):
         fen1 = "r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen1, depth=4)
+        self.benchmark_chess_engine_alpha_beta(fen1, depth=3)
 
     def benchmark_fen_alpha_beta2(self):
         fen2 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
-        self.benchmark_chess_engine_alpha_beta(fen2, depth=4)
+        self.benchmark_chess_engine_alpha_beta(fen2, depth=3)
 
     def benchmark_fen_alpha_beta3(self):
-        fen3 = "2k5/6q1/3P1P2/4N3/8/1K6/8/8 w - - 0 1"
+        fen3 = "r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1"
         self.benchmark_chess_engine_alpha_beta(fen3, depth=4)
 
     def benchmark_fen_alpha_beta4(self):
-        fen4 = "r2qr1k1/p4ppp/2Q1b3/4N3/5B2/3BnP2/PP4PP/R4RK1 w - - 0 19"
+        fen4 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
         self.benchmark_chess_engine_alpha_beta(fen4, depth=4)
 
     # def benchmark_fen_minmax1(self):
