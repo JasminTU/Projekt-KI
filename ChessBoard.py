@@ -290,6 +290,7 @@ class ChessBoard:
         
         The self.current_player is always the maximizing player. Therefore, larger scores are better.
         """
+        best_move = None
         counter = 0
         start_time = time.time()
         global hash_table
@@ -298,12 +299,14 @@ class ChessBoard:
             max_depth = 10000 # take an insane large value, since we have a time limit
         
         for depth in range(1, max_depth + 1):
-            score, counter, _,  move = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, with_cut_off)
-            logger.debug("Vorläufig bester Zug: {}, Tiefe: {}, Score: {}".format(ChessEngine.binary_move_to_algebraic(move[0], move[1]), depth, score))
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= time_limit and with_time_limit:
+            score, counter, _,  move, is_time_over = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, time_limit, start_time, with_time_limit, with_cut_off)
+            if not is_time_over:
+                best_move = move
+                logger.debug("Vorläufig bester Zug: {}, Tiefe: {}, Score: {}".format(ChessEngine.binary_move_to_algebraic(move[0], move[1]), depth, score))
+            else:
                 break
-        return move, counter
+
+        return best_move, counter
 
     def store_hash_board_state(self, depth, score, type):
         hash_key = self.zobrist_board_hash()
@@ -313,7 +316,11 @@ class ChessBoard:
             'value': score 
         }
 
-    def alpha_beta_max(self, alpha, beta, depth_left, depth,  counter, with_cut_off=True):
+    def alpha_beta_max(self, alpha, beta, depth_left, depth,  counter, time_limit, start_time, with_time_limit, with_cut_off=True):
+        # time_management: 
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= time_limit and with_time_limit:
+            return None, counter + 1, None, None, True
         # transposition table:
         hash_key = self.zobrist_board_hash()
         if hash_key in hash_table:
@@ -321,39 +328,47 @@ class ChessBoard:
             # the stored depth has to be larger than the current depth to be meaningful
             if entry['depth'] >= depth:
                 if entry['flag'] == 'exact':
-                    return entry['value'], counter + 1, entry['flag'], None
+                    return entry['value'], counter + 1, entry['flag'], None, False
                 elif entry['flag'] == 'lowerbound':
                     alpha = max(alpha, entry['value'])
 
                 if alpha >= beta:
-                    return entry['value'], counter + 1, entry['flag'], None
+                    return entry['value'], counter + 1, entry['flag'], None, False
 
         # alpha beta:
         if depth_left == 0:
-            return self.evaluate_board(), counter + 1, "lowerbound", None
+            return self.evaluate_board(), counter + 1, "lowerbound", None, False
         elif ChessEngine.is_game_over(self):
-            return self.evaluate_board(), counter + 1, "exact", None
+            return self.evaluate_board(), counter + 1, "exact", None, False
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
         legal_moves = sorted(legal_moves, key=lambda move: ChessEngine.get_move_value(self, move), reverse=True)
         best_move = None
         for move in legal_moves:
+            
             board_after_move = copy.deepcopy(self)
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if ChessEngine.is_draw(legal_moves, board_after_move):
                 score = -board_after_move.evaluate_board() # negative because we evaluate the board for the oppponent already
                 flag = "exact"
             else:
-                score, counter, flag, _ = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
+                score, counter, flag, _, is_time_over  = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, time_limit, start_time, with_time_limit, with_cut_off)
+                if is_time_over: # time_management
+                    return None, counter + 1, None, None, True
                 board_after_move.store_hash_board_state(depth + 1, score, type=flag)
             if score >= beta and with_cut_off == True:
-                return beta, counter+1, "lowerbound", None
+                return beta, counter+1, "lowerbound", None, False
             if score > alpha:
                 best_move = move
                 alpha = score
-        return alpha, counter+1, flag, best_move
+        return alpha, counter+1, flag, best_move, False
 
-    def alpha_beta_min(self, alpha, beta, depth_left, depth, counter, with_cut_off=True):
+    def alpha_beta_min(self, alpha, beta, depth_left, depth, counter, time_limit, start_time, with_time_limit, with_cut_off=True):
+        # time_management: 
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= time_limit and with_time_limit:
+            return None, counter + 1, None, None, True
+        
         # transposition table:
         hash_key = self.zobrist_board_hash()
         if hash_key in hash_table:
@@ -361,18 +376,18 @@ class ChessBoard:
             # the stored depth has to be larger than the current depth to be meaningful
             if entry['depth'] >= depth:
                 if entry['flag'] == 'exact':
-                    return entry['value'], counter + 1, entry['flag'], None
+                    return entry['value'], counter + 1, entry['flag'], None, False
                 elif entry['flag'] == 'upperbound':
                     beta = min(beta, entry['value'])
 
                 if alpha >= beta:
-                    return entry['value'], counter + 1, entry['flag'], None
+                    return entry['value'], counter + 1, entry['flag'], None, False
 
         # alpha beta:
         if depth_left == 0:
-            return -self.evaluate_board(), counter + 1, "upperbound", None
+            return -self.evaluate_board(), counter + 1, "upperbound", None, False
         elif ChessEngine.is_game_over(self):
-            return -self.evaluate_board(), counter + 1, "exact", None
+            return -self.evaluate_board(), counter + 1, "exact", None, False
         moves = ChessEngine.generate_moves(self)
         legal_moves = ChessEngine.filter_illegal_moves(self, moves)
         legal_moves = sorted(legal_moves, key=lambda move: ChessEngine.get_move_value(self, move), reverse=True)
@@ -384,15 +399,17 @@ class ChessBoard:
                 score = board_after_move.evaluate_board() # negative because we evaluate the board for the oppponent already
                 flag = "exact"
             else:
-                score, counter, flag,  _ = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, with_cut_off)
+                score, counter, flag,  _, is_time_over = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, time_limit, start_time, with_time_limit, with_cut_off)
+                if is_time_over: # time_management
+                    return None, counter + 1, None, None, True
                 board_after_move.store_hash_board_state(depth + 1, score, type=flag)
                 
             if score <= alpha and with_cut_off == True:
-                return alpha, counter+1, "upperbound", None
+                return alpha, counter+1, "upperbound", None, False
             if score < beta:
                 best_move = move
                 beta = score
-        return beta, counter+1, flag, best_move
+        return beta, counter+1, flag, best_move, False
 
     @staticmethod
     def get_opponent(player):
