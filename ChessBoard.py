@@ -308,12 +308,13 @@ class ChessBoard:
 
         return best_move, counter
 
-    def store_hash_board_state(self, depth, score, type):
+    def store_hash_board_state(self, depth, score, type, move):
         hash_key = self.zobrist_board_hash()
         hash_table[hash_key] = {
             'depth': depth,
             'flag': type, # type is either exact, upperbound or lowerbound
-            'value': score 
+            'value': score, 
+            'move': move
         }
 
     def alpha_beta_max(self, alpha, beta, depth_left, depth,  counter, time_limit, start_time, with_time_limit, with_cut_off=True):
@@ -328,12 +329,12 @@ class ChessBoard:
             # the stored depth has to be larger than the current depth to be meaningful
             if entry['depth'] >= depth:
                 if entry['flag'] == 'exact':
-                    return entry['value'], counter + 1, entry['flag'], None, False
+                    return entry['value'], counter + 1, entry['flag'], entry['move'], False
                 elif entry['flag'] == 'lowerbound':
                     alpha = max(alpha, entry['value'])
 
                 if alpha >= beta:
-                    return entry['value'], counter + 1, entry['flag'], None, False
+                    return entry['value'], counter + 1, entry['flag'], entry['move'], False
 
         # alpha beta:
         if depth_left == 0:
@@ -355,9 +356,9 @@ class ChessBoard:
                 score, counter, flag, _, is_time_over  = board_after_move.alpha_beta_min(alpha, beta, depth_left - 1, depth + 1, counter, time_limit, start_time, with_time_limit, with_cut_off)
                 if is_time_over: # time_management
                     return None, counter + 1, None, None, True
-                board_after_move.store_hash_board_state(depth + 1, score, type=flag)
+                board_after_move.store_hash_board_state(depth + 1, score, type=flag, move= move)
             if score >= beta and with_cut_off == True:
-                return beta, counter+1, "lowerbound", None, False
+                return beta, counter+1, "lowerbound", best_move, False
             if score > alpha:
                 best_move = move
                 alpha = score
@@ -376,12 +377,12 @@ class ChessBoard:
             # the stored depth has to be larger than the current depth to be meaningful
             if entry['depth'] >= depth:
                 if entry['flag'] == 'exact':
-                    return entry['value'], counter + 1, entry['flag'], None, False
+                    return entry['value'], counter + 1, entry['flag'], entry['move'], False
                 elif entry['flag'] == 'upperbound':
                     beta = min(beta, entry['value'])
 
                 if alpha >= beta:
-                    return entry['value'], counter + 1, entry['flag'], None, False
+                    return entry['value'], counter + 1, entry['flag'], entry['move'], False
 
         # alpha beta:
         if depth_left == 0:
@@ -402,10 +403,10 @@ class ChessBoard:
                 score, counter, flag,  _, is_time_over = board_after_move.alpha_beta_max(alpha, beta, depth_left - 1, depth + 1, counter, time_limit, start_time, with_time_limit, with_cut_off)
                 if is_time_over: # time_management
                     return None, counter + 1, None, None, True
-                board_after_move.store_hash_board_state(depth + 1, score, type=flag)
+                board_after_move.store_hash_board_state(depth + 1, score, type=flag, move= move)
                 
             if score <= alpha and with_cut_off == True:
-                return alpha, counter+1, "upperbound", None, False
+                return alpha, counter+1, "upperbound", best_move, False
             if score < beta:
                 best_move = move
                 beta = score
@@ -439,49 +440,26 @@ if __name__ == "__main__":
     # board.evaluate_board()
     
     board = ChessBoard()
-    board.load_from_fen("2Q5/R5p1/5k1p/2p5/4pB2/2N5/1P4PP/5K1R w - - 0 1")
-    best_move, counter = board.iterative_depth_search(3, True)
-    ChessEngine.perform_move(best_move, board, move_type="binary")
-    # service.print_binary_bitboard(board.bitboards[constants.WHITE])
-    # service.print_binary_bitboard(board.bitboards[constants.BLACK])
+    board.load_from_fen("rnbqkb1r/1p1p1ppp/p3pn2/2p5/4P3/PPNP4/2P2PPP/R1BQKBNR b KQkq - 0 1")
+    best_move, counter = board.iterative_depth_search(max_depth = 4, time_limit = 15, with_cut_off=True, with_time_limit = True, with_max_depth = False)
+    # ChessEngine.perform_move(best_move, board, move_type="binary")
+    # # service.print_binary_bitboard(board.bitboards[constants.WHITE])
+    # # service.print_binary_bitboard(board.bitboards[constants.BLACK])
 
-    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    # print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
     
-    best_move, counter = board.iterative_depth_search(3, True)
-    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
-    ChessEngine.perform_move(best_move, board, move_type="binary")
-    
-    best_move, counter = board.iterative_depth_search(3, True)
-    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
-    ChessEngine.perform_move(best_move, board, move_type="binary")
-    
-    best_move, counter = board.iterative_depth_search(3, True)
-    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
-    ChessEngine.perform_move(best_move, board, move_type="binary")
-    
-    best_move, counter = board.iterative_depth_search(3, True)
-    print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
-    ChessEngine.perform_move(best_move, board, move_type="binary")
-    
-    best_move, counter = board.iterative_depth_search(3, True)
-    print(best_move)
-    moves = ChessEngine.get_move_by_figure(board, constants.KING)
-    legal_moves = ChessEngine.filter_illegal_moves(board, moves)
-    print(legal_moves)
-    print(ChessEngine.is_check_mate(board))
+    # best_move, counter = board.iterative_depth_search(3, True)
     # print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
     # ChessEngine.perform_move(best_move, board, move_type="binary")
-    # service.print_binary_bitboard(board.bitboards[constants.WHITE])
-    # service.print_binary_bitboard(board.bitboards[constants.BLACK])
-    # print(board.bitboards[constants.WHITE].bit_length() - 1)
-    # print(board.bitboards[constants.BLACK].bit_length() - 1)
-
-    # for piece in range(2, 8):
-    #     print(board.bitboards[piece].bit_length() - 1)
-    # service.print_binary_bitboard(board.bitboards[constants.WHITE])
-    # service.print_binary_bitboard(board.bitboards[constants.BLACK])
     
+    # best_move, counter = board.iterative_depth_search(3, True)
+    # print(ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1]))
+    # ChessEngine.perform_move(best_move, board, move_type="binary")
+
+    
+    # best_move, counter = board.iterative_depth_search(3, True)
+    # print(best_move)
     # moves = ChessEngine.get_move_by_figure(board, constants.KING)
     # legal_moves = ChessEngine.filter_illegal_moves(board, moves)
-    # for move in legal_moves:
-    #     print(ChessEngine.binary_move_to_algebraic(move[0], move[1]))
+    # print(legal_moves)
+    # print(ChessEngine.is_check_mate(board))
