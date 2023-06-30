@@ -93,33 +93,11 @@ class ChessEngineBenchmark:
         fen4 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
         self.benchmark_chess_engine_alpha_beta(fen4, depth=4)
 
-    # def benchmark_fen_minmax1(self):
-    #     fen1 = "r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1"
-    #     self.benchmark_chess_engine_alpha_beta(fen1, with_cut_off=False)
-
-    # def benchmark_fen_minmax2(self):
-    #     fen2 = "rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1"
-    #     self.benchmark_chess_engine_alpha_beta(fen2, with_cut_off=False)
-
-    # def benchmark_fen_minmax3(self):
-    #     fen3 = "2k5/6q1/3P1P2/4N3/8/1K6/8/8 w - - 0 1"
-    #     self.benchmark_chess_engine_alpha_beta(fen3, with_cut_off=False)
-
-    # def benchmark_fen_minmax4(self):
-    #     fen4 = "r2qr1k1/p4ppp/2Q1b3/4N3/5B2/3BnP2/PP4PP/R4RK1 w - - 0 19"
-    #     self.benchmark_chess_engine_alpha_beta(fen4, with_cut_off=False)
 
 
 if __name__ == "__main__":
     benchmark = ChessEngineBenchmark()
-    # benchmark.benchmark_fen1()
-    # benchmark.benchmark_fen2()
-    # benchmark.benchmark_fen3()
     benchmark.benchmark_fen_alpha_beta1()
-    # benchmark.benchmark_fen_minmax1()
     benchmark.benchmark_fen_alpha_beta2()
-    # benchmark.benchmark_fen_minmax2()
     benchmark.benchmark_fen_alpha_beta3()
-    # benchmark.benchmark_fen_minmax3()
     benchmark.benchmark_fen_alpha_beta4()
-    # benchmark.benchmark_fen_minmax4()
