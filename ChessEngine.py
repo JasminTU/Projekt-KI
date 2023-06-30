@@ -204,7 +204,7 @@ class ChessEngine():
         return figure_moves
 
     @staticmethod
-    def perform_move(move, board, move_type="algebraic", with_validation=True):
+    def perform_move(move, board, move_type="algebraic", with_validation=True, move_actually_executed = False):
         if move_type == "algebraic":
             move = ChessEngine.algebraic_move_to_binary(move)
         if with_validation:
@@ -259,7 +259,7 @@ class ChessEngine():
             board.opening_bitboard ^= from_square
             board.opening_count += 1
         # Update the game phase after each move
-        board.set_game_phase()
+        board.set_game_phase(move_actually_executed)
         
     @staticmethod
     def _convert_pawn(board, to_square):
@@ -298,8 +298,8 @@ class ChessEngine():
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=True):
                 board.game_result = board.get_opponent(board.current_player)
-                return False
-        return True
+                return True
+        return False
     
     @staticmethod
     def opponent_is_check_mate(board):
@@ -312,8 +312,8 @@ class ChessEngine():
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=False):
                 board.game_result = board.current_player
-                return False
-        return True
+                return True
+        return False
     
     @staticmethod
     def opponent_is_king_on_the_hill(board):
@@ -344,6 +344,9 @@ class ChessEngine():
     
     @staticmethod
     def is_game_over(board):
+        """
+        Returns True if the board.current_player lost, otherwise False
+        """
         return ChessEngine.is_check_mate(board) or ChessEngine.opponent_is_king_on_the_hill(board) or ChessEngine.opponent_is_check_mate(board)
 
     @staticmethod

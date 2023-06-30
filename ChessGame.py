@@ -20,7 +20,7 @@ class ChessGame:
             if self.process_next_move() == "checkmate" or self.process_next_move() == "draw":
                 break
 
-    def process_next_move(self, max_depth=3, print_board=True, with_cut_off=True):
+    def process_next_move(self, max_depth=4, print_board=True, with_cut_off=True):
         if print_board:
             self.print_board()
         self.currentLegalMoves = self.get_legal_moves()
@@ -49,7 +49,7 @@ class ChessGame:
 
     def get_human_move(self):
         str = "White" if self.board.current_player == constants.WHITE else "Black"
-        user_input = input(f"Move {self.move_number} by {str}: ")
+        user_input = input(f"Move {self.move_number} by { str}: ")
         while not self.validate_input(user_input):
             print("Invalid input. Enter a move of the form a1a2 (start square->destination square).")
             user_input = input(f"Move {self.move_number} by {str}: ")
@@ -77,7 +77,7 @@ class ChessGame:
 
     def perform_move(self, move):
         if move in self.currentLegalMoves:
-            ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False)
+            ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False, move_actually_executed=True)
             self.move_number += 1
         else:
             print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")

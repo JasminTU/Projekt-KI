@@ -187,10 +187,12 @@ class ChessBoard:
             pawn_value *= ((passed_bonus + 100)/100)
         return pawn_value
     
-    def set_game_phase(self):
+    def set_game_phase(self, move_actually_executed):
         # 1. Piece developement: Opening -> midgame
         if self.game_phase == "opening" and self.opening_count >= 7:
             self.game_phase = "midgame"
+            if move_actually_executed:
+                logger.debug("Switched to game phase midgame!")
             
         # 2. Piece count: midgame -> endgame: In general, the midgame is characterized by a higher number of pieces on the board, while the endgame typically has fewer pieces remaining
         if self.game_phase == "midgame":
@@ -199,6 +201,7 @@ class ChessBoard:
             count_pieces = ChessBoard._count_set_bits(all_pieces)
             if count_pieces <= piece_count_limit:
                 self.game_phase = "endgame"
+                logger.debug("Switched to game phase endgame!")
             
     def get_game_phase(self):
         return self.game_phase
@@ -278,9 +281,15 @@ class ChessBoard:
             hash ^= int(num)
         return hash
 
-    def iterative_depth_search(self, max_depth, with_cut_off=True, time_limit = 12000):
-        best_score = None
-        best_move = None
+    def iterative_depth_search(self, max_depth, with_cut_off=True, time_limit = 15):
+        """
+        This method iterates through the levels of the search tree, 
+        which is way faster in combination with move ordering and transposition tables.
+        
+        We always take the result from the deepest depth.
+        
+        The self.current_player is always the maximizing player. Therefore, larger scores are better.
+        """
         counter = 0
         start_time = time.time()
         global hash_table
@@ -288,14 +297,11 @@ class ChessBoard:
         
         for depth in range(1, max_depth + 1):
             score, counter, _,  move = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, with_cut_off)
-            if best_score is None or score > best_score:
-                best_score = score
-                best_move = move
-                
-            # elapsed_time = time.time() - start_time
-            # if elapsed_time >= time_limit:
-            #     break
-        return best_move, counter
+            logger.debug("Vorläufig bester Zug: ", ChessEngine.binary_move_to_algebraic(move[0], move[1]),  ", Tiefe: ", depth, "Score: ", score)
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= time_limit:
+                break
+        return move, counter
 
     def store_hash_board_state(self, depth, score, type):
         hash_key = self.zobrist_board_hash()
