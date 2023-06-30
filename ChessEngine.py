@@ -316,14 +316,14 @@ class ChessEngine():
         return False
     
     @staticmethod
-    def opponent_is_king_on_the_hill(board):
-        # checks if current player has won
+    def player_is_king_on_the_hill(board, player):
+        # checks if input player has won
         CENTER_FIELDS = int("0b0000000000000000000000000001100000011000000000000000000000000000", 2)
-        opponent = board.get_opponent(board.current_player)
-        if board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[opponent]:
-            board.game_result = opponent
+        if board.bitboards[constants.KING] & CENTER_FIELDS & board.bitboards[player]:
+            board.game_result = player
             return True
         return False
+    
     
     @staticmethod
     def is_draw(legal_moves, board):
@@ -347,7 +347,14 @@ class ChessEngine():
         """
         Returns True if the board.current_player lost, otherwise False
         """
-        return ChessEngine.is_check_mate(board) or ChessEngine.opponent_is_king_on_the_hill(board) or ChessEngine.opponent_is_check_mate(board)
+        return ChessEngine.is_check_mate(board) or ChessEngine.player_is_king_on_the_hill(board, board.get_opponent(board.current_player))
+    
+    @staticmethod
+    def is_game_won(board):
+        """
+        Returns True if the board.current_player lost, otherwise False
+        """
+        return ChessEngine.opponent_is_check_mate(board) or ChessEngine.player_is_king_on_the_hill(board, board.current_player)
 
     @staticmethod
     def _is_repetition_draw(board_list):

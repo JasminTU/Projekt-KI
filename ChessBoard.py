@@ -137,7 +137,7 @@ class ChessBoard:
             score -= 100  # Penalty for own king in check
         else:
             score += 100  # Bonus for king's safety
-        if ChessEngine.is_check_mate(self) or ChessEngine.opponent_is_king_on_the_hill(self):
+        if ChessEngine.is_game_over(self):
             score -= 100000  # Penalty for own king in check mate
         if ChessEngine.opponent_is_check_mate(self):
             score += 100000
