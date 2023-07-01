@@ -27,7 +27,7 @@ class ChessGame:
         # Check for draw and checkmate before the move is exercised
         if ChessEngine.is_draw(self.currentLegalMoves, self.board):  # more detailed print is in draw function
             return "draw"
-        if ChessEngine.is_game_over(self.board):
+        if ChessEngine.is_game_over(self.board):    
             winner = "White" if self.board.game_result == constants.WHITE else "Black"
             print("Checkmate! Winner is ", winner)
             return "checkmate"
