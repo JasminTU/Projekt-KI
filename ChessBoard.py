@@ -191,8 +191,8 @@ class ChessBoard:
         # 1. Piece developement: Opening -> midgame
         if self.game_phase == "opening" and self.opening_count >= 7:
             self.game_phase = "midgame"
-            if move_actually_executed:
-                logger.debug("Switched to game phase midgame!")
+            # if move_actually_executed:
+            #     logger.debug("Switched to game phase midgame!")
             
         # 2. Piece count: midgame -> endgame: In general, the midgame is characterized by a higher number of pieces on the board, while the endgame typically has fewer pieces remaining
         if self.game_phase == "midgame":
@@ -201,7 +201,7 @@ class ChessBoard:
             count_pieces = ChessBoard._count_set_bits(all_pieces)
             if count_pieces <= piece_count_limit:
                 self.game_phase = "endgame"
-                logger.debug("Switched to game phase endgame!")
+                # logger.debug("Switched to game phase endgame!")
             
     def get_game_phase(self):
         return self.game_phase
@@ -302,7 +302,7 @@ class ChessBoard:
             score, counter, _,  move, is_time_over = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, time_limit, start_time, with_time_limit, with_cut_off)
             if not is_time_over:
                 best_move = move
-                logger.debug("Vorläufig bester Zug: {}, Tiefe: {}, Score: {}".format(ChessEngine.binary_move_to_algebraic(move[0], move[1]), depth, score))
+                # logger.debug("Vorläufig bester Zug: {}, Tiefe: {}, Score: {}".format(ChessEngine.binary_move_to_algebraic(move[0], move[1]), depth, score))
             else:
                 break
 
