@@ -201,7 +201,8 @@ class ChessBoard:
             count_pieces = ChessBoard._count_set_bits(all_pieces)
             if count_pieces <= piece_count_limit:
                 self.game_phase = "endgame"
-                logger.debug("Switched to game phase endgame!")
+                if move_actually_executed:
+                    logger.debug("Switched to game phase endgame!")
             
     def get_game_phase(self):
         return self.game_phase

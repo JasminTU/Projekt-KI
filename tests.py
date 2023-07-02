@@ -781,8 +781,8 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard = ChessBoard()
         actualBoard.load_from_fen("r1bqk1nr/8/2n3P1/p1bP3p/3pPPQ1/p1N5/8/R1B1KBNR b KQkq - 0 1")
         actualGame = ChessGame(actualBoard, isBlackAI=True, isWhiteAI=True)
-        actualGame.process_next_move(3)
-        expectedBoard.load_from_fen("r1bqk1nr/8/2n3P1/p1bP4/3pPPp1/p1N5/8/R1B1KBNR b KQkq - 0 1")
+        actualGame.process_next_move(3, time_limit=5)
+        expectedBoard.load_from_fen("r2qk1nr/8/2n3P1/p1bP3p/3pPPb1/p1N5/8/R1B1KBNR b KQkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
 
     def test_alpha_beta_2(self):
@@ -790,7 +790,7 @@ class TestChessBitboard(unittest.TestCase):
         expectedBoard = ChessBoard()
         actualBoard.load_from_fen("rnbqkbnr/p1pppppp/8/1p6/Q7/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1")
         actualGame = ChessGame(actualBoard, isBlackAI=True, isWhiteAI=True)
-        actualGame.process_next_move(3)
+        actualGame.process_next_move(3, time_limit=5)
         expectedBoard.load_from_fen("rnbqkbnr/p1pppppp/8/1Q6/8/2P5/PP1PPPPP/RNB1KBNR w KQkq - 0 1")
         self.assertEqualBitboards(expectedBoard, actualBoard)
         
