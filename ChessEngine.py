@@ -298,8 +298,8 @@ class ChessEngine():
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=True):
                 board.game_result = board.get_opponent(board.current_player)
-                return True
-        return False
+                return False
+        return True
     
     @staticmethod
     def opponent_is_check_mate(board):
@@ -312,8 +312,8 @@ class ChessEngine():
             ChessEngine.perform_move(move, board_after_move, move_type="binary", with_validation=False)
             if not ChessEngine.is_in_check(board_after_move, isOpponent=False):
                 board.game_result = board.current_player
-                return True
-        return False
+                return False
+        return True
     
     @staticmethod
     def player_is_king_on_the_hill(board, player):
