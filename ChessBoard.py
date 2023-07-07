@@ -23,7 +23,7 @@ class ChessBoard:
         self.pawn_not_moved_counter = 0
         self.opening_bitboard = int("0b1111111110111100000000000000000000000000000000000011111011111111", 2)
         self.opening_count = 0
-        self.game_phase = "opening"
+        self.game_phase = "midgame"
 
     def initialize_bitboards(self):
         self.bitboards = [0] * 8
@@ -81,7 +81,6 @@ class ChessBoard:
         # Evaluate the board after a move or on current board
         # The evaluation method should be symmetric
         # TODO: there are a lot of hardcoded values to compute the score, need for improvement
-        self.game_phase = "midgame"
         board_after_move = copy.deepcopy(self)
         if move:
             ChessEngine.perform_move(move, board_after_move, move_type, with_validation=False)
