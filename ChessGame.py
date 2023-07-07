@@ -22,7 +22,8 @@ class ChessGame:
 
     def play(self):
         while True:
-            if self.process_next_move() == "checkmate" or self.process_next_move() == "draw":
+            result, _ = self.process_next_move()
+            if result == "checkmate" or result == "draw":
                 break
 
     def process_next_move(self, print_board=True, with_cut_off=True, with_time_limit = True):
@@ -31,11 +32,11 @@ class ChessGame:
         self.currentLegalMoves = self.get_legal_moves()
         # Check for draw and checkmate before the move is exercised
         if ChessEngine.is_draw(self.currentLegalMoves, self.board):  # more detailed print is in draw function
-            return "draw"
+            return "draw", None
         if ChessEngine.is_game_over(self.board) or ChessEngine.is_game_won(self.board):    
             winner = "White" if self.board.game_result == constants.WHITE else "Black"
             print("Checkmate! Winner is ", winner)
-            return "checkmate"
+            return "checkmate", None
 
         if self.is_ai_turn():
             move, counter = self.get_ai_move(print_board, with_cut_off, with_time_limit)
@@ -78,7 +79,7 @@ class ChessGame:
         best_move = self.stockfish_ai.get_best_move(self.board, self.time_limit)
         if print_move:
             str = "White" if self.board.current_player == constants.WHITE else "Black"
-            print(f"Move {self.move_number} by {str} (AI): {best_move}")
+            print(f"Move {self.move_number} by {str} (Stockfish AI): {best_move}")
         return best_move
 
     def get_ai_move(self, print_move=True, with_cut_off=True, with_time_limit = True):
@@ -98,7 +99,10 @@ class ChessGame:
         return legal_moves
 
     def perform_move(self, move):
-        if move in self.currentLegalMoves:
+        if self.is_stockfish_ai_turn():
+            ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False, move_actually_executed=True)
+            self.move_number += 1
+        elif move in self.currentLegalMoves:
             ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False, move_actually_executed=True)
             self.move_number += 1
         else:

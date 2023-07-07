@@ -468,6 +468,7 @@ if __name__ == "__main__":
     
     board = ChessBoard()
     board.load_from_fen("rnbq1b1r/p5pp/2p1kn2/3Pp3/1p2p3/4B3/PPP1NPPP/R2Q1KNR b KQha - 0 1")
-    ChessEngine.perform_move("c6d5", board)
+    ChessEngine.perform_move("c6d5", board, with_validation=False)
     # best_move, counter = board.iterative_depth_search(max_depth = 5, time_limit = 15, with_cut_off=True, with_time_limit = False, with_max_depth = True)
     service.print_bitboards(board.bitboards)
+    service.print_board(board.bitboards)
