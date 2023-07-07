@@ -23,7 +23,8 @@ class ChessBoard:
         self.pawn_not_moved_counter = 0
         self.opening_bitboard = int("0b1111111110111100000000000000000000000000000000000011111011111111", 2)
         self.opening_count = 0
-        self.game_phase = "midgame"
+        self.game_phase = "midgame" # should be opening, but works better if we start midgame
+        self.previous_moves = [] # contains the moves as string
 
     def initialize_bitboards(self):
         self.bitboards = [0] * 8
@@ -76,6 +77,42 @@ class ChessBoard:
                     col_index += 1
         # PrintBitBoardService.print_bitboards(self.bitboards)
         # PrintBitBoardService.print_board(self.bitboards)
+
+    def get_fen(self):
+        fen = ""
+        counter = 0
+
+        for row in range(7, -1, -1):
+            for col in range(0, 8):
+                index = row * 8 + col
+                if index % 8 == 0 and index != 56:
+                    if counter != 0:
+                        fen += str(counter)
+                        counter = 0
+                    fen += "/"
+
+                current_square = 1 << index
+                if current_square & self.bitboards[constants.WHITE]:
+                    if counter != 0:
+                        fen += str(counter)
+                        counter = 0
+                    current_figure = self._get_piece_at_square(current_square)
+                    fen += constants.PIECE_SYMBOLS[current_figure].upper()
+                elif current_square & self.bitboards[constants.BLACK]:
+                    if counter != 0:
+                        fen += str(counter)
+                        counter = 0
+                    current_figure = self._get_piece_at_square(current_square)
+                    fen += constants.PIECE_SYMBOLS[current_figure].lower()
+                else:
+                    counter += 1
+
+        fen += " " + constants.CURRENT_PLAYER_FEN[self.current_player] + " "
+
+        # Other FEN fields
+        # (Include other fields such as castling availability, en passant square, etc.)
+
+        return fen
 
     def evaluate_board(self, move=None, move_type="algebraic"):
         # Evaluate the board after a move or on current board
@@ -302,7 +339,7 @@ class ChessBoard:
             score, counter, _,  move, is_time_over = self.alpha_beta_max(-math.inf, math.inf, depth, 0, counter, time_limit, start_time, with_time_limit, with_cut_off)
             if not is_time_over:
                 best_move = move
-                logger.debug("Vorläufig bester Zug: {}, Tiefe: {}, Score: {}".format(ChessEngine.binary_move_to_algebraic(move[0], move[1]), depth, score))
+                # logger.debug("Vorläufig bester Zug: {}, Tiefe: {}, Score: {}".format(ChessEngine.binary_move_to_algebraic(move[0], move[1]), depth, score))
             else:
                 break
 
@@ -430,13 +467,7 @@ if __name__ == "__main__":
     pawn = int("0b0000000000000000000000000000000000000000000000000000000000010000", 2)
     
     board = ChessBoard()
-    board.load_from_fen("rnbqkb1r/1p1p1ppp/p3pn2/2p5/4P3/PPNP4/2P2PPP/R1BQKBNR b KQkq - 0 1")
+    board.load_from_fen("rnbq1b1r/p5pp/2p1kn2/3Pp3/1p2p3/4B3/PPP1NPPP/R2Q1KNR b KQha - 0 1")
+    ChessEngine.perform_move("c6d5", board)
     # best_move, counter = board.iterative_depth_search(max_depth = 5, time_limit = 15, with_cut_off=True, with_time_limit = False, with_max_depth = True)
-    
-    move1 = (1024, 262144)
-    move2 = (4096, 8)
-    move3 = (4096, 524288)
-    
-    print(ChessEngine.binary_move_to_algebraic(move1[0], move1[1]))
-    print(ChessEngine.binary_move_to_algebraic(move2[0], move2[1]))
-    print(ChessEngine.binary_move_to_algebraic(move3[0], move3[1]))
+    service.print_bitboards(board.bitboards)

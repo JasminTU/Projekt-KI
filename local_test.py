@@ -26,8 +26,9 @@ engine.stdin.write("uci\n")
 engine.stdin.write("setoption name UCI_Variant value kingofthehill\n")
 
 # Set the board position in Fairy-Stockfish
-engine.stdin.write(f"position fen {board_state}\n")
-
+moves_list = ["e2e4", "d7d5"]
+moves_string = " ".join(moves_list)
+engine.stdin.write(f"position startpos moves {moves_string}\n")
 # Request the best move from Fairy-Stockfish in x milliseconds
 engine.stdin.write("go movetime 2000\n")
 engine.stdin.flush()
