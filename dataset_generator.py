@@ -1,87 +1,124 @@
-# Here's a modified version of the DatasetGenerator class that integrates with your ChessGame class.
-import numpy as np
+from ChessPrintService import ChessPrintService
+from ChessBoard import ChessBoard
+from ChessEngine import ChessEngine
+import constants
+import re
+from loguru import logger
+import sys
+from stockfish_ai import KingOfTheHillAI
 
-import ChessBoard
-from ChessGame import ChessGame
 
+class ChessGame:
+    def __init__(self, board, max_depth, time_limit, isBlackAI=True, isWhiteAI=True, isBlackStockfishAI=False,
+                 isWhiteStockfishAI=False):
+        self.board = board
+        self.move_number = 1
+        self.isBlackAI = isBlackAI
+        self.isBlackStockfishAI = isBlackStockfishAI
+        self.isWhiteStockfishAI = isWhiteStockfishAI
+        self.isWhiteAI = isWhiteAI
+        self.currentLegalMoves = []
+        self.time_limit = time_limit
+        self.max_depth = max_depth
+        self.stockfish_ai = KingOfTheHillAI()
 
-class DatasetGenerator:
-    def __init__(self, chess_game, random_move_chance=0.1):
-        """
-        Initialize the dataset generator.
-
-        Parameters:
-        - chess_game: An instance of the ChessGame class.
-        - random_move_chance: The chance to make a random move instead of the best move.
-        """
-        self.chess_game = chess_game
-        self.random_move_chance = random_move_chance
-
-    def generate_dataset(self, num_games):
-        """
-        Generate a dataset by having the AI play games against itself.
-
-        Parameters:
-        - num_games: The number of games to play.
-
-        Returns:
-        - A list of game records, where each record is a tuple of (features, label).
-        """
-        dataset = []
-
-        for _ in range(num_games):
-            dataset.extend(self._play_game())
-
-        return dataset
-
-    def _play_game(self):
-        """
-        Play a single game and return the game record.
-
-        Returns:
-        - A list of position records, where each record is a tuple of (features, label).
-        """
-        game_record = []
-
+    def play(self):
         while True:
-            result, _ = self.chess_game.process_next_move(print_board=False)
-
+            result, _ = self.process_next_move()
             if result == "checkmate" or result == "draw":
                 break
 
-            features = self._extract_features()
-            label = self._get_evaluation_score()
-            game_record.append((features, label))
+    def process_next_move(self, print_board=True, with_cut_off=True, with_time_limit=True):
+        if print_board:
+            self.print_board()
+        self.currentLegalMoves = self.get_legal_moves()
+        # Check for draw and checkmate before the move is exercised
+        if ChessEngine.is_draw(self.currentLegalMoves, self.board):  # more detailed print is in draw function
+            return "draw", None
+        if ChessEngine.is_game_over(self.board) or ChessEngine.is_game_won(self.board):
+            winner = "White" if self.board.game_result == constants.WHITE else "Black"
+            print("Checkmate! Winner is ", winner)
+            return "checkmate", None
 
-        return game_record
-
-    def _extract_features(self):
-        """Extract features from the board."""
-        # Please replace this with your actual feature extraction code.
-        return None
-
-    def _get_evaluation_score(self):
-        """Get the evaluation score for the board."""
-        # This is just a placeholder. You might want to modify the KingOfTheHillAI class to also return evaluation scores.
-        return 0
-
-    def _make_move(self):
-        """Make a move on the board."""
-        if np.random.random() < self.random_move_chance:
-            move = self._get_random_move()
+        if self.is_ai_turn():
+            move, counter = self.get_ai_move(print_board, with_cut_off, with_time_limit)
+        elif self.is_stockfish_ai_turn():
+            move = ChessEngine.algebraic_move_to_binary(self.get_stockfish_move())
+            counter = -1
         else:
-            move = self.chess_game.get_best_move(print_move=False)
+            move = ChessEngine.algebraic_move_to_binary(self.get_human_move())
+            counter = -1
 
-        self.chess_game.perform_move(move)
+        self.perform_move(move)
+        self.board.previous_moves.append(ChessEngine.binary_move_to_algebraic(move[0], move[1]))
+        return move, counter
 
-    def _get_random_move(self):
-        """Get a random legal move."""
-        legal_moves = self.chess_game.get_legal_moves()
-        return np.random.choice(legal_moves)
+    def print_board(self):
+        ChessPrintService.print_board(self.board.bitboards)
 
-# To use this class, you'd create an instance of the ChessGame class and pass it to the DatasetGenerator constructor:
-board = ChessBoard.ChessBoard()
-chess_game = ChessGame(board, time_limit = 1)
-generator = DatasetGenerator(chess_game, random_move_chance=0.1)
-# Then you can generate a dataset:
-dataset = generator.generate_dataset(num_games=10)
+    def is_ai_turn(self):
+        return (self.isWhiteAI and self.move_number % 2 == constants.BLACK) or (
+            self.isBlackAI and self.move_number % 2 == constants.WHITE)
+
+    def is_stockfish_ai_turn(self):
+        return (self.isWhiteStockfishAI and self.move_number % 2 == constants.BLACK) or (
+            self.isBlackStockfishAI and self.move_number % 2 == constants.WHITE)
+
+    def get_human_move(self):
+        str = "White" if self.board.current_player == constants.WHITE else "Black"
+        user_input = input(f"Move {self.move_number} by {str}: ")
+        while not self.validate_input(user_input):
+            print("Invalid input. Enter a move of the form a1a2 (start square->destination square).")
+            user_input = input(f"Move {self.move_number} by {str}: ")
+        return user_input
+
+    def validate_input(self, user_input):
+        pattern = r'^[a-h][1-8][a-h][1-8]$'
+        return re.match(pattern, user_input) is not None
+
+    def get_stockfish_move(self, print_move=True):
+        best_move = self.stockfish_ai.get_best_move(self.board, self.time_limit)
+        if print_move:
+            str = "White" if self.board.current_player == constants.WHITE else "Black"
+            print(f"Move {self.move_number} by {str} (Stockfish AI): {best_move}")
+        return best_move
+
+    def get_ai_move(self, print_move=True, with_cut_off=True, with_time_limit=True):
+
+        if len(self.currentLegalMoves) == 0:
+            logger.error("List is empty. This case should be captured as a check mate or draw!")
+            sys.exit(1)
+        best_move, counter = self.board.iterative_depth_search(max_depth=self.max_depth, time_limit=self.time_limit,
+                                                               with_cut_off=with_cut_off,
+                                                               with_time_limit=with_time_limit)
+        if print_move:
+            str = "White" if self.board.current_player == constants.WHITE else "Black"
+            print(
+                f"Move {self.move_number} by {str} (AI): {ChessEngine.binary_move_to_algebraic(best_move[0], best_move[1])}")
+        return best_move, counter
+
+    def get_legal_moves(self):
+        moves = ChessEngine.generate_moves(self.board)
+        legal_moves = ChessEngine.filter_illegal_moves(self.board, moves)
+        return legal_moves
+
+    def perform_move(self, move):
+        if self.is_stockfish_ai_turn():
+            ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False,
+                                     move_actually_executed=True)
+            self.move_number += 1
+        elif move in self.currentLegalMoves:
+            ChessEngine.perform_move(move, self.board, move_type="binary", with_validation=False,
+                                     move_actually_executed=True)
+            self.move_number += 1
+        else:
+            print("Valid input, but invalid move. Enter a move of the form a1a2 (start square->destination square).")
+
+
+if __name__ == "__main__":
+    board = ChessBoard()
+    game = ChessGame(board, max_depth=4, time_limit=5, isBlackAI=False, isWhiteAI=True, isBlackStockfishAI=True,
+                     isWhiteStockfishAI=False)
+    while (True):
+        game.play()
+
