@@ -35,7 +35,7 @@ class DatasetGenerator(ChessGame):
         stockfish_ai_score = KingOfTheHillAIScore()
         evaluation_score = stockfish_ai_score.get_evaluation_score()
         king_square = self.get_king_square()
-        dataset.append((self.board.bitboards, move, evaluation_score, king_square))
+        dataset.append((self.board.bitboards, move, self.board.current_player, evaluation_score, king_square))
 
         self.perform_move(move)
         self.board.previous_moves.append(ChessEngine.binary_move_to_algebraic(move[0], move[1]))
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     start_time = time.time()
     while(True):
         board = ChessBoard()
-        game = ChessGame(board, max_depth = 4, time_limit = 1, isBlackAI=False, isWhiteAI=True, isBlackStockfishAI=True, isWhiteStockfishAI=True)
+        game = ChessGame(board, max_depth = 4, time_limit = 1, isBlackAI=False, isWhiteAI=False, isBlackStockfishAI=True, isWhiteStockfishAI=True)
         game.play()
 
         elapsed_time = time.time() - start_time

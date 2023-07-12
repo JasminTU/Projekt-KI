@@ -112,7 +112,7 @@ class ChessGame:
 if __name__ == "__main__":
     board = ChessBoard()
     # board.load_from_fen("r1bqk2r/pp1p1pQp/3bp3/8/3nP3/P7/1PP1K1PP/RNB2BNR w HAkq - 0 1")
-    game = ChessGame(board, max_depth = 4, time_limit = 1, isBlackAI=False, isWhiteAI=True, isBlackStockfishAI=True, isWhiteStockfishAI=True)
+    game = ChessGame(board, max_depth = 4, time_limit = 1, isBlackAI=False, isWhiteAI=False, isBlackStockfishAI=True, isWhiteStockfishAI=True)
     game.play()
     
     # service = ChessPrintService()
