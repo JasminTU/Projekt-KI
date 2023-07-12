@@ -4,9 +4,16 @@ https://github.com/official-stockfish/Stockfish/wiki/Commands#standard-commands
 https://github.com/fairy-stockfish/Fairy-Stockfish/wiki/Command-line
 """
 import subprocess
+import os
 
-# Specify the path to the Fairy-Stockfish executable
-fairy_stockfish_path = r"C:\Users\Xello\Documents\Informatik\Module\Schach-KI\Projekt-KI\fairy-stockfish-largeboard_x86-64.exe"
+if os.name == "posix":  # Linux or macOS
+    fairy_stockfish_path = os.path.join(os.path.dirname(__file__), "fairy-stockfish-largeboard_x86-64")
+elif os.name == "nt":  # Windows
+    fairy_stockfish_path = os.path.join(os.path.dirname(__file__), "fairy-stockfish-largeboard_x86-64.exe")
+else:
+    raise OSError("Unsupported operating system.")
+
+# Use fairy_stockfish_path in your code
 
 class KingOfTheHillAIScore():
     """
