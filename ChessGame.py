@@ -89,7 +89,7 @@ if __name__ == "__main__":
     board = ChessBoard()
     # board.load_from_fen("r1bqk2r/pp1p1pQp/3bp3/8/3nP3/P7/1PP1K1PP/RNB2BNR w HAkq - 0 1")
     game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
-    game.play(max_depth = 4, time_limit = 15)
+    game.play(max_depth = 4, time_limit = 40)
     
     # service = ChessPrintService()
     # board = ChessBoard()
