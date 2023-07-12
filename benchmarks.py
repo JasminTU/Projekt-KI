@@ -47,12 +47,12 @@ class ChessEngineBenchmark:
         for _ in range(num_tests):
             board = ChessBoard()
             board.load_from_fen(fen)
-            game = ChessGame(board, isBlackAI=True, isWhiteAI=True)
+            game = ChessGame(board, time_limit=10, max_depth=depth, isBlackAI=True, isWhiteAI=True)
 
             start_time = time.time()
 
             # process_next_move() calls iterative_depth_search()
-            move, counter = game.process_next_move(depth, print_board=False, with_cut_off=with_cut_off, time_limit=10, with_time_limit=False)
+            move, counter = game.process_next_move(print_board=False, with_cut_off=with_cut_off, with_time_limit=False)
 
             end_time = time.time()
             elapsed_time = end_time - start_time
