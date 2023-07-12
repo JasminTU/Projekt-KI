@@ -5,10 +5,10 @@ import constants
 import re
 from loguru import logger
 import sys
-from stockfish_ai import KingOfTheHillAI
+from stockfish_get_best_move import KingOfTheHillAI
 
 class ChessGame:
-    def __init__(self, board, max_depth, time_limit, isBlackAI=True, isWhiteAI=True, isBlackStockfishAI = False, isWhiteStockfishAI = False):
+    def __init__(self, board, max_depth = 4, time_limit = 2, isBlackAI=False, isWhiteAI=False, isBlackStockfishAI = True, isWhiteStockfishAI = True):
         self.board = board
         self.move_number = 1
         self.isBlackAI = isBlackAI
