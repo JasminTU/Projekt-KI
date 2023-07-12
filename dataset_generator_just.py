@@ -63,7 +63,7 @@ class DatasetGenerator:
 
     def _get_evaluation_score(self):
         """Get the evaluation score for the board."""
-        return KingOfTheHillAIScore.get_evaluation_score(self.chess_game.board, 1)
+        return KingOfTheHillAIScore().get_evaluation_score(self.chess_game.board, 1)
 
     def _make_move(self):
         """Make a move on the board."""
